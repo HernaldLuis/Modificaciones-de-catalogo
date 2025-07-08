@@ -111,6 +111,32 @@
   margin-right: 8px;
   border-radius: 4px;
 }
+    .fila {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.fila-invertida {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  flex-direction: row-reverse;
+  margin-bottom: 10px;
+}
+
+.pasillo {
+  height: 25px;
+  background-color: transparent;
+  border-bottom: 2px dashed rgba(255, 255, 255, 0.3);
+  margin: 10px 0;
+  width: 80%;
+  margin-left: auto;
+  margin-right: auto;
+}
 
   </style>
 </head>
@@ -141,6 +167,25 @@
       <button class="habitacion-btn" onclick="mostrarInfo('1509')">1509</button>
       <button class="habitacion-btn" onclick="mostrarInfo('1510')">1510</button>
     </div>
+
+     <!-- Pasillo visual -->
+  <div class="pasillo"></div>
+
+  <!-- Fila opuesta: de 1522 a 1511 (invertida) -->
+  <div class="fila fila-invertida">
+    <button class="habitacion-btn" onclick="mostrarInfo('1522')">1522</button>
+    <button class="habitacion-btn" onclick="mostrarInfo('1521')">1521</button>
+    <button class="habitacion-btn" onclick="mostrarInfo('1520')">1520</button>
+    <button class="habitacion-btn" onclick="mostrarInfo('1519')">1519</button>
+    <button class="habitacion-btn" onclick="mostrarInfo('1518')">1518</button>
+    <button class="habitacion-btn" onclick="mostrarInfo('1517')">1517</button>
+    <button class="habitacion-btn" onclick="mostrarInfo('1516')">1516</button>
+    <button class="habitacion-btn" onclick="mostrarInfo('1515')">1515</button>
+    <button class="habitacion-btn" onclick="mostrarInfo('1514')">1514</button>
+    <button class="habitacion-btn" onclick="mostrarInfo('1511')">1512</button>
+    <button class="habitacion-btn" onclick="mostrarInfo('1511')">1511</button>
+  </div>
+</div>
 
     <div class="panel" id="panel">
       <p>Selecciona una habitación para ver los detalles.</p>
@@ -245,7 +290,117 @@
   descripcion: 'Ideal para familias. Vista parcial al jardín y acceso rápido a elevador.',
   disponible: true,
   imagenes: ['1510vista.jpg', '1510habitacion.jpg']
+},
+    '1511': {
+  vista: 'Vista parcial al mar 🌊',
+  cama: 'King Size 🛏️',
+  piso: 5,
+  Torre: 1,
+  descripcion: 'Espaciosa y con excelente iluminación. Muy solicitada por parejas.',
+  disponible: true,
+  imagenes: ['1511vista.jpg', '1511interior.jpg']
+},
+
+'1512': {
+  vista: 'Jardín 🌿',
+  cama: 'Doble 🛏️🛏️',
+  piso: 5,
+  Torre: 1,
+  descripcion: 'Ubicada junto al jardín interno, ideal para descanso tranquilo.',
+  disponible: true,
+  imagenes: ['1512jardin.jpg', '1512interior.jpg']
+},
+
+'1514': {
+  vista: 'Jardín 🌿',
+  cama: 'Doble 🛏️🛏️',
+  piso: 5,
+  Torre: 1,
+  descripcion: 'Habitación acogedora con vista natural. Acceso cómodo al lobby.',
+  disponible: true,
+  imagenes: ['1514vista.jpg', '1514interior.jpg']
+},
+
+'1515': {
+  vista: 'Parcial al mar 🌅',
+  cama: 'King Size 🛏️',
+  piso: 5,
+  Torre: 1,
+  descripcion: 'Vista parcial al océano. Ideal para desconectarse.',
+  disponible: true,
+  imagenes: ['1515mar.jpg', '1515habitacion.jpg']
+},
+
+'1516': {
+  vista: 'Jardín 🌸',
+  cama: 'Doble 🛏️🛏️',
+  piso: 5,
+  Torre: 1,
+  descripcion: 'Diseño funcional. Espaciosa y cercana a elevadores.',
+  disponible: true,
+  imagenes: ['1516jardin.jpg', '1516habitacion.jpg']
+},
+
+'1517': {
+  vista: 'Mar 🌊',
+  cama: 'King Size 🛏️',
+  piso: 5,
+  Torre: 1,
+  descripcion: 'Balcón con vista panorámica al mar. Muy recomendada.',
+  disponible: true,
+  imagenes: ['1517mar.jpg', '1517habitacion.jpg']
+},
+
+'1518': {
+  vista: 'Parcial jardín 🌳',
+  cama: 'Doble 🛏️🛏️',
+  piso: 5,
+  Torre: 1,
+  descripcion: 'Ambiente cálido y fresco. Recientemente remodelada.',
+  disponible: true,
+  imagenes: ['1518vista.jpg', '1518habitacion.jpg']
+},
+
+'1519': {
+  vista: 'Alberca y jardín 🌴',
+  cama: 'King Size 🛏️',
+  piso: 5,
+  Torre: 1,
+  descripcion: 'Perfecta para familias con niños. Vista doble.',
+  disponible: true,
+  imagenes: ['1519alberca.jpg', '1519habitacion.jpg']
+},
+
+'1520': {
+  vista: 'Mar abierta 🌊',
+  cama: 'Doble 🛏️🛏️',
+  piso: 5,
+  Torre: 1,
+  descripcion: 'Vista despejada al mar. Muy tranquila.',
+  disponible: true,
+  imagenes: ['1520mar.jpg', '1520interior.jpg']
+},
+
+'1521': {
+  vista: 'Jardín 🌿',
+  cama: 'King Size 🛏️',
+  piso: 5,
+  Torre: 1,
+  descripcion: 'Espaciosa y elegante. Con vista al jardín lateral.',
+  disponible: true,
+  imagenes: ['1521jardin.jpg', '1521habitacion.jpg']
+},
+
+'1522': {
+  vista: 'Vista completa al mar 🌅',
+  cama: 'Doble 🛏️🛏️',
+  piso: 5,
+  Torre: 1,
+  descripcion: 'Una de las mejores vistas del hotel. Muy demandada.',
+  disponible: true,
+  imagenes: ['1522mar.jpg', '1522habitacion.jpg']
 }
+
 
 };
 
