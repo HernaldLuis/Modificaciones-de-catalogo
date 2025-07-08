@@ -4,43 +4,39 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Croquis Habitaciones | Nivel 5</title>
+
   <style>
+    /* ========== ESTILOS CSS ========== */
     body {
-
-<div class="boton-home">
-  <button onclick="irAlInicio()">🏠 Volver al croquis</button> /* <-- aquí va el boton back home */
-</div>
-
       margin: 0;
       font-family: Arial, sans-serif;
-      background-image: url('FondoPag.jpg'); /* <-- aquí va el nombre de tu imagen */
+      background-image: url('FondoPag.jpg'); /* Cambia este nombre por el de tu fondo real */
       background-size: cover;
       background-position: center;
       background-attachment: fixed;
       color: white;
+    }
 
-      .boton-home {
-  position: absolute;
-  top: 20px;
-  left: 20px;
-}
+    .boton-home {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+    }
 
-.boton-home button {
-  background-color: #2ecc71;
-  border: none;
-  padding: 10px 18px;
-  border-radius: 8px;
-  color: white;
-  font-weight: bold;
-  cursor: pointer;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-  transition: background-color 0.3s ease;
-}
+    .boton-home button {
+      background-color: #2ecc71;
+      border: none;
+      padding: 10px 18px;
+      border-radius: 8px;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+      transition: background-color 0.3s ease;
+    }
 
-.boton-home button:hover {
-  background-color: #27ae60;
-}
-
+    .boton-home button:hover {
+      background-color: #27ae60;
     }
 
     .contenedor {
@@ -106,14 +102,19 @@
       margin-right: auto;
     }
 
-.panel img:hover {
-  transform: scale(1.05);
+    .panel img:hover {
+      transform: scale(1.05);
     }
-
-
   </style>
 </head>
 <body>
+
+  <!-- ========== BOTÓN HOME ========== -->
+  <div class="boton-home">
+    <button onclick="irAlInicio()">🏠 Volver al croquis</button>
+  </div>
+
+  <!-- ========== CONTENEDOR PRINCIPAL ========== -->
   <div class="contenedor">
     <h1>Catálogo de Habitaciones - Paradisus Los Cabos By Mèlia</h1>
 
@@ -127,20 +128,26 @@
     </div>
   </div>
 
+  <!-- ========== JAVASCRIPT ========== -->
   <script>
-    function mostrarInfo() {  /* <--aqui puede ingresar la informacion de cada habitacion en este caso es la 1501 */
-  const contenido = `
-    <h2>Habitación 1501</h2>
-    <p><strong>Vista:</strong> Jardín 🌴</p>
-    <p><strong>Cama:</strong> King Size 🛏️</p>
-    <p><strong>Piso:</strong> 5</p>
-    <p><strong>Descripción:</strong> Solicita a tu administrador que actualice esta sección en caso de ser requerida :)</p>
-    <img src="VISTAMAR.jpg" alt="Vista al mar - 1501" />
-    <img src="VISTAHABITACION.jpg" alt="Interior habitación 1501" />
-  `;
-  document.getElementById('panel').innerHTML = contenido;
-}
+    function mostrarInfo() {
+      const contenido = `
+        <h2>Habitación 1501</h2>
+        <p><strong>Vista:</strong> Jardín 🌴</p>
+        <p><strong>Cama:</strong> King Size 🛏️</p>
+        <p><strong>Piso:</strong> 5</p>
+        <p><strong>Descripción:</strong> Solicita a tu administrador que actualice esta sección en caso de ser requerida :)</p>
+        <img src="VISTAMAR.jpg" alt="Vista al mar - 1501" />
+        <img src="VISTAHABITACION.jpg" alt="Interior habitación 1501" />
+      `;
+      document.getElementById('panel').innerHTML = contenido;
+    }
 
+    function irAlInicio() {
+      document.getElementById('panel').innerHTML = `<p>Selecciona una habitación para ver los detalles.</p>`;
+    }
   </script>
+
 </body>
 </html>
+
