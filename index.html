@@ -124,13 +124,14 @@
   </button>
 </div>
 
-  <!-- ========== CONTENEDOR PRINCIPAL ========== -->
+  <!-- ========== CONTENEDOR PRINCIPAL  - AQUI VAN LAS HABITACIONES ========== -->
   <div class="contenedor">
     <h1>Catálogo de Habitaciones - Paradisus Los Cabos By Mèlia</h1>
 
     <div class="croquis">
       <div class="etiqueta">🏢 Oficinas Ejecutivas</div>
-      <button class="habitacion-btn" onclick="mostrarInfo()">1501</button>
+      <button class="habitacion-btn" onclick="mostrarInfo('1501')">1501</button>
+      <button class="habitacion-btn" onclick="mostrarInfo('1502')">1502</button>
     </div>
 
     <div class="panel" id="panel">
@@ -148,35 +149,43 @@
       Torre: 1,
       descripcion: 'Solicita a tu administrador que actualice esta sección en caso de ser requerida :)',
       disponible: true,
-      imagenes: [
-        'VISTAMAR.jpg',
-        'VISTAHABITACION.jpg'
-      ]
-    }
-  };
-
-  function mostrarInfo() {
-    const h = habitaciones['1501'];
-    if (!h.disponible) {
-      document.getElementById('panel').innerHTML = `<p>La habitación no está disponible actualmente.</p>`;
-      return;
-    }
-
-    let contenido = `
-      <h2>Habitación 1501</h2>
-      <p><strong>Vista:</strong> ${h.vista}</p>
-      <p><strong>Cama:</strong> ${h.cama}</p>
-      <p><strong>Piso:</strong> ${h.piso}</p>
-      <p><strong>Torre:</strong> ${h.Torre}</p>
-      <p><strong>Descripción:</strong> ${h.descripcion}</p>
-    `;
-
-    h.imagenes.forEach(img => {
-      contenido += `<img src="${img}" alt="Habitación 1501">`;
-    });
-
-    document.getElementById('panel').innerHTML = contenido;
+      imagenes: ['VISTAMAR.jpg','VISTAHABITACION.jpg']
+   },
+  '1502': {
+    vista: 'Jardín 🌿',
+    cama: 'Doble 🛏️🛏️',
+    piso: 5,
+    Torre: 1,
+    descripcion: 'En excelente estado. Agradable y cómoda.',
+    disponible: true,
+    imagenes: ['PRUEBA1502CENTRALES.png', 'PRUEBA1502MAR.jpg']
   }
+};
+
+  function mostrarInfo(numero) {
+  const h = habitaciones[numero];
+
+  if (!h || !h.disponible) {
+    document.getElementById('panel').innerHTML = `<p>La habitación ${numero} no está disponible actualmente.</p>`;
+    return;
+  }
+
+  let contenido = `
+    <h2>Habitación ${numero}</h2>
+    <p><strong>Vista:</strong> ${h.vista}</p>
+    <p><strong>Cama:</strong> ${h.cama}</p>
+    <p><strong>Piso:</strong> ${h.piso}</p>
+    <p><strong>Torre:</strong> ${h.Torre}</p>
+    <p><strong>Descripción:</strong> ${h.descripcion}</p>
+  `;
+
+  h.imagenes.forEach(img => {
+    contenido += `<img src="${img}" alt="Habitación ${numero}">`;
+  });
+
+  document.getElementById('panel').innerHTML = contenido;
+}
+
 
   function irAlInicio() {
     document.getElementById('panel').innerHTML = `<p>Selecciona una habitación para ver los detalles.</p>`;
