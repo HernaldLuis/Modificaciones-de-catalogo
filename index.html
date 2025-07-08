@@ -137,6 +137,27 @@
   margin-left: auto;
   margin-right: auto;
 }
+    .fila {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.fila-izquierda {
+  justify-content: flex-end;
+  margin-right: 4px; /* Puedes ajustar este valor según el alineado que desees */
+}
+
+.fila-invertida {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  flex-direction: row-reverse;
+  margin-bottom: 10px;
+}
 
   </style>
 </head>
@@ -154,8 +175,8 @@
   <div class="contenedor">
     <h1>Catálogo de Habitaciones - Paradisus Los Cabos By Mèlia</h1>
 
-    <div class="fila">
-      <div class="etiqueta">🏢 Oficinas Ejecutivas</div>
+    <div class="fila fila-izquierda">
+    <div class="etiqueta">🏢 Oficinas Ejecutivas</div>
       <button class="habitacion-btn" onclick="mostrarInfo('1501')">1501</button>
       <button class="habitacion-btn" onclick="mostrarInfo('1502')">1502</button>
       <button class="habitacion-btn" onclick="mostrarInfo('1503')">1503</button>
