@@ -1,2 +1,30 @@
-# CatalogoHabitacionesParadisus
-Sistema interactivo para la visualización y consulta de habitaciones mediante croquis estructurado. Incluye ubicación precisa, tipo de cama, vista e imagen representativa por habitación. Desarrollado en HTML, CSS y JavaScript para apoyar las áreas operativas como Ama de Llaves y Recepción.
+
+---
+
+## 📊 Código de colores por vista
+
+| Color     | Vista             |
+|-----------|-------------------|
+| 🟩 Verde   | Vista al mar o premium |
+| 🟨 Amarillo | Vista parcial o regular |
+| 🟥 Rojo    | Vista comprometida o interna |
+
+---
+
+## 🧭 Próximas mejoras
+
+- 📱 Diseño responsive para tablets y móviles
+- 🔍 Buscador por número de habitación
+- 📂 Separación de niveles en pestañas
+
+---
+
+## 👤 Autor
+
+**Luis Hernaldo Juárez Pineda**  
+Coordinador de Ama de Llaves  
+Paradisus by Meliá, Los Cabos
+
+---
+
+> Proyecto creado con amor, dedicación y una pizca de HTML puro 😄
