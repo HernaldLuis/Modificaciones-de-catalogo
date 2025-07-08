@@ -139,24 +139,50 @@
   </div>
 
   <!-- ========== JAVASCRIPT ========== -->
-  <script>
-    function mostrarInfo() {
-      const contenido = `
-        <h2>Habitación 1501</h2>
-        <p><strong>Vista:</strong> Jardín 🌴</p>
-        <p><strong>Cama:</strong> King Size 🛏️</p>
-        <p><strong>Piso:</strong> 5</p>
-        <p><strong>Descripción:</strong> Solicita a tu administrador que actualice esta sección en caso de ser requerida :)</p>
-        <img src="VISTAMAR.jpg" alt="Vista al mar - 1501" />
-        <img src="VISTAHABITACION.jpg" alt="Interior habitación 1501" />
-      `;
-      document.getElementById('panel').innerHTML = contenido;
+ <script>
+  const habitaciones = {
+    '1501': {
+      vista: 'Jardín 🌴',
+      cama: 'King Size 🛏️',
+      piso: 5,
+      Torre: 1,
+      descripcion: 'Solicita a tu administrador que actualice esta sección en caso de ser requerida :)',
+      disponible: true,
+      imagenes: [
+        'VISTAMAR.jpg',
+        'VISTAHABITACION.jpg'
+      ]
+    }
+  };
+
+  function mostrarInfo() {
+    const h = habitaciones['1501'];
+    if (!h.disponible) {
+      document.getElementById('panel').innerHTML = `<p>La habitación no está disponible actualmente.</p>`;
+      return;
     }
 
-    function irAlInicio() {
-      document.getElementById('panel').innerHTML = `<p>Selecciona una habitación para ver los detalles.</p>`;
-    }
-  </script>
+    let contenido = `
+      <h2>Habitación 1501</h2>
+      <p><strong>Vista:</strong> ${h.vista}</p>
+      <p><strong>Cama:</strong> ${h.cama}</p>
+      <p><strong>Piso:</strong> ${h.piso}</p>
+      <p><strong>Torre:</strong> ${h.Torre}</p>
+      <p><strong>Descripción:</strong> ${h.descripcion}</p>
+    `;
+
+    h.imagenes.forEach(img => {
+      contenido += `<img src="${img}" alt="Habitación 1501">`;
+    });
+
+    document.getElementById('panel').innerHTML = contenido;
+  }
+
+  function irAlInicio() {
+    document.getElementById('panel').innerHTML = `<p>Selecciona una habitación para ver los detalles.</p>`;
+  }
+</script>
+
 
 </body>
 </html>
