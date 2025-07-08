@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Croquis Habitaciones | Nivel 5</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #1e272e;
+      color: white;
+    }
+
+    .contenedor {
+      max-width: 1000px;
+      margin: 30px auto;
+      padding: 20px;
+      background: #2f3640;
+      border-radius: 10px;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .croquis {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 30px;
+      margin-top: 40px;
+    }
+
+    .etiqueta {
+      font-weight: bold;
+      background-color: #57606f;
+      padding: 10px 20px;
+      border-radius: 8px;
+    }
+
+    .habitacion-btn {
+      padding: 12px 20px;
+      background-color: #3498db;
+      border: none;
+      border-radius: 6px;
+      color: white;
+      cursor: pointer;
+      font-weight: bold;
+      transition: transform 0.2s;
+    }
+
+    .habitacion-btn:hover {
+      transform: scale(1.1);
+      background-color: #2980b9;
+    }
+
+    .panel {
+      margin-top: 30px;
+      padding: 20px;
+      background-color: #3d3d3d;
+      border-radius: 10px;
+    }
+
+    .panel img {
+      margin-top: 15px;
+      max-width: 100%;
+      border-radius: 8px;
+    }
+
+  </style>
+</head>
+<body>
+  <div class="contenedor">
+    <h1>Catálogo de Habitaciones - Nivel 5</h1>
+
+    <div class="croquis">
+      <div class="etiqueta">🏢 Oficinas Ejecutivas</div>
+      <button class="habitacion-btn" onclick="mostrarInfo()">1501</button>
+    </div>
+
+    <div class="panel" id="panel">
+      <p>Selecciona una habitación para ver los detalles.</p>
+    </div>
+  </div>
+
+  <script>
+    function mostrarInfo() {
+      const contenido = `
+        <h2>Habitación 1501</h2>
+        <p><strong>Vista:</strong> Jardín 🌴</p>
+        <p><strong>Cama:</strong> King Size 🛏️</p>
+        <p><strong>Piso:</strong> 5</p>
+        <p><strong>Descripción:</strong> Muy solicitada por su tranquilidad y ubicación cercana a las oficinas ejecutivas.</p>
+        <img src="habitacion1501.jpeg" alt="Habitación 1501" />
+      `;
+      document.getElementById('panel').innerHTML = contenido;
+    }
+  </script>
+</body>
+</html>
