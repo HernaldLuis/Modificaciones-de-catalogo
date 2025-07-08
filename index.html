@@ -124,7 +124,7 @@
   </button>
 </div>
 
-  <!-- ========== CONTENEDOR PRINCIPAL  - AQUI VAN LAS HABITACIONES ========== -->
+  <!-- ========== CONTENEDOR PRINCIPAL              -           AQUI VAN LAS HABITACIONES ========== -->
   <div class="contenedor">
     <h1>Catálogo de Habitaciones - Paradisus Los Cabos By Mèlia</h1>
 
@@ -132,6 +132,8 @@
       <div class="etiqueta">🏢 Oficinas Ejecutivas</div>
       <button class="habitacion-btn" onclick="mostrarInfo('1501')">1501</button>
       <button class="habitacion-btn" onclick="mostrarInfo('1502')">1502</button>
+      <button class="habitacion-btn" onclick="mostrarInfo('1503')">1503</button>
+      <button class="habitacion-btn" onclick="mostrarInfo('1504')">1504</button>
     </div>
 
     <div class="panel" id="panel">
@@ -139,7 +141,7 @@
     </div>
   </div>
 
-  <!-- ========== JAVASCRIPT ========== -->
+  <!-- ========== JAVASCRIPT ========== - ==================== aqui iran las demas habitaciones-->
  <script>
   const habitaciones = {
     '1501': {
@@ -159,7 +161,26 @@
     descripcion: 'En excelente estado. Agradable y cómoda.',
     disponible: true,
     imagenes: ['PRUEBA1502CENTRALES.png', 'PRUEBA1502MAR.jpg']
-  }
+  },
+    '1503': {
+  vista: 'Parcial al mar 🌊',
+  cama: 'King Size 🛏️',
+  piso: 5,
+  Torre: 1,
+  descripcion: 'Habitación acogedora con vista parcial al mar. Ideal para relajarse.',
+  disponible: true,
+  imagenes: ['VISTAHABITACION', 'VISTAMAR.jpg']
+},
+
+'1504': {
+  vista: 'Jardín y alberca 🏝️',
+  cama: 'Doble 🛏️🛏️',
+  piso: 5,
+  Torre: 1,
+  descripcion: 'Ambiente fresco y natural con vista al jardín y cercanía a la alberca.',
+  disponible: true,
+  imagenes: ['VISTAMAR.jpg', 'PRUEBA1502CENTRALES']
+}
 };
 
   function mostrarInfo(numero) {
