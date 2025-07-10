@@ -3,18 +3,47 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Croquis Habitaciones | Ama de llaves </title>
-
+  <title>Croquis Habitaciones | Ama de llaves</title>
   <style>
-    /* ========== ESTILOS CSS ========== */
     body {
       margin: 0;
       font-family: Arial, sans-serif;
-      background-image: url('FondoPag.jpg'); /* Cambia este nombre por el de tu fondo real */
+      background-image: url('FondoPag.jpg');
       background-size: cover;
       background-position: center;
       background-attachment: fixed;
       color: white;
+    }
+
+    #login-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      background-color: rgba(0,0,0,0.6);
+    }
+
+    #login-container input {
+      padding: 10px;
+      margin: 10px;
+      border-radius: 5px;
+      border: none;
+      width: 250px;
+    }
+
+    #login-container button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      background-color: #3498db;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    #contenido-principal {
+      display: none;
     }
 
     .boton-home {
@@ -39,6 +68,13 @@
       background-color: #27ae60;
     }
 
+    .logo-boton {
+      height: 24px;
+      vertical-align: middle;
+      margin-right: 8px;
+      border-radius: 4px;
+    }
+
     .contenedor {
       max-width: 1000px;
       margin: 30px auto;
@@ -52,24 +88,55 @@
       margin-bottom: 20px;
     }
 
-    .croquis {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 30px;
-      margin-top: 40px;
+    .bloque-oficinas {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  margin-right: 8px;
+  padding: 4px 12px;
+  border-radius: 6px;
+  background-color: #57606f;
+  color: white;
+  font-size: 12px;
+  font-weight: bold;
+  text-align: center;
+}
+.bloque-oficinas .linea {
+  line-height: 1.2;
+}
+
+    .elevador-btn {
+     padding: 6px 10px;
+     font-size: 12px;
+     background-color: #7f8c8d; /* gris neutro */
+     border: none;
+     border-radius: 6px;
+     color: white;
+     font-weight: bold;
+     text-align: center;
+     white-space: normal;
+     cursor: default; /* sin efecto de clic */
+     opacity: 0.85;
+     pointer-events: none; /* no se puede hacer clic */
+      
     }
 
-    .etiqueta {
-      font-weight: bold;
-      background-color: #57606f;
-      padding: 10px 20px;
-      border-radius: 8px;
+    .fila-derecha {
+  margin-left: 60px; /* Ajusta este valor hasta alinear con 1511 */
+
+
+    .fila-base {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
     }
+
 
     .habitacion-btn {
-      padding: 12px 20px;
-      background-color: #3498db;
+      padding: 6px 10px; /* REDUCIDO */
+      font-size: 12px;   /* NUEVO: Fuente más pequeña */
+      background-color: #119d2b; /* NUEVO: Fuente verde Melia */
       border: none;
       border-radius: 6px;
       color: white;
@@ -105,356 +172,264 @@
     .panel img:hover {
       transform: scale(1.05);
     }
-    .logo-boton {
-  height: 24px;
-  vertical-align: middle;
-  margin-right: 8px;
-  border-radius: 4px;
-}
-    .fila {
-  display: flex;
-  justify-content: center;
-  gap: 6px;
-  flex-wrap: wrap;
-  margin-bottom: 10px;
+
+    .boton-ejecutiva { /*este es el estilo de la oficina ejecutiva*/
+  white-space: normal;
+  text-align: center;
 }
 
-.fila-invertida {
-  display: flex;
-  justify-content: center;
-  gap: 6px;
-  flex-wrap: wrap;
-  flex-direction: row-reverse;
-  margin-bottom: 10px;
+    .fila15 {
+      display: flex;
+      justify-content:  flex-start;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+
+    .pasillo {
+      height: 25px;
+      background-color: transparent;
+      border-bottom: 2px dashed rgba(255, 255, 255, 0.3);
+      margin: 10px 0;
+      width: 80%;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .elevador-btn {
+  padding: 6px 10px;
+  font-size: 12px;
+  background-color: #7f8c8d; /* gris neutro */
+  border: none;
+  border-radius: 6px;
+  color: white;
+  font-weight: bold;
+  text-align: center;
+  white-space: normal;
+  cursor: default;
+  opacity: 0.85;
+  pointer-events: none;
+  animation: subirElevador 0.8s ease-out forwards, elevadorLatido 4s ease-in-out infinite;
+  animation-delay: 0s, 1s;
 }
 
-.pasillo {
-  height: 25px;
-  background-color: transparent;
-  border-bottom: 2px dashed rgba(255, 255, 255, 0.3);
-  margin: 10px 0;
-  width: 80%;
-  margin-left: auto;
-  margin-right: auto;
-}
-    .fila {
-  display: flex;
-  justify-content: center;
-  gap: 6px;
-  flex-wrap: wrap;
-  margin-bottom: 10px;
-}
-
-.fila-izquierda {
-  justify-content: flex-end;
-  margin-right: 50px; /* Puedes ajustar este valor según el alineado que desees */
+.elevador-compartido-btn {
+  padding: 6px 10px;
+  font-size: 12px;
+  background-color: #f1c40f; /* amarillo dorado */
+  border: none;
+  border-radius: 6px;
+  color: #2f3640;
+  font-weight: bold;
+  text-align: center;
+  white-space: normal;
+  cursor: default;
+  opacity: 0.9;
+  pointer-events: none;
+  animation: subirElevador 0.8s ease-out forwards, elevadorLatido 4s ease-in-out infinite;
+  animation-delay: 0s, 1s;
 }
 
-.fila-invertida {
-  display: flex;
-  justify-content: center;
-  gap: 6px;
-  flex-wrap: wrap;
-  flex-direction: row-reverse;
-  margin-bottom: 10px;
+/* Animaciones ya conocidas */
+@keyframes subirElevador {
+  from {
+    transform: translateY(25px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 0.85;
+  }
+}
+
+@keyframes elevadorLatido {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-2px);
+  }
 }
 
   </style>
 </head>
 <body>
 
-  <!-- ========== BOTÓN HOME ========== -->
- <div class="boton-home">
-  <button onclick="irAlInicio()">
-    <img src="logoparadisus.png" alt="Inicio" class="logo-boton" />
-    Volver al croquis
-  </button>
-</div>
-
-  <!-- ========== CONTENEDOR PRINCIPAL              -           AQUI VAN LAS HABITACIONES ========== -->
-  <div class="contenedor">
-    <h1>Catálogo de Habitaciones - Paradisus Los Cabos By Mèlia</h1>
-
-    <div class="fila">
-    <div class="etiqueta">🏢 Oficinas Ejecutivas</div>
-      <button class="habitacion-btn" onclick="mostrarInfo('1501')">1501</button>
-      <button class="habitacion-btn" onclick="mostrarInfo('1502')">1502</button>
-      <button class="habitacion-btn" onclick="mostrarInfo('1503')">1503</button>
-      <button class="habitacion-btn" onclick="mostrarInfo('1504')">1504</button>
-      <button class="habitacion-btn" onclick="mostrarInfo('1505')">1505</button>
-      <button class="habitacion-btn" onclick="mostrarInfo('1506')">1506</button>
-      <button class="habitacion-btn" onclick="mostrarInfo('1507')">1507</button>
-      <button class="habitacion-btn" onclick="mostrarInfo('1508')">1508</button>
-      <button class="habitacion-btn" onclick="mostrarInfo('1509')">1509</button>
-      <button class="habitacion-btn" onclick="mostrarInfo('1510')">1510</button>
-    </div>
-
-    <!-- Pasillo visual -->
-<div class="pasillo"></div>
-
-<!-- Fila derecha invertida (1522 a 1511)   - si quieres que vaya invertida usamos <div class="fila fila-invertida"> si los numeros los pondrias en un orden normal, pero ya lo invetiste desde la entrada -->
-<div class="fila">
-    <button class="habitacion-btn" onclick="mostrarInfo('1522')">1522</button>
-    <button class="habitacion-btn" onclick="mostrarInfo('1521')">1521</button>
-    <button class="habitacion-btn" onclick="mostrarInfo('1520')">1520</button>
-    <button class="habitacion-btn" onclick="mostrarInfo('1519')">1519</button>
-    <button class="habitacion-btn" onclick="mostrarInfo('1518')">1518</button>
-    <button class="habitacion-btn" onclick="mostrarInfo('1517')">1517</button>
-    <button class="habitacion-btn" onclick="mostrarInfo('1516')">1516</button>
-    <button class="habitacion-btn" onclick="mostrarInfo('1515')">1515</button>
-    <button class="habitacion-btn" onclick="mostrarInfo('1514')">1514</button>
-    <button class="habitacion-btn" onclick="mostrarInfo('1512')">1512</button>
-    <button class="habitacion-btn" onclick="mostrarInfo('1511')">1511</button>
-  </div>
-</div>
-
-    <div class="panel" id="panel">
-      <p>Selecciona una habitación para ver los detalles.</p>
-    </div>
+  <!-- solo borra los simbolos - esto sirve para ocultar solo borra los simbolos-->
+  <div id="login-container">
+    <h2>Acceso Privado</h2>
+    <input type="text" id="usuario" placeholder="Usuario" />
+    <input type="password" id="password" placeholder="Contraseña" />
+    <button onclick="validarLogin()">Ingresar</button>
   </div>
 
-  <!-- ========== JAVASCRIPT ========== - ==================== aqui iran las demas habitaciones-->
- <script>
-  const habitaciones = {
-    '1501': {
-      vista: 'Jardín 🌴',
-      cama: 'King Size 🛏️',
-      piso: 5,
-      Torre: 1,
-      descripcion: 'Solicita a tu administrador que actualice esta sección en caso de ser requerida :)',
-      disponible: true,
-      imagenes: ['VISTAMAR.jpg','VISTAHABITACION.jpg']
-   },
-  '1502': {
-    vista: 'Jardín 🌿',
-    cama: 'Doble 🛏️🛏️',
-    piso: 5,
-    Torre: 1,
-    descripcion: 'En excelente estado. Agradable y cómoda.',
-    disponible: true,
-    imagenes: ['PRUEBA1502CENTRALES.png', 'PRUEBA1502MAR.jpg']
-  },
-    '1503': {
-  vista: 'Parcial al mar 🌊',
-  cama: 'King Size 🛏️',
-  piso: 5,
-  Torre: 1,
-  descripcion: 'Habitación acogedora con vista parcial al mar. Ideal para relajarse.',
-  disponible: true,
-  imagenes: ['VISTAMAR.jpg', 'PRUEBA1502MAR.jpg']
-},
+  
 
-'1504': {
-  vista: 'Jardín y alberca 🏝️',
-  cama: 'Doble 🛏️🛏️',
-  piso: 5,
-  Torre: 1,
-  descripcion: 'Ambiente fresco y natural con vista al jardín y cercanía a la alberca.',
-  disponible: true,
-  imagenes: ['VISTAHABITACION.jpg', 'PRUEBA1502CENTRALES.png']
-},
-    '1505': {
-  vista: 'Mar abierta 🌅',
-  cama: 'King Size 🛏️',
-  piso: 5,
-  Torre: 1,
-  descripcion: 'Ubicación privilegiada con vista abierta al mar. Muy solicitada.',
-  disponible: true,
-  imagenes: ['1505mar.jpg', '1505interior.jpg']
-},
+  <div id="contenido-principal">
+    <div class="boton-home">
+      <button onclick="irAlInicio()">
+        <img src="logoparadisus.png" alt="Inicio" class="logo-boton" />
+        Volver al croquis
+      </button>
+    </div>
+    <div class="contenedor">
+      <h1>Catálogo de Habitaciones - Paradisus Los Cabos By Mèlia</h1>
 
-'1506': {
-  vista: 'Jardín 🌿',
-  cama: 'Doble 🛏️🛏️',
-  piso: 5,
-  Torre: 1,
-  descripcion: 'Ambiente silencioso y acogedor. Vista lateral al jardín.',
-  disponible: true,
-  imagenes: ['1506jardin.jpg', '1506habitacion.jpg']
-},
+      <div class="titulo-torre">TORRE 1</div>
 
-'1507': {
-  vista: 'Parcial al mar 🌊',
-  cama: 'King Size 🛏️',
-  piso: 5,
-  Torre: 1,
-  descripcion: 'Decoración moderna. Ideal para estancias largas.',
-  disponible: true,
-  imagenes: ['1507vista.jpg', '1507habitacion.jpg']
-},
+     <div class="fila-base fila15">
+  <div class="bloque-oficinas">
+    <div class="linea">🏢 Oficinas</div>
+    <div class="linea">Ejecutivas</div>
+  </div> 
+      
+        <button class="habitacion-btn" onclick="mostrarInfo('1501')">1501</button>
+        <button class="habitacion-btn" onclick="mostrarInfo('1502')">1502</button>
+        <button class="habitacion-btn" onclick="mostrarInfo('1503')">1503</button>
+        <button class="habitacion-btn" onclick="mostrarInfo('1504')">1504</button>
+        <button class="habitacion-btn" onclick="mostrarInfo('1505')">1505</button>
+        <button class="habitacion-btn" onclick="mostrarInfo('1506')">1506</button>
+        <button class="habitacion-btn" onclick="mostrarInfo('1507')">1507</button>
+        <button class="habitacion-btn" onclick="mostrarInfo('1508')">1508</button>
+        <button class="habitacion-btn" onclick="mostrarInfo('1509')">1509</button>
+        <button class="habitacion-btn" onclick="mostrarInfo('1510')">1510</button>
+      </div>
 
-'1508': {
-  vista: 'Jardín central 🌴',
-  cama: 'Doble 🛏️🛏️',
-  piso: 5,
-  Torre: 1,
-  descripcion: 'Conectada al jardín principal. Recién remodelada.',
-  disponible: true,
-  imagenes: ['1508central.jpg', '1508habitacion.jpg']
-},
+    
+      <div class="fila-base">
+  <button class="elevador-btn">🛗<br>Elevador</button>
+</div>
 
-'1509': {
-  vista: 'Alberca y mar 🏖️',
-  cama: 'King Size 🛏️',
-  piso: 5,
-  Torre: 1,
-  descripcion: 'Vista privilegiada con excelente iluminación natural.',
-  disponible: true,
-  imagenes: ['1509alberca.jpg', '1509habitacion.jpg']
-},
+<div class="fila-base fila-derecha">
+        <button class="habitacion-btn" onclick="mostrarInfo('1522')">1522</button>
+        <button class="habitacion-btn" onclick="mostrarInfo('1521')">1521</button>
+        <button class="habitacion-btn" onclick="mostrarInfo('1520')">1520</button>
+        <button class="habitacion-btn" onclick="mostrarInfo('1519')">1519</button>
+        <button class="habitacion-btn" onclick="mostrarInfo('1518')">1518</button>
+        <button class="habitacion-btn" onclick="mostrarInfo('1517')">1517</button>
+        <button class="habitacion-btn" onclick="mostrarInfo('1516')">1516</button>
+        <button class="habitacion-btn" onclick="mostrarInfo('1515')">1515</button>
+        <button class="habitacion-btn" onclick="mostrarInfo('1514')">1514</button>
+        <button class="habitacion-btn" onclick="mostrarInfo('1512')">1512</button>
+        <button class="habitacion-btn" onclick="mostrarInfo('1511')">1511</button>
+      </div>
 
-'1510': {
-  vista: 'Parcial jardín 🌺',
-  cama: 'Doble 🛏️🛏️',
-  piso: 5,
-  Torre: 1,
-  descripcion: 'Ideal para familias. Vista parcial al jardín y acceso rápido a elevador.',
-  disponible: true,
-  imagenes: ['1510vista.jpg', '1510habitacion.jpg']
-},
-    '1511': {
-  vista: 'Vista parcial al mar 🌊',
-  cama: 'King Size 🛏️',
-  piso: 5,
-  Torre: 1,
-  descripcion: 'Espaciosa y con excelente iluminación. Muy solicitada por parejas.',
-  disponible: true,
-  imagenes: ['1511vista.jpg', '1511interior.jpg']
-},
+      <div class="pasillo"></div>
 
-'1512': {
-  vista: 'Jardín 🌿',
-  cama: 'Doble 🛏️🛏️',
-  piso: 5,
-  Torre: 1,
-  descripcion: 'Ubicada junto al jardín interno, ideal para descanso tranquilo.',
-  disponible: true,
-  imagenes: ['1512jardin.jpg', '1512interior.jpg']
-},
+     <div class="fila">
+       <button class="habitacion-btn" onclick="mostrarInfo('1401')">1401</button>
+        <button class="habitacion-btn" onclick="mostrarInfo('1402')">1402</button>
+        <button class="habitacion-btn" onclick="mostrarInfo('1403')">1403</button>
+        <button class="habitacion-btn" onclick="mostrarInfo('1404')">1404</button>
+        <button class="habitacion-btn" onclick="mostrarInfo('1405')">1405</button>
+        <button class="habitacion-btn" onclick="mostrarInfo('1406')">1406</button>
+        <button class="habitacion-btn" onclick="mostrarInfo('1407')">1407</button>
+        <button class="habitacion-btn" onclick="mostrarInfo('1408')">1408</button>
+        <button class="habitacion-btn" onclick="mostrarInfo('1409')">1409</button>
+        <button class="habitacion-btn" onclick="mostrarInfo('1410')">1410</button>
 
-'1514': {
-  vista: 'Jardín 🌿',
-  cama: 'Doble 🛏️🛏️',
-  piso: 5,
-  Torre: 1,
-  descripcion: 'Habitación acogedora con vista natural. Acceso cómodo al lobby.',
-  disponible: true,
-  imagenes: ['1514vista.jpg', '1514interior.jpg']
-},
+       <button class="habitacion-btn" onclick="mostrarInfo('2401')">2401</button>
+        <button class="habitacion-btn" onclick="mostrarInfo('2402')">2402</button>
+        <button class="habitacion-btn" onclick="mostrarInfo('2403')">2403</button>
+        <button class="habitacion-btn" onclick="mostrarInfo('2404')">2404</button>
+        <button class="habitacion-btn" onclick="mostrarInfo('2405')">2405</button>
+        <button class="habitacion-btn" onclick="mostrarInfo('2406')">2406</button>
+        <button class="habitacion-btn" onclick="mostrarInfo('2407')">2407</button>
+        <button class="habitacion-btn" onclick="mostrarInfo('2408')">2408</button>
+        <button class="habitacion-btn" onclick="mostrarInfo('2409')">2409</button>
+        <button class="habitacion-btn" onclick="mostrarInfo('2410')">2410</button>
 
-'1515': {
-  vista: 'Parcial al mar 🌅',
-  cama: 'King Size 🛏️',
-  piso: 5,
-  Torre: 1,
-  descripcion: 'Vista parcial al océano. Ideal para desconectarse.',
-  disponible: true,
-  imagenes: ['1515mar.jpg', '1515habitacion.jpg']
-},
+      <div class="pasillo"></div>
 
-'1516': {
-  vista: 'Jardín 🌸',
-  cama: 'Doble 🛏️🛏️',
-  piso: 5,
-  Torre: 1,
-  descripcion: 'Diseño funcional. Espaciosa y cercana a elevadores.',
-  disponible: true,
-  imagenes: ['1516jardin.jpg', '1516habitacion.jpg']
-},
+         <div class="fila">
+        <button class="habitacion-btn" onclick="mostrarInfo('1422')">1422</button>
+        <button class="habitacion-btn" onclick="mostrarInfo('1421')">1421</button>
+        <button class="habitacion-btn" onclick="mostrarInfo('1420')">1420</button>
+        <button class="habitacion-btn" onclick="mostrarInfo('1419')">1419</button>
+        <button class="habitacion-btn" onclick="mostrarInfo('1418')">1418</button>
+        <button class="habitacion-btn" onclick="mostrarInfo('1417')">1417</button>
+        <button class="habitacion-btn" onclick="mostrarInfo('1416')">1416</button>
+        <button class="habitacion-btn" onclick="mostrarInfo('1415')">1415</button>
+        <button class="habitacion-btn" onclick="mostrarInfo('1414')">1414</button>
+        <button class="habitacion-btn" onclick="mostrarInfo('1412')">1412</button>
+        <button class="habitacion-btn" onclick="mostrarInfo('1411')">1411</button>
 
-'1517': {
-  vista: 'Mar 🌊',
-  cama: 'King Size 🛏️',
-  piso: 5,
-  Torre: 1,
-  descripcion: 'Balcón con vista panorámica al mar. Muy recomendada.',
-  disponible: true,
-  imagenes: ['1517mar.jpg', '1517habitacion.jpg']
-},
+        <button class="habitacion-btn" onclick="mostrarInfo('2422')">2422</button>
+        <button class="habitacion-btn" onclick="mostrarInfo('2421')">2421</button>
+        <button class="habitacion-btn" onclick="mostrarInfo('2420')">2420</button>
+        <button class="habitacion-btn" onclick="mostrarInfo('2419')">2419</button>
+        <button class="habitacion-btn" onclick="mostrarInfo('2418')">2418</button>
+        <button class="habitacion-btn" onclick="mostrarInfo('2417')">2417</button>
+        <button class="habitacion-btn" onclick="mostrarInfo('2416')">2416</button>
+        <button class="habitacion-btn" onclick="mostrarInfo('2415')">2415</button>
+        <button class="habitacion-btn" onclick="mostrarInfo('2414')">2414</button>
+        <button class="habitacion-btn" onclick="mostrarInfo('2412')">2412</button>
+        <button class="habitacion-btn" onclick="mostrarInfo('2411')">2411</button>
+      </div>        
 
-'1518': {
-  vista: 'Parcial jardín 🌳',
-  cama: 'Doble 🛏️🛏️',
-  piso: 5,
-  Torre: 1,
-  descripcion: 'Ambiente cálido y fresco. Recientemente remodelada.',
-  disponible: true,
-  imagenes: ['1518vista.jpg', '1518habitacion.jpg']
-},
+        <div class="panel" id="panel">
+        <p>Selecciona una habitación para ver los detalles.</p>
+      </div>
+    </div>
+  </div>
 
-'1519': {
-  vista: 'Alberca y jardín 🌴',
-  cama: 'King Size 🛏️',
-  piso: 5,
-  Torre: 1,
-  descripcion: 'Perfecta para familias con niños. Vista doble.',
-  disponible: true,
-  imagenes: ['1519alberca.jpg', '1519habitacion.jpg']
-},
+  <script>
+    function validarLogin() {
+// - - if (usuario === 'admin' && password === 'paradisus2025') este era el por default
+      const usuario = document.getElementById('usuario').value;
+      const password = document.getElementById('password').value;
+      if (true) { 
+        document.getElementById('login-container').style.display = 'none';
+        document.getElementById('contenido-principal').style.display = 'block';
+      } else {
+        alert('Usuario o contraseña incorrectos');
+      }
+    }
 
-'1520': {
-  vista: 'Mar abierta 🌊',
-  cama: 'Doble 🛏️🛏️',
-  piso: 5,
-  Torre: 1,
-  descripcion: 'Vista despejada al mar. Muy tranquila.',
-  disponible: true,
-  imagenes: ['1520mar.jpg', '1520interior.jpg']
-},
+    const habitaciones = {
+      '1501': {
+        vista: 'Jardín 🌴', cama: 'King Size 🛏️', piso: 5, Torre: 1,
+        descripcion: 'Solicita a tu administrador que actualice esta sección en caso de ser requerida :)',
+        disponible: true,
+        imagenes: ['VISTAMAR.jpg','VISTAHABITACION.jpg']
+      },
+      '1502': {
+        vista: 'Jardín 🌴', cama: 'King Size 🛏️', piso: 5, Torre: 1,
+        descripcion: 'Solicita a tu administrador que actualice esta sección en caso de ser requerida :)',
+        disponible: true,
+        imagenes: ['VISTAMAR.jpg','VISTAHABITACION.jpg']
+      },
+      '1522': {
+        vista: 'Mar', cama: 'Queen Size', piso: 5, Torre: 1,
+        descripcion: 'Vista al mar. Excelente ubicación.',
+        disponible: true,
+        imagenes: ['habitacion1522.jpeg']
+      }
+    };
 
-'1521': {
-  vista: 'Jardín 🌿',
-  cama: 'King Size 🛏️',
-  piso: 5,
-  Torre: 1,
-  descripcion: 'Espaciosa y elegante. Con vista al jardín lateral.',
-  disponible: true,
-  imagenes: ['1521jardin.jpg', '1521habitacion.jpg']
-},
+    function mostrarInfo(numero) {
+      const h = habitaciones[numero];
+      if (!h || !h.disponible) {
+        document.getElementById('panel').innerHTML = `<p>La habitación ${numero} no está disponible actualmente.</p>`;
+        return;
+      }
+      let contenido = `
+        <h2>Habitación ${numero}</h2>
+        <p><strong>Vista:</strong> ${h.vista}</p>
+        <p><strong>Cama:</strong> ${h.cama}</p>
+        <p><strong>Piso:</strong> ${h.piso}</p>
+        <p><strong>Torre:</strong> ${h.Torre}</p>
+        <p><strong>Descripción:</strong> ${h.descripcion}</p>
+      `;
+      h.imagenes.forEach(img => {
+        contenido += `<img src="${img}" alt="Habitación ${numero}">`;
+      });
+      document.getElementById('panel').innerHTML = contenido;
+    }
 
-'1522': {
-  vista: 'Vista completa al mar 🌅',
-  cama: 'Doble 🛏️🛏️',
-  piso: 5,
-  Torre: 1,
-  descripcion: 'Una de las mejores vistas del hotel. Muy demandada.',
-  disponible: true,
-  imagenes: ['1522mar.jpg', '1522habitacion.jpg']
-}
-
-
-};
-
-  function mostrarInfo(numero) {
-  const h = habitaciones[numero];
-
-  if (!h || !h.disponible) {
-    document.getElementById('panel').innerHTML = `<p>La habitación ${numero} no está disponible actualmente.</p>`;
-    return;
-  }
-
-  let contenido = `
-    <h2>Habitación ${numero}</h2>
-    <p><strong>Vista:</strong> ${h.vista}</p>
-    <p><strong>Cama:</strong> ${h.cama}</p>
-    <p><strong>Piso:</strong> ${h.piso}</p>
-    <p><strong>Torre:</strong> ${h.Torre}</p>
-    <p><strong>Descripción:</strong> ${h.descripcion}</p>
-  `;
-
-  h.imagenes.forEach(img => {
-    contenido += `<img src="${img}" alt="Habitación ${numero}">`;
-  });
-
-  document.getElementById('panel').innerHTML = contenido;
-}
-
-
-  function irAlInicio() {
-    document.getElementById('panel').innerHTML = `<p>Selecciona una habitación para ver los detalles.</p>`;
-  }
-</script>
-
-
+    function irAlInicio() {
+      document.getElementById('panel').innerHTML = `<p>Selecciona una habitación para ver los detalles.</p>`;
+    }
+  </script>
 </body>
 </html>
