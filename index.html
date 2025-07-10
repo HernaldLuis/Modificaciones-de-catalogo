@@ -88,23 +88,6 @@
       margin-bottom: 20px;
     }
 
-    .bloque-oficinas {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  margin-right: 8px;
-  padding: 4px 12px;
-  border-radius: 6px;
-  background-color: #57606f;
-  color: white;
-  font-size: 12px;
-  font-weight: bold;
-  text-align: center;
-}
-.bloque-oficinas .linea {
-  line-height: 1.2;
-}
-
     .elevador-btn {
      padding: 6px 10px;
      font-size: 12px;
@@ -120,9 +103,6 @@
      pointer-events: none; /* no se puede hacer clic */
       
     }
-
-    .fila-derecha {
-  margin-left: 60px; /* Ajusta este valor hasta alinear con 1511 */
 
 
     .fila-base {
@@ -296,11 +276,8 @@
       </div>
 
     
-      <div class="fila-base">
-  <button class="elevador-btn">🛗<br>Elevador</button>
-</div>
-
-<div class="fila-base fila-derecha">
+      <div class="fila-base fila15">
+     <button class="elevador-btn" title="Elevador Torre 1">🛗<br>Elevador</button>
         <button class="habitacion-btn" onclick="mostrarInfo('1522')">1522</button>
         <button class="habitacion-btn" onclick="mostrarInfo('1521')">1521</button>
         <button class="habitacion-btn" onclick="mostrarInfo('1520')">1520</button>
