@@ -121,6 +121,9 @@
       
     }
 
+    .fila-derecha {
+  margin-left: 60px; /* Ajusta este valor hasta alinear con 1511 */
+
 
     .fila-base {
       display: flex;
@@ -293,8 +296,11 @@
       </div>
 
     
-      <div class="fila-base fila15">
-     <button class="elevador-btn" title="Elevador Torre 1">🛗<br>Elevador</button>
+      <div class="fila-base">
+  <button class="elevador-btn">🛗<br>Elevador</button>
+</div>
+
+<div class="fila-base fila-derecha">
         <button class="habitacion-btn" onclick="mostrarInfo('1522')">1522</button>
         <button class="habitacion-btn" onclick="mostrarInfo('1521')">1521</button>
         <button class="habitacion-btn" onclick="mostrarInfo('1520')">1520</button>
