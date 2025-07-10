@@ -88,20 +88,30 @@
       margin-bottom: 20px;
     }
 
-    .croquis {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 30px;
-      margin-top: 40px;
+    .elevador-btn {
+     padding: 6px 10px;
+     font-size: 12px;
+     background-color: #7f8c8d; /* gris neutro */
+     border: none;
+     border-radius: 6px;
+     color: white;
+     font-weight: bold;
+     text-align: center;
+     white-space: normal;
+     cursor: default; /* sin efecto de clic */
+     opacity: 0.85;
+     pointer-events: none; /* no se puede hacer clic */
+      
     }
 
-    .etiquetaejecutiva { /*esta es la etiqueta de la oficina ejecutiva*/
-      font-weight: bold;
-      background-color: #57606f;
-      padding: 10px 20px;
-      border-radius: 8px;
+
+    .fila-base {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
     }
+
 
     .habitacion-btn {
       padding: 6px 10px; /* REDUCIDO */
@@ -156,15 +166,6 @@
       margin-bottom: 10px;
     }
 
-    .fila-invertida {
-      display: flex;
-      justify-content: center;
-      gap: 4px; /* antes 6px */
-      flex-wrap: wrap;
-      flex-direction: row-reverse;
-      margin-bottom: 8px;
-    }
-
     .pasillo {
       height: 25px;
       background-color: transparent;
@@ -174,6 +175,62 @@
       margin-left: auto;
       margin-right: auto;
     }
+
+    .elevador-btn {
+  padding: 6px 10px;
+  font-size: 12px;
+  background-color: #7f8c8d; /* gris neutro */
+  border: none;
+  border-radius: 6px;
+  color: white;
+  font-weight: bold;
+  text-align: center;
+  white-space: normal;
+  cursor: default;
+  opacity: 0.85;
+  pointer-events: none;
+  animation: subirElevador 0.8s ease-out forwards, elevadorLatido 4s ease-in-out infinite;
+  animation-delay: 0s, 1s;
+}
+
+.elevador-compartido-btn {
+  padding: 6px 10px;
+  font-size: 12px;
+  background-color: #f1c40f; /* amarillo dorado */
+  border: none;
+  border-radius: 6px;
+  color: #2f3640;
+  font-weight: bold;
+  text-align: center;
+  white-space: normal;
+  cursor: default;
+  opacity: 0.9;
+  pointer-events: none;
+  animation: subirElevador 0.8s ease-out forwards, elevadorLatido 4s ease-in-out infinite;
+  animation-delay: 0s, 1s;
+}
+
+/* Animaciones ya conocidas */
+@keyframes subirElevador {
+  from {
+    transform: translateY(25px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 0.85;
+  }
+}
+
+@keyframes elevadorLatido {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-2px);
+  }
+}
+
   </style>
 </head>
 <body>
@@ -197,15 +254,18 @@
     </div>
     <div class="contenedor">
       <h1>Catálogo de Habitaciones - Paradisus Los Cabos By Mèlia</h1>
-    
+
+      <div class="titulo-torre">TORRE 1</div>
+
+      <div class="fila-superior">
       <button class="habitacion-btn boton-ejecutiva" onclick="mostrarInfo('🏢 Oficinas Ejecutivas')">
       🏢 Oficinas<br>Ejecutivas
       </button>
-
-        
+       
       </div>
         
-      <div class="fila15">
+      <div class="fila-base fila15">
+      <button class="elevador-btn" title="Elevador Torre 1">🛗<br>Elevador</button>
         <button class="habitacion-btn" onclick="mostrarInfo('1501')">1501</button>
         <button class="habitacion-btn" onclick="mostrarInfo('1502')">1502</button>
         <button class="habitacion-btn" onclick="mostrarInfo('1503')">1503</button>
@@ -218,9 +278,9 @@
         <button class="habitacion-btn" onclick="mostrarInfo('1510')">1510</button>
       </div>
 
-      <div class="pasillo"></div>
+      <div class="pasillo">⬆️ Elevador Huesped ⬆️</div>
 
-      <div class="fila">
+      <div class="fila-base fila15">
         <button class="habitacion-btn" onclick="mostrarInfo('1522')">1522</button>
         <button class="habitacion-btn" onclick="mostrarInfo('1521')">1521</button>
         <button class="habitacion-btn" onclick="mostrarInfo('1520')">1520</button>
