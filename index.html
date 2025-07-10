@@ -96,7 +96,7 @@
       margin-top: 40px;
     }
 
-    .etiquetaejecutiva {
+    .etiquetaejecutiva { /*esta es la etiqueta de la oficina ejecutiva*/
       font-weight: bold;
       background-color: #57606f;
       padding: 10px 20px;
@@ -142,6 +142,11 @@
     .panel img:hover {
       transform: scale(1.05);
     }
+
+    .boton-ejecutiva { /*este es el estilo de la oficina ejecutiva*/
+  white-space: normal;
+  text-align: center;
+}
 
     .fila15 {
       display: flex;
@@ -193,8 +198,10 @@
     <div class="contenedor">
       <h1>Catálogo de Habitaciones - Paradisus Los Cabos By Mèlia</h1>
     
-      <div class="etiquetaejecutiva">
-      <button class="habitacion-btn" onclick="mostrarInfo('🏢 Oficinas Ejecutivas')">🏢 Oficinas Ejecutivas</button>
+      <button class="habitacion-btn boton-ejecutiva" onclick="mostrarInfo('🏢 Oficinas Ejecutivas')">
+      🏢 Oficinas<br>Ejecutivas
+      </button>
+
         
       </div>
         
