@@ -173,7 +173,7 @@
 </head>
 <body>
 
-  <!-- solo borra los simbolos
+  <!-- solo borra los simbolos - esto sirve para ocultar solo borra los simbolos-->
   <div id="login-container">
     <h2>Acceso Privado</h2>
     <input type="text" id="usuario" placeholder="Usuario" />
@@ -181,7 +181,7 @@
     <button onclick="validarLogin()">Ingresar</button>
   </div>
 
-  solo borra los simbolos-->
+  
 
   <div id="contenido-principal">
     <div class="boton-home">
@@ -285,7 +285,7 @@
     function validarLogin() {
       const usuario = document.getElementById('usuario').value;
       const password = document.getElementById('password').value;
-      if (usuario === 'admin' && password === 'paradisus2024') {
+      if (usuario === '-' && password === '-') {
         document.getElementById('login-container').style.display = 'none';
         document.getElementById('contenido-principal').style.display = 'block';
       } else {
