@@ -283,9 +283,10 @@
 
   <script>
     function validarLogin() {
+// - - if (usuario === 'admin' && password === 'paradisus2025') este era el por default
       const usuario = document.getElementById('usuario').value;
       const password = document.getElementById('password').value;
-      if (usuario === '-' && password === '-') {
+      if (true) { 
         document.getElementById('login-container').style.display = 'none';
         document.getElementById('contenido-principal').style.display = 'block';
       } else {
