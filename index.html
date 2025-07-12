@@ -89,6 +89,14 @@ body {
 
 }
 
+  .zona-desplazable {
+      overflow-x: auto;
+      overflow-y: hidden;
+      white-space: nowrap;
+      padding-bottom: 10px;
+}
+
+
 
     h1 {
       text-align: center;
@@ -112,14 +120,11 @@ body {
     }
 
 
-    .fila-base {
-      display: flex;
-      gap: 6px;
-      flex-wrap: nowrap;       /* 👈 NO permite que los botones se bajen */
-      overflow-x: auto;        /* 👈 Scroll horizontal activado */
-      margin-bottom: 10px;
-      padding-bottom: 6px;
-  }
+ .fila-base {
+  display: flex;
+  gap: 6px;
+  flex-wrap: nowrap;
+}
     .fila-base::-webkit-scrollbar {
   height: 6px;
 }
@@ -283,6 +288,7 @@ body {
     <div class="linea">Ejecutivas</div>
   </div> 
 
+  <div class="zona-desplazable">
        <div class="fila-base fila15">
         <button class="habitacion-btn" onclick="mostrarInfo('1501')">1501</button>
         <button class="habitacion-btn" onclick="mostrarInfo('1502')">1502</button>
