@@ -112,17 +112,22 @@
       border-radius: 3px;
     }
 
-    .habitacion-btn {
-      padding: 6px 10px;
-      font-size: 12px;
-      background-color: #119d2b;
-      border: none;
-      border-radius: 6px;
-      color: white;
-      cursor: pointer;
-      font-weight: bold;
-      transition: transform 0.2s;
-    }
+  .habitacion-btn {
+  padding: 10px 14px;
+  width: 70px;               /* ✅ TAMAÑO FIJO para uniformidad */
+  min-width: 70px;           /* evita que se encoja más */
+  max-width: 70px;           /* evita que crezca más */
+  font-size: 12px;
+  background-color: #119d2b;
+  border: none;
+  border-radius: 6px;
+  color: white;
+  cursor: pointer;
+  font-weight: bold;
+  transition: transform 0.2s;
+  flex-shrink: 0;            /* ✅ EVITA que se achique por flex */
+  text-align: center;
+}
 
     .habitacion-btn:hover {
       transform: scale(1.1);
