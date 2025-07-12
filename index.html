@@ -118,13 +118,18 @@
   min-width: 300px;
   max-width: 450px;
   height: 100vh;
-  overflow-y: auto;
   background-color: #3d3d3d;
   padding: 20px;
+  overflow-y: auto;
+  overflow-x: hidden;
   border-left: 2px solid rgba(255,255,255,0.1);
-  position: sticky;
-  top: 0;
+  word-wrap: break-word;
+  white-space: normal;
+  overflow-wrap: break-word;
+  position: relative;  /* 👈 CORRECTO: que se comporte como parte del flex */
+  flex-shrink: 0;       /* 👈 para que no se colapse en pantallas pequeñas */
 }
+
 
 .croquis-zona:active {
   cursor: grabbing;
