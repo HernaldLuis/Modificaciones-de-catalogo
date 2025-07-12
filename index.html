@@ -120,8 +120,9 @@
 }
 
     .panel {
-  word-wrap: break-word;
-  overflow-wrap: break-word;
+  word-wrap: break-word;       /* 🔧 Rompe palabras largas si exceden el ancho */
+  white-space: normal;         /* 🔧 Asegura saltos de línea normales */
+  overflow-wrap: break-word;   /* 🔧 Para compatibilidad */
 }
 
 .panel p {
