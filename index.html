@@ -137,6 +137,7 @@
   gap: 6px;
   flex-wrap: nowrap;
   overflow-x: auto; /* por si una fila se pasa del ancho visible */
+  overflow-y: hidden;  /* 👈 Esta línea evita el scroll vertical */
     }
 
     .fila-base::-webkit-scrollbar {
@@ -163,6 +164,7 @@
   transition: transform 0.2s;
   flex-shrink: 0;            /* ✅ EVITA que se achique por flex */
   text-align: center;
+  align-self: center;  /* 👈 Esto alinea verticalmente todos los botones en la fila */
 }
 
     .habitacion-btn:hover {
