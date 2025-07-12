@@ -28,7 +28,7 @@
       background-color: rgba(0,0,0,0.6);
     }
 
-    #login-container input {
+    #login-container input, #login-container button {
       padding: 10px;
       margin: 10px;
       border-radius: 5px;
@@ -37,9 +37,6 @@
     }
 
     #login-container button {
-      padding: 10px 20px;
-      border: none;
-      border-radius: 5px;
       background-color: #3498db;
       color: white;
       font-weight: bold;
@@ -48,6 +45,8 @@
 
     #contenido-principal {
       display: none;
+      height: 100vh;
+      width: 100vw;
     }
 
     .boton-home {
@@ -79,132 +78,38 @@
       border-radius: 4px;
     }
 
-    .contenedor {
-      width: 100%;
+    .contenedor-principal {
+      display: flex;
+      flex-direction: row;
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
+    }
+
+    .croquis-zona {
+      flex: 1;
+      overflow: auto;
       padding: 20px;
-      background: rgba(0,0,0,0.2);
+      cursor: grab;
+      user-select: none;
     }
 
-    .zona-desplazable {
-      overflow-x: auto;
-      overflow-y: hidden;
-      white-space: nowrap;
-      padding-bottom: 10px;
-    }
-
-    h1 {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-
-.contenedor-principal {
-  display: flex;
-  flex-direction: row;   /* 👈 Asegura disposición horizontal */
-  height: 100vh;
-  width: 100vw;          /* 👈 Asegura el ancho completo */
-  overflow: hidden;
-}
-
-.croquis-zona {
-  flex: 1;
-  overflow: auto;
-  padding: 20px;
-  cursor: grab;
-  user-select: none;
-}
-
-.panel {
-  width: 35%;
-  min-width: 300px;
-  max-width: 450px;
-  height: 100vh;
-  background-color: #3d3d3d;
-  padding: 20px;
-  overflow-y: auto;
-  overflow-x: hidden;
-  border-left: 2px solid rgba(255,255,255,0.1);
-  word-wrap: break-word;
-  white-space: normal;
-  overflow-wrap: break-word;
-  position: relative;  /* 👈 CORRECTO: que se comporte como parte del flex */
-  flex-shrink: 0;       /* 👈 para que no se colapse en pantallas pequeñas */
-}
-
-
-.croquis-zona:active {
-  cursor: grabbing;
-}
-
-
-.panel {
-  width: 35%;
-  min-width: 300px;
-  max-width: 450px;
-  height: 100vh;
-  overflow-y: auto;
-  background-color: #3d3d3d;
-  padding: 20px;
-  border-left: 2px solid rgba(255,255,255,0.1);
-  position: sticky;
-  top: 0;
-}
-
-
-    .panel {
-  word-wrap: break-word;       /* 🔧 Rompe palabras largas si exceden el ancho */
-  white-space: normal;         /* 🔧 Asegura saltos de línea normales */
-  overflow-wrap: break-word;   /* 🔧 Para compatibilidad */
-}
-
-.panel p {
-  text-align: justify;
-  margin-bottom: 10px;
-  line-height: 1.5;
-}
-   .fila-base {
-  display: flex;
-  gap: 6px;
-  flex-wrap: nowrap;
-  overflow: visible; /* 🔥 Quita cualquier scroll */
-}
-
-    .fila-base::-webkit-scrollbar {
-      height: 6px;
-    }
-
-    .fila-base::-webkit-scrollbar-thumb {
-      background-color: rgba(255, 255, 255, 0.3);
-      border-radius: 3px;
-    }
-
-  .habitacion-btn {
-  padding: 10px 14px;
-  width: 70px;               /* ✅ TAMAÑO FIJO para uniformidad */
-  min-width: 70px;           /* evita que se encoja más */
-  max-width: 70px;           /* evita que crezca más */
-  font-size: 12px;
-  background-color: #119d2b;
-  border: none;
-  border-radius: 6px;
-  color: white;
-  cursor: pointer;
-  font-weight: bold;
-  transition: transform 0.2s;
-  flex-shrink: 0;            /* ✅ EVITA que se achique por flex */
-  text-align: center;
-  align-self: center;  /* 👈 Esto alinea verticalmente todos los botones en la fila */
-}
-
-    .habitacion-btn:hover {
-      transform: scale(1.1);
-      background-color: #2980b9;
+    .croquis-zona:active {
+      cursor: grabbing;
     }
 
     .panel {
-      margin-top: 30px;
-      padding: 20px;
+      width: 35%;
+      min-width: 300px;
+      max-width: 450px;
+      height: 100vh;
+      overflow-y: auto;
       background-color: #3d3d3d;
-      border-radius: 10px;
+      padding: 20px;
+      border-left: 2px solid rgba(255,255,255,0.1);
+      word-wrap: break-word;
+      white-space: normal;
+      overflow-wrap: break-word;
     }
 
     .panel img {
@@ -219,24 +124,40 @@
       margin-right: auto;
     }
 
-    *::after, *::before {
-  border: none !important;
-  box-shadow: none !important;
-}
-
-
     .panel img:hover {
       transform: scale(1.05);
     }
 
-    .panel p,
-    .panel h2 {
-  text-align: justify;
-}
+    .panel p, .panel h2 {
+      text-align: justify;
+    }
 
+    .fila-base {
+      display: flex;
+      gap: 6px;
+      flex-wrap: nowrap;
+      overflow: visible;
+    }
 
-    .fila15 {
-      margin-bottom: 10px;
+    .habitacion-btn {
+      padding: 10px 14px;
+      width: 70px;
+      font-size: 12px;
+      background-color: #119d2b;
+      border: none;
+      border-radius: 6px;
+      color: white;
+      cursor: pointer;
+      font-weight: bold;
+      transition: transform 0.2s;
+      flex-shrink: 0;
+      text-align: center;
+      align-self: center;
+    }
+
+    .habitacion-btn:hover {
+      transform: scale(1.1);
+      background-color: #2980b9;
     }
 
     .pasillo {
@@ -248,15 +169,7 @@
       margin-left: auto;
       margin-right: auto;
     }
-  
-    * {
-    -webkit-user-drag: none;
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-  }
-</style>
+  </style>
   
 </head>
 <body>
