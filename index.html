@@ -143,16 +143,12 @@
   margin-bottom: 10px;
   line-height: 1.5;
 }
-
-
-
-    .fila-base {
+   .fila-base {
   display: flex;
   gap: 6px;
   flex-wrap: nowrap;
-  overflow-x: auto; /* por si una fila se pasa del ancho visible */
-  overflow-y: hidden;  /* 👈 Esta línea evita el scroll vertical */
-    }
+  overflow: visible; /* 🔥 Quita cualquier scroll */
+}
 
     .fila-base::-webkit-scrollbar {
       height: 6px;
