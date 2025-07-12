@@ -92,8 +92,9 @@
       padding: 20px;
       cursor: grab;
       user-select: none;
-    }
-
+      box-sizing: border-box;
+      max-width: 65vw; /* IMPORTANTE: evita que el croquis se extienda demasiado */
+}
     .croquis-zona:active {
       cursor: grabbing;
     }
@@ -110,7 +111,10 @@
       word-wrap: break-word;
       white-space: normal;
       overflow-wrap: break-word;
-    }
+      box-shadow: inset 0 0 10px rgba(0,0,0,0.2);
+      border-radius: 10px 0 0 10px;
+}
+
 
     .panel img {
       margin-top: 15px;
