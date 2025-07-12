@@ -121,16 +121,20 @@
   max-width: 450px;
   background-color: #3d3d3d;
   padding: 20px;
-  overflow-y: visible;
+  overflow-y: auto;           /* ✅ permite scroll si hay muchas imágenes */
+  height: 100vh;              /* ✅ altura total de pantalla */
+  position: sticky;           /* ✅ se queda visible mientras croquis se mueve */
+  top: 0;
+  right: 0;
   border-left: 2px solid rgba(255,255,255,0.1);
 
-  /* 🛠️ Correcciones añadidas */
   word-wrap: break-word;
   white-space: normal;
   overflow-wrap: break-word;
   box-shadow: none !important;
   border-bottom: none !important;
 }
+
 
     .panel {
   word-wrap: break-word;       /* 🔧 Rompe palabras largas si exceden el ancho */
