@@ -108,9 +108,12 @@
     .fila-base {
       display: flex;
       gap: 6px;
-      flex-wrap: wrap;
+      flex-wrap: nowrap;       /* 👈 NO permite que los botones se bajen */
+      overflow-x: auto;        /* 👈 Scroll horizontal activado */
       margin-bottom: 10px;
-    }
+      padding-bottom: 6px;
+  }
+
 
 
     .habitacion-btn {
@@ -177,20 +180,20 @@
     }
 
     .elevador-btn {
-  padding: 6px 10px;
-  font-size: 12px;
-  background-color: #7f8c8d; /* gris neutro */
-  border: none;
-  border-radius: 6px;
-  color: white;
-  font-weight: bold;
-  text-align: center;
-  white-space: normal;
-  cursor: default;
-  opacity: 0.85;
-  pointer-events: none;
-  animation: subirElevador 0.8s ease-out forwards, elevadorLatido 4s ease-in-out infinite;
-  animation-delay: 0s, 1s;
+      padding: 6px 10px;
+      font-size: 12px;
+      background-color: #7f8c8d; /* gris neutro */
+      border: none;
+      border-radius: 6px;
+      color: white;
+      font-weight: bold;
+      text-align: center;
+      white-space: normal;
+      cursor: default;
+      opacity: 0.85;
+      pointer-events: none;
+      animation: subirElevador 0.8s ease-out forwards, elevadorLatido 4s ease-in-out infinite;
+      animation-delay: 0s, 1s;
 }
 
 .elevador-compartido-btn {
@@ -312,8 +315,7 @@
         <button class="habitacion-btn" onclick="mostrarInfo('1407')">1407</button>
         <button class="habitacion-btn" onclick="mostrarInfo('1408')">1408</button>
         <button class="habitacion-btn" onclick="mostrarInfo('1409')">1409</button>
-        <button class="habitacion-btn" onclick="mostrarInfo('1410')">1410</button>
-       
+        <button class="habitacion-btn" onclick="mostrarInfo('1410')">1410</button>       
         <button class="habitacion-btn" onclick="mostrarInfo('2401')">2401</button>
         <button class="habitacion-btn" onclick="mostrarInfo('2402')">2402</button>
         <button class="habitacion-btn" onclick="mostrarInfo('2403')">2403</button>
