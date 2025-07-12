@@ -97,6 +97,29 @@
       margin-bottom: 20px;
     }
 
+    .contenedor-principal {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.croquis-zona {
+  flex: 1;
+  overflow: auto;
+  padding: 20px;
+}
+
+.panel {
+  width: 35%;
+  min-width: 300px;
+  max-width: 450px;
+  background-color: #3d3d3d;
+  padding: 20px;
+  overflow-y: auto;
+  border-left: 2px solid rgba(255,255,255,0.1);
+}
+
+
     .fila-base {
   display: flex;
   gap: 6px;
@@ -192,13 +215,16 @@
       </button>
     </div>
 
-      <div class="contenedor">
+      <div class="contenedor-principal">
+  <!-- ZONA IZQUIERDA: Croquis -->
+  <div class="croquis-zona">
     <h1 style="text-align: center">Catálogo de Habitaciones - Paradisus Los Cabos</h1>
-    <div class="contenedor-columnas">
-      
-      <div class="titulo-torre">TORRE 1</div>
+    
+    <div class="titulo-torre">TORRE 1</div>
 
-      <div class="zona-desplazable">
+    <div class="zona-desplazable">
+      <!-- Aquí van tus filas: fila15, fila14, etc -->
+
         <!-- Aquí van todas tus filas organizadas como en tu código original -->
         <!-- Ejemplo -->
         <div class="fila-base fila15">
@@ -282,11 +308,15 @@
 
 
 
-      <div class="panel" id="panel">
-        <p>Selecciona una habitación para ver los detalles.</p>
-      </div>
-    </div>
+         </div> <!-- zona-desplazable -->
+  </div> <!-- croquis-zona -->
+
+  <!-- ZONA DERECHA: PANEL -->
+  <div class="panel" id="panel">
+    <p>Selecciona una habitación para ver los detalles.</p>
   </div>
+</div> <!-- contenedor-principal -->
+
 
   <script>
     function validarLogin() {
