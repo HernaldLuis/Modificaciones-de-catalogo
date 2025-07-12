@@ -5,19 +5,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Croquis Habitaciones | Ama de llaves</title>
   <style>
-body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  background-image: url('FondoPag.jpg');
-  background-size: cover;
-  background-position: center;
-  background-attachment: fixed;
-  color: white;
-  overflow: hidden; /* ✅ ESTA LÍNEA quita el scroll general */
-  min-width: 100vw;
-  min-height: 100vh;
-}
-
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-image: url('FondoPag.jpg');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      color: white;
+      overflow-x: auto;
+      overflow-y: auto;
+      min-width: 100vw;
+      min-height: 100vh;
+    }
 
     #login-container {
       display: flex;
@@ -92,9 +92,8 @@ body {
       padding: 20px;
       cursor: grab;
       user-select: none;
-      box-sizing: border-box;
-      max-width: 65vw; /* IMPORTANTE: evita que el croquis se extienda demasiado */
-}
+    }
+
     .croquis-zona:active {
       cursor: grabbing;
     }
@@ -111,10 +110,7 @@ body {
       word-wrap: break-word;
       white-space: normal;
       overflow-wrap: break-word;
-      box-shadow: inset 0 0 10px rgba(0,0,0,0.2);
-      border-radius: 10px 0 0 10px;
-}
-
+    }
 
     .panel img {
       margin-top: 15px;
@@ -380,19 +376,19 @@ body {
     function mostrarInfo(numero) {
       const h = habitaciones[numero];
       if (!h || !h.disponible) {
-        document.getElementById('panel').innerHTML = `<p>La habitación ${numero} no está disponible actualmente.</p>`;
+        document.getElementById('panel').innerHTML = <p>La habitación ${numero} no está disponible actualmente.</p>;
         return;
       }
-      let contenido = `
+      let contenido = 
         <h2>Habitación ${numero}</h2>
         <p><strong>Vista:</strong> ${h.vista}</p>
         <p><strong>Cama:</strong> ${h.cama}</p>
         <p><strong>Piso:</strong> ${h.piso}</p>
         <p><strong>Torre:</strong> ${h.Torre}</p>
         <p><strong>Descripción:</strong> ${h.descripcion}</p>
-      `;
+      ;
       h.imagenes.forEach(img => {
-        contenido += `<img src="${img}" alt="Habitación ${numero}">`;
+        contenido += <img src="${img}" alt="Habitación ${numero}">;
       });
       document.getElementById('panel').innerHTML = contenido;
     }
@@ -431,7 +427,7 @@ zona.addEventListener('mousemove', (e) => {
 });
 
     function irAlInicio() {
-      document.getElementById('panel').innerHTML = `<p>Selecciona una habitación para ver los detalles.</p>`;
+      document.getElementById('panel').innerHTML = <p>Selecciona una habitación para ver los detalles.</p>;
     }
   </script>
 </body>
