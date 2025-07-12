@@ -105,9 +105,16 @@
 
 .croquis-zona {
   flex: 1;
-  overflow: auto;
+  overflow: hidden;
   padding: 20px;
+  cursor: grab;
+  user-select: none; /* para evitar selección de texto al arrastrar */
 }
+
+.croquis-zona:active {
+  cursor: grabbing;
+}
+
 
 .panel {
   width: 35%;
@@ -397,6 +404,39 @@
       });
       document.getElementById('panel').innerHTML = contenido;
     }
+
+    // Movimiento tipo "mapa"
+const zona = document.querySelector('.croquis-zona');
+let isDragging = false;
+let startX, startY, scrollLeft, scrollTop;
+
+zona.addEventListener('mousedown', (e) => {
+  isDragging = true;
+  zona.classList.add('active');
+  startX = e.pageX - zona.offsetLeft;
+  startY = e.pageY - zona.offsetTop;
+  scrollLeft = zona.scrollLeft;
+  scrollTop = zona.scrollTop;
+});
+
+zona.addEventListener('mouseleave', () => {
+  isDragging = false;
+});
+
+zona.addEventListener('mouseup', () => {
+  isDragging = false;
+});
+
+zona.addEventListener('mousemove', (e) => {
+  if (!isDragging) return;
+  e.preventDefault();
+  const x = e.pageX - zona.offsetLeft;
+  const y = e.pageY - zona.offsetTop;
+  const walkX = (x - startX) * 1; // sensibilidad
+  const walkY = (y - startY) * 1;
+  zona.scrollLeft = scrollLeft - walkX;
+  zona.scrollTop = scrollTop - walkY;
+});
 
     function irAlInicio() {
       document.getElementById('panel').innerHTML = `<p>Selecciona una habitación para ver los detalles.</p>`;
