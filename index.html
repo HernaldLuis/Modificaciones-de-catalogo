@@ -98,9 +98,10 @@
     }
 
     .fila-base {
-      display: flex;
-      gap: 6px;
-      flex-wrap: nowrap;
+  display: flex;
+  gap: 6px;
+  flex-wrap: nowrap;
+  overflow-x: auto; /* por si una fila se pasa del ancho visible */
     }
 
     .fila-base::-webkit-scrollbar {
