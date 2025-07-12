@@ -5,15 +5,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Croquis Habitaciones | Ama de llaves</title>
   <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background-image: url('FondoPag.jpg');
-      background-size: cover;
-      background-position: center;
-      background-attachment: fixed;
-      color: white;
-    }
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background-image: url('FondoPag.jpg');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  color: white;
+  overflow-x: auto; /* 👈 permite desplazamiento horizontal */
+  overflow-y: auto; /* 👈 desplazamiento vertical */
+  min-width: 100vw; /* 👈 asegura que el body pueda extenderse más allá */
+  min-height: 100vh;
+}
+
 
     #login-container {
       display: flex;
@@ -76,12 +81,14 @@
     }
 
 .contenedor {
-  max-width: 1000px;
-  margin: 30px auto;
-  padding: 10px;
-  background: rgba(0, 0, 0, 0.2); /* más sutil */
-  border-radius: 5px;
+  width: max-content;  /* 👈 se ajusta al contenido total */
+  padding: 20px;
+  background: rgba(0,0,0,0.2); /* si quieres mantener estilo */
+  display: flex;
+  justify-content: center;
+
 }
+
 
     h1 {
       text-align: center;
