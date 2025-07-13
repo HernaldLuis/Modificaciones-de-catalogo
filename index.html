@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+  <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
@@ -265,21 +265,23 @@
 
 <div class="card-habitacion-fija">
 
-<div id="bienvenida" class="mensaje-bienvenida">  <!-- SINO QUEDA ELIMINA -->
+<!-- Bienvenida (mostrada al cargar la página) -->
+<div id="bienvenida" class="mensaje-bienvenida">
   <h2>¡Bienvenido!</h2>
   <p>Selecciona una habitación del croquis y descubre sus características, comodidades y vista.</p>
 </div>
 
-<h2 id="num-habitacion"></h2>
-<p><strong>Vista:</strong> <span id="vista"></span></p>
-<p><strong>Cama:</strong> <span id="cama"></span></p>
-<p><strong>Piso:</strong> <span id="piso"></span></p>
-<p><strong>Torre:</strong> <span id="torre"></span></p>
-<p><strong>Descripción:</strong> <span id="descripcion"></span></p>
-<img id="img1" src="" alt="Vista desde el balcón">
-<img id="img2" src="" alt="Interior de la habitación">
-<img id="img1" src="" alt="paradisusexterior.jpg">
-<img id="img2" src="" alt="IMG_20250530_102102.jpg">
+<!-- Información de habitación (oculta hasta seleccionar una habitación) -->
+<div id="info-habitacion" style="display: none;">
+  <h2 id="num-habitacion"></h2>
+  <p><strong>Vista:</strong> <span id="vista"></span></p>
+  <p><strong>Cama:</strong> <span id="cama"></span></p>
+  <p><strong>Piso:</strong> <span id="piso"></span></p>
+  <p><strong>Torre:</strong> <span id="torre"></span></p>
+  <p><strong>Descripción:</strong> <span id="descripcion"></span></p>
+  <img id="img1" src="" alt="Imagen 1" style="display: none;">
+  <img id="img2" src="" alt="Imagen 2" style="display: none;">
+</div>
 
 </div>
 
@@ -462,42 +464,45 @@
       }
     };
 
-    function mostrarHabitacion(num) {
+function mostrarHabitacion(num) {
   const info = datosHabitaciones[num];
 
-// Ocultar mensaje de bienvenida
-  const bienvenida = document.getElementById("bienvenida");
-  if (bienvenida) {
-    bienvenida.style.display = "none";
+  // Oculta la bienvenida y muestra info-habitacion
+  document.getElementById("bienvenida").style.display = "none";
+  document.getElementById("info-habitacion").style.display = "block";
+
+  if (!info) {
+    document.getElementById("num-habitacion").innerText = "Habitación " + num;
+    document.getElementById("vista").innerText = "No disponible";
+    document.getElementById("cama").innerText = "No disponible";
+    document.getElementById("piso").innerText = "-";
+    document.getElementById("torre").innerText = "-";
+    document.getElementById("descripcion").innerText = `La información de la habitación ${num} no está disponible actualmente. Estamos trabajando para habilitar su contenido lo antes posible.`;
+
+    document.getElementById("img1").src = "nodisponible.gif";
+    document.getElementById("img1").style.display = "block";
+
+    document.getElementById("img2").src = "EnProceso.png";
+    document.getElementById("img2").style.display = "block";
+
+    return;
   }
 
-
-if (!info) {
-  document.getElementById("num-habitacion").innerText = "Habitación " + num;
-  document.getElementById("vista").innerText = "No disponible";
-  document.getElementById("cama").innerText = "No disponible";
-  document.getElementById("piso").innerText = "-";
-  document.getElementById("torre").innerText = "-";
-  document.getElementById("descripcion").innerText = `La información de la habitación ${num} no está disponible actualmente. Estamos trabajando para habilitar su contenido lo antes posible.`;
-  document.getElementById("img1").src = "nodisponible.gif";
-  document.getElementById("img2").src = "nodisponible.gif";
-  document.getElementById("img2").src = "EnProceso.png";
-
-
-
-  return;
-}
-
-  // Si existe la info, se muestra normalmente
+  // Si existe la info, la mostramos
   document.getElementById("num-habitacion").innerText = "Habitación " + num;
   document.getElementById("vista").innerText = info.vista;
   document.getElementById("cama").innerText = info.cama;
   document.getElementById("piso").innerText = info.piso;
   document.getElementById("torre").innerText = info.torre;
   document.getElementById("descripcion").innerText = info.descripcion;
+
   document.getElementById("img1").src = info.imagenes[0];
+  document.getElementById("img1").style.display = "block";
+
   document.getElementById("img2").src = info.imagenes[1];
+  document.getElementById("img2").style.display = "block";
 }
+
 
     function mostrarInfo(numero) {
   mostrarHabitacion(numero);
