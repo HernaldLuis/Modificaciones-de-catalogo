@@ -243,16 +243,17 @@
   <div class="croquis-zona">
     <h1 style="text-align: center">Catálogo de Habitaciones - Paradisus Los Cabos</h1>
 
-    <div class="card-habitacion-fija">
-  <h2>Habitación 1501</h2>
-  <p><strong>Vista:</strong> Jardín 🌴</p>
-  <p><strong>Cama:</strong> King Size 🧸</p>
-  <p><strong>Piso:</strong> 5</p>
-  <p><strong>Torre:</strong> 1</p>
-  <p><strong>Descripción:</strong> Solicita a tu administrador que actualice esta sección en caso de ser requerida :)</p>
-  <img src="VISTAMAR.jpg" alt="Vista desde el balcón">
-  <img src="VISTAHABITACION.jpg" alt="Interior de la habitación">
+<div class="card-habitacion-fija">
+  <h2 id="num-habitacion">Habitación 1501</h2>
+  <p><strong>Vista:</strong> <span id="vista">Jardín 🌴</span></p>
+  <p><strong>Cama:</strong> <span id="cama">King Size 🧸</span></p>
+  <p><strong>Piso:</strong> <span id="piso">5</span></p>
+  <p><strong>Torre:</strong> <span id="torre">1</span></p>
+  <p><strong>Descripción:</strong> <span id="descripcion">Solicita a tu administrador que actualice esta sección en caso de ser requerida :)</span></p>
+  <img id="img1" src="VISTAMAR.jpg" alt="Vista desde el balcón">
+  <img id="img2" src="VISTAHABITACION.jpg" alt="Interior de la habitación">
 </div>
+
 
 
 
@@ -398,10 +399,6 @@
          </div> <!-- zona-desplazable -->
   </div> <!-- croquis-zona -->
 
-  <!-- ZONA DERECHA: PANEL -->
-  <div class="panel" id="panel">
-    <p>Selecciona una habitación para ver los detalles.</p>
-  </div>
 </div> <!-- contenedor-principal -->
 
 
@@ -437,7 +434,7 @@
     };
 
     function mostrarHabitacion(num) {
-      const info = datosHabitaciones[num];
+ const info = datosHabitaciones[num];
       if (!info) return;
 
       document.getElementById("num-habitacion").innerText = "Habitación " + num;
@@ -449,6 +446,10 @@
       document.getElementById("img1").src = info.imagenes[0];
       document.getElementById("img2").src = info.imagenes[1];
     }
+
+    function mostrarInfo(numero) {
+  mostrarHabitacion(numero);
+}
 
     document.querySelectorAll(".habitacion-btn").forEach(btn => {
       const num = btn.innerText;
