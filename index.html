@@ -105,19 +105,20 @@
 .contenedor-principal {
   display: flex;
   flex-direction: row;
-  min-height: 100vh;
-  width: 100vw;
-  overflow: auto;
-  position: relative;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 20px;
 }
 
-    .croquis-zona {
-      flex: 1;
-      overflow: auto;
-      padding: 20px;
-      cursor: grab;
-      user-select: none;
-    }
+.croquis-zona {
+  flex: 2; /* o incluso 2.5 dependiendo del espacio que quieras */
+  max-width: 65vw; /* limita visualmente el ancho */
+  overflow: auto;
+  padding: 20px;
+  cursor: grab;
+  user-select: none;
+  box-sizing: border-box;
+}
     .croquis-zona:active {
       cursor: grabbing;
     }
