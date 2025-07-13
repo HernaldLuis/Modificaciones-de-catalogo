@@ -17,6 +17,26 @@
       overflow-y: auto;
       min-width: 100vw;
       min-height: 100vh;
+
+#video-fondo {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  object-fit: cover;
+  z-index: -1;
+  opacity: 0.75; /* Ajusta si lo quieres más claro u oscuro */
+  pointer-events: none;
+}
+#login-container {
+  position: relative;
+  z-index: 1;
+  background-color: rgba(0, 0, 0, 0.5); /* Fondo semitransparente */
+  padding: 30px;
+  border-radius: 12px;
+  color: white;
+  
     }
     .layout {
   display: flex;
@@ -241,6 +261,11 @@
 </head>
 <body>
 
+  <video autoplay muted loop id="video-fondo">
+  <source src="ParadisusHoteltodoincluidol.mp4" type="video/mp4">
+  Tu navegador no soporta video HTML5.
+</video>
+  
   <!-- aqui va pegado el login container -->
   <div id="login-container">
     <h2>Acceso Privado</h2>
