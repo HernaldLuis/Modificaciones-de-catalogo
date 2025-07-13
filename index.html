@@ -240,22 +240,27 @@
 
       <div class="contenedor-principal">
   <!-- ZONA IZQUIERDA: Croquis -->
-  <div class="croquis-zona">
-    <h1 style="text-align: center">Catálogo de Habitaciones - Paradisus Los Cabos</h1>
+<div class="croquis-zona">
+  <h1 style="text-align: center">Catálogo de Habitaciones - Paradisus Los Cabos</h1>
 
-<div class="card-habitacion-fija">
-  <h2 id="num-habitacion">Habitación 1501</h2>
-  <p><strong>Vista:</strong> <span id="vista">Jardín 🌴</span></p>
-  <p><strong>Cama:</strong> <span id="cama">King Size 🧸</span></p>
-  <p><strong>Piso:</strong> <span id="piso">5</span></p>
-  <p><strong>Torre:</strong> <span id="torre">1</span></p>
-  <p><strong>Descripción:</strong> <span id="descripcion">Solicita a tu administrador que actualice esta sección en caso de ser requerida :)</span></p>
-  <img id="img1" src="VISTAMAR.jpg" alt="Vista desde el balcón">
-  <img id="img2" src="VISTAHABITACION.jpg" alt="Interior de la habitación">
+  <div class="card-habitacion-fija" id="panel">
+    <!-- Mensaje de bienvenida -->
+    <div id="bienvenida" class="mensaje-bienvenida">
+      <h2>¡Bienvenido!</h2>
+      <p>Selecciona una habitación del croquis y descubre sus características, comodidades y vista.</p>
+    </div>
+
+    <!-- Info dinámica de habitación (vacía al inicio) -->
+    <h2 id="num-habitacion"></h2>
+    <p><strong>Vista:</strong> <span id="vista"></span></p>
+    <p><strong>Cama:</strong> <span id="cama"></span></p>
+    <p><strong>Piso:</strong> <span id="piso"></span></p>
+    <p><strong>Torre:</strong> <span id="torre"></span></p>
+    <p><strong>Descripción:</strong> <span id="descripcion"></span></p>
+    <img id="img1" src="" alt="Vista desde el balcón">
+    <img id="img2" src="" alt="Interior de la habitación">
+  </div>
 </div>
-
-
-
 
     <div class="zona-desplazable">
       <!-- Aquí van tus filas: fila15, fila14, etc -->
@@ -434,6 +439,10 @@
     };
 
     function mostrarHabitacion(num) {
+
+      // Oculta el mensaje de bienvenida
+  document.getElementById("bienvenida").style.display = "none";
+      
   const info = datosHabitaciones[num];
 
 if (!info) {
