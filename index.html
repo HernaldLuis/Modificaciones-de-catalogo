@@ -27,7 +27,7 @@
   margin: 0 auto;
   padding: 20px;
   box-sizing: border-box;
- 
+
 }
 
     #login-container {
@@ -222,6 +222,14 @@
 <body>
 
   <!-- aqui va pegado el login container -->
+  <div id="login-container">
+    <h2>Acceso Privado</h2>
+    <input type="text" id="usuario" placeholder="Usuario" />
+    <input type="password" id="password" placeholder="Contraseña" />
+    <button onclick="validarLogin()">Ingresar</button>
+  </div>
+
+
   <div id="contenido-principal">
     <div class="boton-home">
       <button onclick="irAlInicio()">
@@ -229,18 +237,6 @@
         Volver al croquis
       </button>
     </div>
-
-    <div id="info-habitacion" class="card-habitacion-fija">
-  <h2 id="num-habitacion">Habitación 1501</h2>
-  <p><strong>Vista:</strong> <span id="vista">Jardín 🌴</span></p>
-  <p><strong>Cama:</strong> <span id="cama">King Size 🧸</span></p>
-  <p><strong>Piso:</strong> <span id="piso">5</span></p>
-  <p><strong>Torre:</strong> <span id="torre">1</span></p>
-  <p><strong>Descripción:</strong> <span id="descripcion">Solicita a tu administrador que actualice esta sección en caso de ser requerida :)</span></p>
-  <img id="img1" src="VISTAMAR.jpg" alt="Vista externa">
-  <img id="img2" src="VISTAHABITACION.jpg" alt="Interior">
-</div>
-
 
       <div class="contenedor-principal">
   <!-- ZONA IZQUIERDA: Croquis -->
@@ -434,7 +430,28 @@
         disponible: true,
         imagenes: ['VISTAMAR.jpg','VISTAHABITACION.jpg']
       }
-  
+    };
+
+    function mostrarInfo(numero) {
+      const h = habitaciones[numero];
+      if (!h || !h.disponible) {
+        document.getElementById('panel').innerHTML = `<p>La habitación ${numero} no está disponible actualmente.</p>`;
+        return;
+      }
+      let contenido = `
+        <h2>Habitación ${numero}</h2>
+        <p><strong>Vista:</strong> ${h.vista}</p>
+        <p><strong>Cama:</strong> ${h.cama}</p>
+        <p><strong>Piso:</strong> ${h.piso}</p>
+        <p><strong>Torre:</strong> ${h.Torre}</p>
+        <p><strong>Descripción:</strong> ${h.descripcion}</p>
+      `;
+      h.imagenes.forEach(img => {
+        contenido += `<img src="${img}" alt="Habitación ${numero}">`;
+      });
+      document.getElementById('panel').innerHTML = contenido;
+    }
+
     // Movimiento tipo "mapa"
 const zona = document.querySelector('.croquis-zona');
 let isDragging = false;
@@ -467,6 +484,10 @@ zona.addEventListener('mousemove', (e) => {
   zona.scrollLeft = scrollLeft - walkX;
   zona.scrollTop = scrollTop - walkY;
 });
+
+    function irAlInicio() {
+      document.getElementById('panel').innerHTML = `<p>Selecciona una habitación para ver los detalles.</p>`;
+    }
   </script>
 </body>
 </html>
