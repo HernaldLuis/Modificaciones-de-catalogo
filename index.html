@@ -222,14 +222,6 @@
 <body>
 
   <!-- aqui va pegado el login container -->
-  <div id="login-container">
-    <h2>Acceso Privado</h2>
-    <input type="text" id="usuario" placeholder="Usuario" />
-    <input type="password" id="password" placeholder="Contraseña" />
-    <button onclick="validarLogin()">Ingresar</button>
-  </div>
-
-
   <div id="contenido-principal">
     <div class="boton-home">
       <button onclick="irAlInicio()">
@@ -442,28 +434,7 @@
         disponible: true,
         imagenes: ['VISTAMAR.jpg','VISTAHABITACION.jpg']
       }
-    };
-
-    function mostrarInfo(numero) {
-      const h = habitaciones[numero];
-      if (!h || !h.disponible) {
-        document.getElementById('panel').innerHTML = `<p>La habitación ${numero} no está disponible actualmente.</p>`;
-        return;
-      }
-      let contenido = `
-        <h2>Habitación ${numero}</h2>
-        <p><strong>Vista:</strong> ${h.vista}</p>
-        <p><strong>Cama:</strong> ${h.cama}</p>
-        <p><strong>Piso:</strong> ${h.piso}</p>
-        <p><strong>Torre:</strong> ${h.Torre}</p>
-        <p><strong>Descripción:</strong> ${h.descripcion}</p>
-      `;
-      h.imagenes.forEach(img => {
-        contenido += `<img src="${img}" alt="Habitación ${numero}">`;
-      });
-      document.getElementById('panel').innerHTML = contenido;
-    }
-
+  
     // Movimiento tipo "mapa"
 const zona = document.querySelector('.croquis-zona');
 let isDragging = false;
@@ -496,10 +467,6 @@ zona.addEventListener('mousemove', (e) => {
   zona.scrollLeft = scrollLeft - walkX;
   zona.scrollTop = scrollTop - walkY;
 });
-
-    function irAlInicio() {
-      document.getElementById('panel').innerHTML = `<p>Selecciona una habitación para ver los detalles.</p>`;
-    }
   </script>
 </body>
 </html>
