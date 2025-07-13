@@ -238,6 +238,18 @@
       </button>
     </div>
 
+    <div id="info-habitacion" class="card-habitacion-fija">
+  <h2 id="num-habitacion">Habitación 1501</h2>
+  <p><strong>Vista:</strong> <span id="vista">Jardín 🌴</span></p>
+  <p><strong>Cama:</strong> <span id="cama">King Size 🧸</span></p>
+  <p><strong>Piso:</strong> <span id="piso">5</span></p>
+  <p><strong>Torre:</strong> <span id="torre">1</span></p>
+  <p><strong>Descripción:</strong> <span id="descripcion">Solicita a tu administrador que actualice esta sección en caso de ser requerida :)</span></p>
+  <img id="img1" src="VISTAMAR.jpg" alt="Vista externa">
+  <img id="img2" src="VISTAHABITACION.jpg" alt="Interior">
+</div>
+
+
       <div class="contenedor-principal">
   <!-- ZONA IZQUIERDA: Croquis -->
   <div class="croquis-zona">
@@ -415,6 +427,47 @@
       } else {
         alert('Usuario o contraseña incorrectos');
       }
+    }
+
+    const datosHabitaciones = {
+    "1501": {
+      vista: "Jardín 🌴",
+      cama: "King Size 🧸",
+      piso: "5",
+      torre: "1",
+      descripcion: "Esta habitación cuenta con vista a los jardines y acceso rápido a elevadores.",
+      imagenes: ["VISTAMAR.jpg", "VISTAHABITACION.jpg"]
+    },
+    "1502": {
+      vista: "Vista Mar 🌊",
+      cama: "King Size 🧸",
+      piso: "5",
+      torre: "1",
+      descripcion: "Hermosa vista parcial al mar, ideal para relajarte.",
+      imagenes: ["vista1502a.jpg", "vista1502b.jpg"]
+    }
+    // Agrega más habitaciones aquí
+  };
+
+  function mostrarHabitacion(num) {
+    const info = datosHabitaciones[num];
+    if (!info) return;
+
+    document.getElementById("num-habitacion").innerText = "Habitación " + num;
+    document.getElementById("vista").innerText = info.vista;
+    document.getElementById("cama").innerText = info.cama;
+    document.getElementById("piso").innerText = info.piso;
+    document.getElementById("torre").innerText = info.torre;
+    document.getElementById("descripcion").innerText = info.descripcion;
+    document.getElementById("img1").src = info.imagenes[0];
+    document.getElementById("img2").src = info.imagenes[1];
+  }
+
+  // Escuchar clicks en botones de habitación
+  document.querySelectorAll("button").forEach(btn => {
+    const num = btn.innerText;
+    if (datosHabitaciones[num]) {
+      btn.addEventListener("click", () => mostrarHabitacion(num));
     }
 
     const habitaciones = {
