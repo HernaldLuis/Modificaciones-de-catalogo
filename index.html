@@ -8,7 +8,6 @@
     body {
       margin: 0;
       font-family: Arial, sans-serif;
-      background-image: url('FondoPag.jpg');
       background-size: cover;
       background-position: center;
       background-attachment: fixed;
@@ -79,7 +78,11 @@
   width: 100%;
   min-height: 100vh;
   box-sizing: border-box;
+  background-image: url('FondoPag.jpg');
+  background-size: cover;
+  background-position: center;
 }
+      
     .boton-home {
       position: absolute;
       top: 20px;
@@ -459,16 +462,19 @@
 
 
   <script>
-    function validarLogin() {
-      const usuario = document.getElementById('usuario').value;
-      const password = document.getElementById('password').value;
-      if (true) {
-        document.getElementById('login-container').style.display = 'none';
-        document.getElementById('contenido-principal').style.display = 'block';
-      } else {
-        alert('Usuario o contraseña incorrectos');
-      }
-    }
+function validarLogin() {
+  const usuario = document.getElementById('usuario').value;
+  const password = document.getElementById('password').value;
+
+  if (true) {
+    document.getElementById('login-container').style.display = 'none';
+    document.getElementById('contenido-principal').style.display = 'block';
+
+    // Oculta el video de fondo
+    document.getElementById('video-fondo').style.display = 'none';
+  } else {
+    alert('Usuario o contraseña incorrectos');
+  }
 
     const datosHabitaciones = {
       "1501": {
