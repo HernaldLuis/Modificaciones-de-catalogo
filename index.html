@@ -264,10 +264,11 @@
 </head>
 <body>
 
-  <video autoplay muted loop id="video-fondo">
+<video autoplay muted loop id="video-fondo">
   <source src="ParadisusHoteltodoincluidol.mp4" type="video/mp4">
   Tu navegador no soporta video HTML5.
 </video>
+
   
   <!-- aqui va pegado el login container -->
   <div id="login-container">
@@ -466,15 +467,21 @@ function validarLogin() {
   const usuario = document.getElementById('usuario').value;
   const password = document.getElementById('password').value;
 
+  // Aquí puedes poner condiciones si quieres validar usuario y contraseña reales
   if (true) {
     document.getElementById('login-container').style.display = 'none';
     document.getElementById('contenido-principal').style.display = 'block';
 
-    // Oculta el video de fondo
-    document.getElementById('video-fondo').style.display = 'none';
+    // Ocultar el video
+    const videoFondo = document.getElementById('video-fondo');
+    if (videoFondo) {
+      videoFondo.style.display = 'none';
+    }
   } else {
     alert('Usuario o contraseña incorrectos');
   }
+}
+
 
     const datosHabitaciones = {
       "1501": {
