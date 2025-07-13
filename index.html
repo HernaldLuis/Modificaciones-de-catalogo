@@ -427,8 +427,79 @@
       } else {
         alert('Usuario o contraseña incorrectos');
       }
+    }
+
+    const habitaciones = {
+      '1501': {
+        vista: 'Jardín 🌴', cama: 'King Size 💏', piso: 5, Torre: 1,
+        descripcion: 'Solicita a tu administrador que actualice esta sección en caso de ser requerida :)',
+        disponible: true,
+        imagenes: ['VISTAMAR.jpg','VISTAHABITACION.jpg']
+      },
+      '1502': {
+        vista: 'Jardín 🌴', cama: 'King Size 💏', piso: 5, Torre: 1,
+        descripcion: 'Solicita a tu administrador que actualice esta sección en caso de ser requerida :)',
+        disponible: true,
+        imagenes: ['VISTAMAR.jpg','VISTAHABITACION.jpg']
+      }
+    };
+
+    function mostrarInfo(numero) {
+      const h = habitaciones[numero];
+      if (!h || !h.disponible) {
+        document.getElementById('panel').innerHTML = `<p>La habitación ${numero} no está disponible actualmente.</p>`;
+        return;
+      }
+      let contenido = `
+        <h2>Habitación ${numero}</h2>
+        <p><strong>Vista:</strong> ${h.vista}</p>
+        <p><strong>Cama:</strong> ${h.cama}</p>
+        <p><strong>Piso:</strong> ${h.piso}</p>
+        <p><strong>Torre:</strong> ${h.Torre}</p>
+        <p><strong>Descripción:</strong> ${h.descripcion}</p>
+      `;
+      h.imagenes.forEach(img => {
+        contenido += `<img src="${img}" alt="Habitación ${numero}">`;
+      });
+      document.getElementById('panel').innerHTML = contenido;
+    }
+
+    // Movimiento tipo "mapa"
+const zona = document.querySelector('.croquis-zona');
+let isDragging = false;
+let startX, startY, scrollLeft, scrollTop;
+
+zona.addEventListener('mousedown', (e) => {
+  isDragging = true;
+  zona.classList.add('active');
+  startX = e.pageX - zona.offsetLeft;
+  startY = e.pageY - zona.offsetTop;
+  scrollLeft = zona.scrollLeft;
+  scrollTop = zona.scrollTop;
 });
 
+zona.addEventListener('mouseleave', () => {
+  isDragging = false;
+});
+
+zona.addEventListener('mouseup', () => {
+  isDragging = false;
+});
+
+zona.addEventListener('mousemove', (e) => {
+  if (!isDragging) return;
+  e.preventDefault();
+  const x = e.pageX - zona.offsetLeft;
+  const y = e.pageY - zona.offsetTop;
+  const walkX = (x - startX) * 1; // sensibilidad
+  const walkY = (y - startY) * 1;
+  zona.scrollLeft = scrollLeft - walkX;
+  zona.scrollTop = scrollTop - walkY;
+});
+
+    function irAlInicio() {
+      document.getElementById('panel').innerHTML = `<p>Selecciona una habitación para ver los detalles.</p>`;
+    }
   </script>
 </body>
 </html>
