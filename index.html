@@ -434,18 +434,33 @@
     };
 
     function mostrarHabitacion(num) {
- const info = datosHabitaciones[num];
-      if (!info) return;
+  const info = datosHabitaciones[num];
 
-      document.getElementById("num-habitacion").innerText = "Habitación " + num;
-      document.getElementById("vista").innerText = info.vista;
-      document.getElementById("cama").innerText = info.cama;
-      document.getElementById("piso").innerText = info.piso;
-      document.getElementById("torre").innerText = info.torre;
-      document.getElementById("descripcion").innerText = info.descripcion;
-      document.getElementById("img1").src = info.imagenes[0];
-      document.getElementById("img2").src = info.imagenes[1];
-    }
+if (!info) {
+  document.getElementById("num-habitacion").innerText = "Habitación " + num;
+  document.getElementById("vista").innerText = "No disponible";
+  document.getElementById("cama").innerText = "No disponible";
+  document.getElementById("piso").innerText = "-";
+  document.getElementById("torre").innerText = "-";
+  document.getElementById("descripcion").innerText = `La información de la habitación ${num} no está disponible actualmente. Estamos trabajando para habilitar su contenido lo antes posible.`;
+  document.getElementById("img1").src = "nodisponible.jpg";
+  document.getElementById("img2").src = "nodisponible.jpg";
+
+
+
+  return;
+}
+
+  // Si existe la info, se muestra normalmente
+  document.getElementById("num-habitacion").innerText = "Habitación " + num;
+  document.getElementById("vista").innerText = info.vista;
+  document.getElementById("cama").innerText = info.cama;
+  document.getElementById("piso").innerText = info.piso;
+  document.getElementById("torre").innerText = info.torre;
+  document.getElementById("descripcion").innerText = info.descripcion;
+  document.getElementById("img1").src = info.imagenes[0];
+  document.getElementById("img2").src = info.imagenes[1];
+}
 
     function mostrarInfo(numero) {
   mostrarHabitacion(numero);
