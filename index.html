@@ -255,6 +255,13 @@
       background-color: #2980b9;
     }
 
+    /* Habitaciones ya cargadas / disponibles */
+.habitacion-btn.disponible {
+  background-color: #007bff; /* Azul = ya con info */
+  font-weight: bold;
+  border: 2px solid #0056b3;
+}
+
     /* Línea de pasillo entre las habitaciones */
     .pasillo {
       height: 25px;
@@ -334,7 +341,16 @@ body {
             <div class="linea">🏢 Oficinas</div>
             <div class="linea">Ejecutivas</div>
           </div>
-    </div>
+
+<div id="panel-fotos">
+  <h3 id="titulo-habitacion"></h3>
+  <img id="foto-pan" alt="Panorámica" />
+  <img id="foto-mar" alt="Vista al mar" />
+  <img id="foto-central" alt="Vista central" />
+  <img id="foto-lobby" alt="Vista lobby" />
+</div>
+        
+</div>
 
 <!-- ZONA DESPLAZABLE DE TORRES -->
 <div class="zona-desplazable">
@@ -708,7 +724,52 @@ function mostrarHabitacion(num) {
 
     function irAlInicio() {
       // Puedes dejar esta función vacía o mostrar un mensaje si gustas
+    });
+      // aqui empieza magia aqui agregas todas las imagenes, asegurate de que este lo mas ordenado posible
+
+      const habitaciones = {
+  "2208": {
+    panoramica: "https://res.cloudinary.com/dor6za85u/image/upload/v1752723665/2208_Pano_xeakt3.jpg",
+    mar:        "https://res.cloudinary.com/dor6za85u/image/upload/v1752723666/2208_Mar_xagttf.jpg",
+    central:    "https://res.cloudinary.com/dor6za85u/image/upload/v1752723665/2208_Central_beqdos.jpg",
+    lobby:      "https://res.cloudinary.com/dor6za85u/image/upload/v1752723665/2208_Lobby_v1tkjn.jpg"
+  }
+  // Puedes ir agregando más habitaciones aquí...
+};
+
+    const habitaciones = {
+  "2208": {
+    panoramica: "...",
+    mar: "...",
+    central: "...",
+    lobby: "..."
+  },
+  // Aquí agregas más habitaciones que tengan info
+};
+
+// Al cargar la página, marca con clase "disponible" los botones que ya tienen info
+window.onload = function() {
+  for (let num in habitaciones) {
+    const btn = document.querySelector(`button[onclick="mostrarInfo('${num}')"]`);
+    if (btn) {
+      btn.classList.add("disponible");
+      btn.title = "Información disponible";
     }
+  }
+};
+    function mostrarInfo(numHabitacion) {
+  const datos = habitaciones[numHabitacion];
+  if (datos) {
+    document.getElementById("titulo-habitacion").innerText = `Habitación ${numHabitacion}`;
+    document.getElementById("foto-pan").src = datos.panoramica;
+    document.getElementById("foto-mar").src = datos.mar;
+    document.getElementById("foto-central").src = datos.central;
+    document.getElementById("foto-lobby").src = datos.lobby;
+  } else {
+    alert("No hay datos disponibles para esta habitación.");
+  }
+}
+
   </script>
 </body>
 </html>
