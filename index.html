@@ -1,14 +1,15 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Croquis Habitaciones | Ama de llaves</title>
   <style>
+    /* Estilos generales del body */
     body {
       margin: 0;
       font-family: Arial, sans-serif;
-      background-size: cover;
+      background-size: cover; /* Hace que la imagen o video cubra todo el fondo */
       background-position: center;
       background-attachment: fixed;
       color: white;
@@ -16,50 +17,39 @@
       overflow-y: auto;
       min-width: 100vw;
       min-height: 100vh;
-
-     
-#video-fondo {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  object-fit: cover;
-  z-index: -1;
-  opacity: 0.75; /* Ajusta si lo quieres más claro u oscuro */
-  pointer-events: none;
-}
-#login-container {
-  position: relative;
-  z-index: 1;
-  background-color: rgba(0, 0, 0, 0.5); /* Fondo semitransparente */
-  padding: 30px;
-  border-radius: 12px;
-  color: white;
-
     }
-    .layout {
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  gap: 30px;
-  max-width: 1300px;
-  margin: 0 auto;
-  padding: 20px;
-  box-sizing: border-box;
 
-}
+    /* Video de fondo en pantalla completa */
+    #video-fondo {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      object-fit: cover; /* Asegura que el video cubra todo el espacio sin deformarse */
+      z-index: -1; /* Coloca el video por debajo de los demás elementos */
+      opacity: 0.75; /* Transparencia del video */
+      pointer-events: none; /* Evita que el video interrumpa clics */
+    }
 
+    /* Contenedor del formulario de login */
     #login-container {
+      position: relative;
+      z-index: 1;
+      background-color: rgba(0, 0, 0, 0.6); /* Fondo oscuro semitransparente */
+      padding: 30px;
+      border-radius: 12px;
+      color: white;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       height: 100vh;
-      background-color: rgba(0,0,0,0.6);
     }
 
-    #login-container input, #login-container button {
+    /* Estilos para los campos de entrada y botón en login */
+    #login-container input,
+    #login-container button {
       padding: 10px;
       margin: 10px;
       border-radius: 5px;
@@ -74,16 +64,18 @@
       cursor: pointer;
     }
 
-#contenido-principal {
-  display: none;
-  width: 100%;
-  min-height: 100vh;
-  box-sizing: border-box;
-  background-image: url('FondoPag.jpg');
-  background-size: cover;
-  background-position: center;
-}
+    /* Estilos para el contenedor principal luego del login */
+    #contenido-principal {
+      display: none; /* Oculto hasta que se haga login */
+      width: 100%;
+      min-height: 100vh;
+      box-sizing: border-box;
+      background-image: url('FondoPag.jpg');
+      background-size: cover;
+      background-position: center;
+    }
 
+    /* Botón flotante para regresar al croquis */
     .boton-home {
       position: absolute;
       top: 20px;
@@ -113,125 +105,125 @@
       border-radius: 4px;
     }
 
+    /* Tarjeta lateral fija con la información de la habitación */
     .card-habitacion-fija {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  background-color: #333;
-  color: white;
-  border-radius: 10px;
-  padding: 20px;
-  width: 300px;
-  font-family: Arial, sans-serif;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
-  z-index: 1000;
-}
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background-color: #333;
+      color: white;
+      border-radius: 10px;
+      padding: 20px;
+      width: 300px;
+      font-family: Arial, sans-serif;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+    }
 
-.card-habitacion-fija h2 {
-  margin-top: 0;
-}
+    .card-habitacion-fija h2 {
+      margin-top: 0;
+    }
 
-.card-habitacion-fija img {
-  width: 100%;
-  margin-top: 15px;
-  border-radius: 10px;
-  object-fit: cover;
-}
+    .card-habitacion-fija img {
+      width: 100%;
+      margin-top: 15px;
+      border-radius: 10px;
+      object-fit: cover;
+    }
 
-    .mensaje-bienvenida { 
-  position: absolute;
-  top: 100px;
-  right: 40px;
-  background: rgba(0, 0, 0, 0.85);
-  padding: 20px 25px;
-  border-radius: 15px;
-  max-width: 320px;
-  color: white;
-  z-index: 1000;
-  box-shadow: 0 0 10px rgba(0,0,0,0.5);
-  animation: fadeIn 1s ease;
-}
+    /* Mensaje de bienvenida inicial */
+    .mensaje-bienvenida {
+      position: absolute;
+      top: 100px;
+      right: 40px;
+      background: rgba(0, 0, 0, 0.85);
+      padding: 20px 25px;
+      border-radius: 15px;
+      max-width: 320px;
+      color: white;
+      z-index: 1000;
+      box-shadow: 0 0 10px rgba(0,0,0,0.5);
+      animation: fadeIn 1s ease;
+    }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
+    /* Animación de entrada para el mensaje */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
 
+    /* Contenedor principal que divide el croquis y el panel lateral */
+    .contenedor-principal {
+      display: flex;
+      flex-direction: row;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 20px;
+    }
 
+    /* Zona del croquis que puede desplazarse horizontalmente */
+    .croquis-zona {
+      flex: 2;
+      max-width: 65vw;
+      overflow: auto;
+      padding: 20px;
+      cursor: grab;
+      user-select: none;
+      box-sizing: border-box;
+    }
 
-.contenedor-principal {
-  display: flex;
-  flex-direction: row;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 20px;
-}
-
-.croquis-zona {
-  flex: 2; /* o incluso 2.5 dependiendo del espacio que quieras */
-  max-width: 65vw; /* limita visualmente el ancho */
-  overflow: auto;
-  padding: 20px;
-  cursor: grab;
-  user-select: none;
-  box-sizing: border-box;
-}
     .croquis-zona:active {
       cursor: grabbing;
     }
 
-     .zona-desplazable {
-  display: flex;
-  flex-direction: row;
-  gap: 100px; /* espacio entre torres */
-  flex-wrap: nowrap;
-  min-width: max-content;
-}
+    /* Zona interna desplazable que contiene las torres */
+    .zona-desplazable {
+      display: flex;
+      flex-direction: row;
+      gap: 100px; /* espacio entre torres */
+      flex-wrap: nowrap;
+      min-width: max-content; /* asegura que no se corte */
+    }
 
-.panel {
-  width: 35%;
-  min-width: 300px;
-  max-width: 450px;
-  height: auto;
-  max-height: 90vh;
-  overflow-y: auto;
-  background-color: #3d3d3d;
-  padding: 20px;
-  border-left: 2px solid rgba(255,255,255,0.1);
-  word-wrap: break-word;
-  white-space: normal;
-  overflow-wrap: break-word;
-  box-shadow: inset 0 0 10px rgba(0,0,0,0.2);
-  border-radius: 10px 0 0 10px;
-}
+    /* Panel lateral derecho con contenido adicional */
+    .panel {
+      width: 35%;
+      min-width: 300px;
+      max-width: 450px;
+      height: auto;
+      max-height: 90vh;
+      overflow-y: auto;
+      background-color: #3d3d3d;
+      padding: 20px;
+      border-left: 2px solid rgba(255,255,255,0.1);
+      word-wrap: break-word;
+      white-space: normal;
+      overflow-wrap: break-word;
+      box-shadow: inset 0 0 10px rgba(0,0,0,0.2);
+      border-radius: 10px 0 0 10px;
+    }
 
+    /* Estilo de las imágenes dentro del panel */
+    .panel img {
+      display: block;
+      margin: 10px auto;
+      border-radius: 6px;
+      max-width: 100%;
+      max-height: 180px;
+      object-fit: cover;
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+    }
 
-.panel img {
-  display: block;
-  margin: 10px auto;
-  border-radius: 6px;
-  max-width: 100%;
-  max-height: 180px; /* súper pequeño para notar el cambio */
-  object-fit: cover;
-  box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
-}
-
-.croquis-zona {
-  overflow-x: auto;
-  overflow-y: hidden;
-  white-space: nowrap;
-  width: 100%;
-  height: 100%;
-  position: relative;
-}
     .panel img:hover {
       transform: scale(1.05);
     }
 
-    .panel p, .panel h2 {
+    .panel p,
+    .panel h2 {
       text-align: justify;
     }
 
+    /* Fila base para agrupar habitaciones */
     .fila-base {
       display: flex;
       gap: 6px;
@@ -239,6 +231,7 @@
       overflow: visible;
     }
 
+    /* Botón que representa una habitación */
     .habitacion-btn {
       padding: 10px 14px;
       width: 70px;
@@ -260,6 +253,7 @@
       background-color: #2980b9;
     }
 
+    /* Línea de pasillo entre las habitaciones */
     .pasillo {
       height: 25px;
       background-color: transparent;
@@ -270,15 +264,15 @@
       margin-right: auto;
     }
 
+    /* Prevención de scroll horizontal global innecesario */
     body {
-  overflow-x: hidden;
-}
-
+      overflow-x: hidden;
+    }
   </style>
-
 </head>
 <body>
 
+ 
   <video autoplay muted loop id="video-fondo">
 
   <source src="ParadisusHoteltodoincluidol.mp4" type="video/mp4">
