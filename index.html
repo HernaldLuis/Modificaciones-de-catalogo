@@ -265,6 +265,30 @@
       margin-left: auto;
       margin-right: auto;
     }
+    
+/* TORRES */
+    .torre1 {
+  margin-left: 80px; /* Ajusta según el espacio que necesites para el elevador */
+}
+
+/* ELEVADORES */
+.torre1 .fila-base {
+  padding-left: 80px;
+}
+
+.fila-base {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.elevador {
+  width: 50px;
+  height: 50px;
+  background-image: url('elevador.gif'); /* o la animación que uses */
+  background-size: contain;
+  background-repeat: no-repeat;
+}
 
     
 body {
@@ -340,13 +364,18 @@ body {
 <div class="zona-desplazable">
       <!-- Aquí van tus filas: fila15, fila14, etc -->
 
-<div class="torre" style="display: flex; flex-direction: column; align-items: center;">
+<div class="torre torre1" style="display: flex; flex-direction: column; align-items: center;">
   <h2>🏢 Torre 1</h2>
 
   <!-- Piso 5 (1501–1522) -->
   <div style="display: flex; flex-direction: column; margin-bottom: 30px;">
     <!-- Vista Interna -->
     <div class="fila-base">
+      
+ <div class="elevador">
+   </div>
+    <div class="botones-habitacion">
+      
       <button class="habitacion-btn" onclick="mostrarInfo('1501')">1501</button>
       <button class="habitacion-btn" onclick="mostrarInfo('1502')">1502</button>
       <button class="habitacion-btn" onclick="mostrarInfo('1503')">1503</button>
