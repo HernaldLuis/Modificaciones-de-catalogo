@@ -273,6 +273,44 @@
       margin-right: auto;
     }
 
+    /* NUEVO PANEL, PRUEBA NUMBER 1º */
+
+    .panel-derecho {
+  width: 400px;
+  max-height: 95vh;
+  overflow-y: auto;
+  background-color: rgba(0, 0, 0, 0.7);
+  padding: 15px;
+  color: white;
+  border-left: 2px solid #444;
+}
+
+.panel-derecho h2 {
+  margin-top: 0;
+  font-size: 24px;
+  text-align: center;
+}
+
+.detalle p {
+  margin: 5px 0;
+  font-size: 14px;
+}
+
+.galeria {
+  margin-top: 10px;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+}
+
+.galeria img {
+  width: 100%;
+  height: auto;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+
 
 body {
   overflow-x: auto;
@@ -751,16 +789,23 @@ document.addEventListener("DOMContentLoaded", function () {
   document.querySelector('.croquis-zona').scrollLeft = 0;
 });
 
-    function mostrarInfo(numHabitacion) {
+function mostrarInfo(numHabitacion) {
   const datos = habitaciones[numHabitacion];
+
   if (datos) {
     document.getElementById("titulo-habitacion").innerText = `Habitación ${numHabitacion}`;
-    document.getElementById("foto-pan").src = datos.panoramica;
-    document.getElementById("foto-mar").src = datos.mar;
-    document.getElementById("foto-central").src = datos.central;
-    document.getElementById("foto-lobby").src = datos.lobby;
+    document.getElementById("vista").innerText = datos.vista || "N/A";
+    document.getElementById("cama").innerText = datos.cama || "N/A";
+    document.getElementById("piso").innerText = datos.piso || "N/A";
+    document.getElementById("torre").innerText = datos.torre || "N/A";
+    document.getElementById("descripcion").innerText = datos.descripcion || "N/A";
+
+    document.getElementById("foto-pan").src = datos.panoramica || "";
+    document.getElementById("foto-mar").src = datos.mar || "";
+    document.getElementById("foto-central").src = datos.central || "";
+    document.getElementById("foto-lobby").src = datos.lobby || "";
   } else {
-    alert("No hay datos disponibles para esta habitación.");
+    alert(`No hay información disponible para la habitación ${numHabitacion}`);
   }
 }
 
