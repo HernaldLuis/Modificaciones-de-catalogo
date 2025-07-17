@@ -177,13 +177,15 @@
     }
 
     /* Zona interna desplazable que contiene las torres */
-    .zona-desplazable {
-      display: flex;
-      flex-direction: row;
-      gap: 100px; /* espacio entre torres */
-      flex-wrap: nowrap;
-      min-width: max-content; /* asegura que no se corte */
-    }
+.zona-desplazable {
+  display: flex;
+  flex-direction: row;
+  gap: 100px;
+  flex-wrap: nowrap;
+  overflow-x: auto; /* 👈 Para hacer scroll horizontal */
+  width: 100%; /* 👈 Asegúrate de esto */
+}
+
 
     /* Panel lateral derecho con contenido adicional */
     .panel {
