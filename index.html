@@ -185,6 +185,7 @@
   flex-direction: row;
   gap: 100px; /* espacio entre torres */
   flex-wrap: nowrap;
+  min-width: max-content;
 }
 
 .panel {
@@ -215,7 +216,14 @@
   box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
 }
 
-
+.croquis-zona {
+  overflow-x: auto;
+  overflow-y: hidden;
+  white-space: nowrap;
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
 
     .panel img:hover {
       transform: scale(1.05);
