@@ -180,6 +180,13 @@
       cursor: grabbing;
     }
 
+     .zona-desplazable {
+  display: flex;
+  flex-direction: row;
+  gap: 100px; /* espacio entre torres */
+  flex-wrap: nowrap;
+}
+
 .panel {
   width: 35%;
   min-width: 300px;
@@ -291,10 +298,7 @@
 
       <div class="contenedor-principal">
   <!-- ZONA IZQUIERDA: Croquis -->
-  <div class="croquis-zona">
-    <h1 style="text-align: center">Catálogo de Habitaciones - Paradisus Los Cabos</h1>
-
-<div class="card-habitacion-fija">
+ <div class="card-habitacion-fija">
 
 <!-- Bienvenida (mostrada al cargar la página) -->
 <div id="bienvenida" class="mensaje-bienvenida">
@@ -316,7 +320,8 @@
 
 </div>
 
-
+ <div class="croquis-zona">
+    <h1 style="text-align: center">Catálogo de Habitaciones - Paradisus Los Cabos</h1>
 
 
     <div class="zona-desplazable">
@@ -331,8 +336,8 @@
           </div>
 
 
-<div style="display: flex; flex-direction: column; align-items: center;">
-  <h2 style="text-align: center;">🏢 Torre 1</h2>
+<div class="torre" style="display: flex; flex-direction: column; align-items: center;">
+  <h2>🏢 Torre 1</h2>
 
   <!-- Piso 5 (1501–1522) -->
   <div style="display: flex; flex-direction: column; margin-bottom: 30px;">
@@ -456,8 +461,8 @@
     <button class="habitacion-btn" onclick="mostrarInfo('1211')">1211</button>
   </div>
 
-<div style="display: flex; flex-direction: column; align-items: center; margin-left: 60px;">
-  <h2 style="text-align: center;">🏢 Torre 2</h2>
+<div class="torre" style="display: flex; flex-direction: column; align-items: center;">
+  <h2>🏢 Torre 2</h2>
 
   <!-- Piso 4 -->
   <div style="display: flex; flex-direction: column; margin-bottom: 30px;">
@@ -650,6 +655,9 @@ function mostrarHabitacion(num) {
   document.getElementById("img2").style.display = "block";
 }
 
+   window.onload = function () {
+  document.querySelector('.croquis-zona').scrollLeft = 0; // o el valor que desees
+}
 
     function mostrarInfo(numero) {
   mostrarHabitacion(numero);
