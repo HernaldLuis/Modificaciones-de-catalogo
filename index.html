@@ -735,20 +735,11 @@ function mostrarHabitacion(num) {
     lobby:      "https://res.cloudinary.com/dor6za85u/image/upload/v1752723665/2208_Lobby_v1tkjn.jpg"
   }
   // Puedes ir agregando más habitaciones aquí...
-};
 
-    const habitaciones = {
-  "2208": {
-    panoramica: "...",
-    mar: "...",
-    central: "...",
-    lobby: "..."
-  },
-  // Aquí agregas más habitaciones que tengan info
 };
 
 // Al cargar la página, marca con clase "disponible" los botones que ya tienen info
-window.onload = function() {
+document.addEventListener("DOMContentLoaded", function () {
   for (let num in habitaciones) {
     const btn = document.querySelector(`button[onclick="mostrarInfo('${num}')"]`);
     if (btn) {
@@ -756,7 +747,10 @@ window.onload = function() {
       btn.title = "Información disponible";
     }
   }
-};
+
+  document.querySelector('.croquis-zona').scrollLeft = 0;
+});
+
     function mostrarInfo(numHabitacion) {
   const datos = habitaciones[numHabitacion];
   if (datos) {
