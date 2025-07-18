@@ -819,6 +819,12 @@ function mostrarHabitacion(num) {
     function irAlInicio() {
       // Puedes dejar esta función vacía o mostrar un mensaje si gustas
     }
+
+    function validarLogin() {
+  // Aquí va tu lógica de validación más adelante
+  console.log("Login presionado (aún sin lógica)");
+}
+
       // aqui empieza magia aqui agregas todas las imagenes, asegurate de que este lo mas ordenado posible
 
       const habitaciones = {
@@ -841,9 +847,9 @@ document.addEventListener("DOMContentLoaded", function () {
       btn.title = "Información disponible";
     }
   }
-});
+
   document.querySelector('.croquis-zona').scrollLeft = 0;
-}
+});
 
 function mostrarInfo(numHabitacion) {
   const datos = habitaciones[numHabitacion];
