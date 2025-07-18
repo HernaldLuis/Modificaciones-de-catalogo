@@ -317,6 +317,58 @@
   max-height: 180px;
 }
 
+    #panel-galeria {
+  padding: 20px;
+  background-color: rgba(0,0,0,0.85);
+  color: white;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+#panel-galeria button {
+  margin-bottom: 15px;
+  padding: 8px 16px;
+  font-size: 16px;
+  background-color: #ffffff22;
+  border: 1px solid #fff;
+  border-radius: 6px;
+  color: white;
+  cursor: pointer;
+}
+
+.galeria {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.fila-superior {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.fila-superior img,
+.fila-inferior img {
+  width: 100%;
+  border-radius: 6px;
+  object-fit: cover;
+}
+
+.fila-superior img {
+  max-width: 32%;
+  height: auto;
+}
+
+.fila-inferior {
+  display: flex;
+  justify-content: center;
+}
+
+.fila-inferior img {
+  max-width: 98%;
+}
+
 
 
 body {
@@ -635,8 +687,22 @@ body {
     <button class="habitacion-btn" onclick="mostrarInfo('2111')">2111</button>
     <button class="habitacion-btn" onclick="mostrarInfo('2110')">2110</button>
     <button class="habitacion-btn" onclick="mostrarInfo('2109')">2109</button>
-  </div>                          
-</div>
+  </div>
+
+<!-- PANEL DE GALERÍA -->
+<div id="panel-galeria" style="display: none;">
+  <button onclick="volverAlCroquis()">← Volver al croquis</button>
+
+  <div class="galeria">
+    <div class="fila-superior">
+      <img id="img-lobby" alt="Lobby">
+      <img id="img-central" alt="Centrales">
+      <img id="img-mar" alt="Mar">
+    </div>
+    <div class="fila-inferior">
+      <img id="img-panoramica" alt="Panorámica">
+    </div>
+  </div>  
 
 
   <script>
@@ -661,24 +727,30 @@ function validarLogin() {
   }
 }
 
+    function mostrarInfo(numHabitacion) {
+  const datos = habitaciones[numHabitacion];
 
-    const datosHabitaciones = {
-      "1501": {
-        vista: "Jardín 🌴",
-        cama: "King Size 🦸",
-        piso: "5",
-        torre: "1",
-        descripcion: "Esta habitación cuenta con vista a los jardines y acceso rápido a elevadores.",
-        imagenes: ["VISTAMAR.jpg", "VISTAHABITACION.jpg"]
-      },
-      "1502": {
-        vista: "Vista Mar 🌊",
-        cama: "King Size 🦸",
-        piso: "5",
-        torre: "1",
-        descripcion: "Hermosa vista parcial al mar, ideal para relajarte.",
-        imagenes: ["vista1502a.jpg", "vista1502b.jpg"]
-      }
+  if (datos) {
+    // Oculta croquis
+    document.getElementById("contenido-principal").style.display = "none";
+    // Muestra galería
+    document.getElementById("panel-galeria").style.display = "block";
+
+    // Rellena imágenes
+    document.getElementById("img-lobby").src = datos.lobby || "";
+    document.getElementById("img-central").src = datos.central || "";
+    document.getElementById("img-mar").src = datos.mar || "";
+    document.getElementById("img-panoramica").src = datos.panoramica || "";
+  } else {
+    alert(`No hay información disponible para la habitación ${numHabitacion}`);
+  }
+}
+
+function volverAlCroquis() {
+  document.getElementById("panel-galeria").style.display = "none";
+  document.getElementById("contenido-principal").style.display = "block";
+}
+
     };
 
 function mostrarHabitacion(num) {
