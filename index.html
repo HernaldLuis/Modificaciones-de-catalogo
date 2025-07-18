@@ -305,7 +305,10 @@
 
 .galeria img {
   width: 100%;
+  max-width: 100%;
   height: auto;
+  aspect-ratio: 16 / 9; /* Mantiene proporción elegante */
+  object-fit: cover;
   border-radius: 6px;
   border: 1px solid #ccc;
 }
