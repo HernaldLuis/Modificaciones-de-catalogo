@@ -654,7 +654,8 @@ body {
     <button class="habitacion-btn" onclick="mostrarInfo('2205')">2205</button>
     <button class="habitacion-btn" onclick="mostrarInfo('2206')">2206</button>
     <button class="habitacion-btn" onclick="mostrarInfo('2207')">2207</button>
-    <button class="habitacion-btn" onclick="mostrarInfo('2208')">2208</button>
+    <button class="habitacion-btn" data-num="2208" onclick="mostrarInfo('2208')">2208</button>
+
   </div>
 
   <div class="pasillo"></div>
@@ -856,13 +857,13 @@ function mostrarHabitacion(num) {
 // Al cargar la página, marca con clase "disponible" los botones que ya tienen info
 document.addEventListener("DOMContentLoaded", function () {
   for (let num in habitaciones) {
-    const btn = document.querySelector(`button[onclick="mostrarInfo('${num}')"]`);
+    const btn = document.querySelector(`.habitacion-btn[data-num="${num}"]`);
     if (btn) {
       btn.classList.add("disponible");
       btn.title = "Información disponible";
     }
   }
-
+});
   document.querySelector('.croquis-zona').scrollLeft = 0;
 });
 
