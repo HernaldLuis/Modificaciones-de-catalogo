@@ -131,21 +131,6 @@
       object-fit: cover;
     }
 
-    /* Mensaje de bienvenida inicial */
-    .mensaje-bienvenida {
-      position: absolute;
-      top: 100px;
-      right: 40px;
-      background: rgba(0, 0, 0, 0.85);
-      padding: 20px 25px;
-      border-radius: 15px;
-      max-width: 320px;
-      color: white;
-      z-index: 1000;
-      box-shadow: 0 0 10px rgba(0,0,0,0.5);
-      animation: fadeIn 1s ease;
-    }
-
     /* Animación de entrada para el mensaje */
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(-10px); }
@@ -407,13 +392,7 @@ body {
       <div class="contenedor-principal">
   <!-- ZONA IZQUIERDA: Croquis -->
  <div class="card-habitacion-fija">
-
-<!-- Bienvenida (mostrada al cargar la página) -->
-<div id="bienvenida" class="mensaje-bienvenida">
-  <h2>¡Bienvenido!</h2>
-  <p>Selecciona una habitación del croquis y descubre sus características, comodidades y vista.</p>
-</div>
-
+   
 <!-- Información de habitación (oculta hasta seleccionar una habitación) -->
 <div id="info-habitacion" style="display: none;">
   <h2 id="num-habitacion"></h2>
