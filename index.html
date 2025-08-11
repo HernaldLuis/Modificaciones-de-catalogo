@@ -1153,7 +1153,7 @@ async function marcarHabitacionesDisponibles() {
     const botones = document.querySelectorAll(".habitacion-btn");
 
     botones.forEach(boton => {
-      const num = boton.textContent.trim();
+const num = boton.dataset.num || boton.textContent.trim();
       const habitacion = data[num];
 
       if (habitacion) {
@@ -1216,8 +1216,6 @@ zona.addEventListener('mousemove', (e) => {
   const x = e.pageX - zona.offsetLeft;
   zona.scrollLeft = scrollLeft - (x - startX);
 });
-  });
-});
 
     async function actualizarHabitacionesSilenciosamente() {
   try {
@@ -1256,7 +1254,6 @@ zona.addEventListener('mousemove', (e) => {
 }
 setInterval(actualizarHabitacionesSilenciosamente, 5000); // Se actualiza cada 5 segundos
 
-}
 document.addEventListener('DOMContentLoaded', async () => {
   const sel = document.getElementById('filtro-categoria');
   const btnClear = document.getElementById('btn-limpiar-filtro');
