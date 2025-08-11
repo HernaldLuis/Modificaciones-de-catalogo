@@ -602,8 +602,6 @@ border-bottom: none;
 </h1>
 
 
-<!-- Recuadro del video accesible -->
-<div id="video-corner" class="video-corner hidden"></div>
 
   <div class="habitacion-info-panel" id="panelHabitacion">
   <div class="habitacion-detalle" id="contenidoHabitacion">
@@ -1257,11 +1255,13 @@ border-bottom: none;
 
 
   <!-- Panel flotante inferior -->
-  <div id="panelInferior" class="panel-inferior">
-    <div id="mensajeSeleccion" class="mensaje-inicial">
-  ℹ️ Selecciona una habitación para ver más detalles.
+<div id="panelInferior" class="panel-inferior">
+  <div class="contenido-inferior">
+    <div id="video-corner" class="video-corner hidden"></div> <!-- AQUÍ dentro -->
+    <!-- Aquí va el resto de la info que llenas con mostrarInfo -->
+  </div>
 </div>
-</div>
+
 
   <!-- Lightbox de imagen -->
 <div id="zoom-overlay" class="visor-oculto" onclick="cerrarZoom(event)">
