@@ -357,6 +357,40 @@ border-bottom: none;
   opacity: 0.85;
 }
 
+/* === FILTROS POR CATEGORÍA === */
+.panel-filtros {
+  position: sticky;
+  top: 0;
+  background: rgba(255,255,255,0.95);
+  padding: .5rem 1rem;
+  z-index: 50;
+  display: flex;
+  gap: .75rem;
+  align-items: center;
+  border-bottom: 1px solid #eee;
+  flex-wrap: wrap;
+  backdrop-filter: blur(6px);
+}
+.panel-filtros label { font-weight: 600; }
+.panel-filtros .contador { margin-left: auto; }
+
+.habitacion-btn {
+  transition: transform .2s, box-shadow .2s, opacity .2s, filter .2s;
+}
+.habitacion-btn.resaltada {
+  animation: boom .6s ease;
+  box-shadow: 0 0 12px rgba(0,180,255,.6);
+}
+.habitacion-btn.atenuada {
+  opacity: .25;
+  filter: grayscale(.2);
+}
+
+@keyframes boom {
+  0% { transform: scale(1); }
+  60% { transform: scale(1.18); }
+  100% { transform: scale(1); }
+}
 
 
 
@@ -367,6 +401,20 @@ border-bottom: none;
 <body>
 
   <h1>Catálogo de Habitaciones</h1>
+
+<!-- Panel de filtros -->
+<div class="panel-filtros">
+  <label for="filtro-categoria">Categoría:</label>
+  <select id="filtro-categoria">
+    <option value="">Todas</option>
+  </select>
+
+  <button id="btn-limpiar" type="button">Limpiar</button>
+
+  <span class="contador">
+    Coincidencias: <strong id="total-coincidencias">0</strong>
+  </span>
+</div>
 
   <div class="habitacion-info-panel" id="panelHabitacion">
   <div class="habitacion-detalle" id="contenidoHabitacion">
@@ -1222,7 +1270,81 @@ zona.addEventListener('mousemove', (e) => {
 }
 setInterval(actualizarHabitacionesSilenciosamente, 5000); // Se actualiza cada 5 segundos
 
-  </script> 
+  <script>
+  // --- Accesos rápidos a elementos del filtro
+  const selCategoria = document.getElementById('filtro-categoria');
+  const totalEl = document.getElementById('total-coincidencias');
+
+  // Obtiene el número de habitación desde el botón (usa data-num si existe)
+  function getNumFromButton(btn) {
+    return (btn.dataset && btn.dataset.num) ? btn.dataset.num : btn.textContent.trim();
+  }
+
+  // Carga "habitaciones.json" una sola vez para el filtro
+  let HAB_CACHE = null;
+  async function cargarHabitacionesCache() {
+    if (HAB_CACHE) return HAB_CACHE;
+    const resp = await fetch('habitaciones.json');
+    HAB_CACHE = await resp.json();
+    return HAB_CACHE;
+  }
+
+  // Llena el <select> de categorías a partir del JSON real
+  async function initCategorias() {
+    const habitaciones = await cargarHabitacionesCache();
+    const categorias = new Set(
+      Object.values(habitaciones).map(h => h.categoria).filter(Boolean)
+    );
+    [...categorias].sort().forEach(cat => {
+      const opt = document.createElement('option');
+      opt.value = cat;
+      opt.textContent = cat;
+      selCategoria.appendChild(opt);
+    });
+  }
+
+  // Aplica el filtro visual (resalta/atenua) y cuenta coincidencias
+  async function aplicarFiltroCategoria(cat) {
+    const habitaciones = await cargarHabitacionesCache();
+    let count = 0;
+
+    document.querySelectorAll('.habitacion-btn').forEach(btn => {
+      const num = getNumFromButton(btn);
+      const h = habitaciones[num];
+      const coincide = !cat || (h && h.categoria === cat);
+
+      btn.classList.toggle('resaltada', coincide);
+      btn.classList.toggle('atenuada', !coincide);
+
+      if (coincide) count++;
+    });
+
+    totalEl.textContent = count;
+
+    // Lleva a la primera coincidencia
+    const primero = document.querySelector('.habitacion-btn.resaltada');
+    if (cat && primero) {
+      primero.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+    }
+  }
+
+  // Eventos del panel
+  selCategoria?.addEventListener('change', e => aplicarFiltroCategoria(e.target.value));
+  document.getElementById('btn-limpiar')?.addEventListener('click', () => {
+    selCategoria.value = '';
+    aplicarFiltroCategoria('');
+  });
+
+  // Inicializa al cargar
+  document.addEventListener('DOMContentLoaded', async () => {
+    await initCategorias();
+    aplicarFiltroCategoria('');
+    // Si quieres arrancar prefiltrado por "Master Suite", descomenta:
+    // selCategoria.value = 'Master Suite';
+    // aplicarFiltroCategoria('Master Suite');
+  });
+</script>
+
 
 </body>
 </html>
