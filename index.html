@@ -1354,26 +1354,29 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   // Aplicar filtro visual
-async function aplicarFiltro(categoria) {
+  async function aplicarFiltro(categoria) {
   const data = await cargarHabitaciones();
   let count = 0;
 
-  // Normalizamos la categoría seleccionada
-  const catSel = (categoria || '').trim().toLowerCase();
+  // Quitamos espacios y normalizamos
+  const catSel = (categoria || '').trim();
 
   document.querySelectorAll('.habitacion-btn').forEach(btn => {
     const num = btn.dataset.num || btn.textContent.trim();
     const habitacion = data[num];
+    const catHab = ((habitacion && habitacion.categoria) || '').trim();
 
-    // Normalizamos la categoría de la habitación
-    const catHab = ((habitacion && habitacion.categoria) || '').trim().toLowerCase();
-
-    const coincide = !catSel || (catHab === catSel);
-
-    btn.classList.toggle('filtro-activo', coincide);
-    btn.classList.toggle('filtro-inactivo', !coincide);
-
-    if (coincide) count++;
+    if (catSel) {
+      // Si hay una categoría seleccionada, comparar
+      const coincide = catHab.toLowerCase() === catSel.toLowerCase();
+      btn.classList.toggle('filtro-activo', coincide);
+      btn.classList.toggle('filtro-inactivo', !coincide);
+      if (coincide) count++;
+    } else {
+      // Si está en "Todas", limpiar clases
+      btn.classList.remove('filtro-activo', 'filtro-inactivo');
+      count++;
+    }
   });
 
   totalEl.textContent = count;
