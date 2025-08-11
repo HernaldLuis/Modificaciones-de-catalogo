@@ -357,7 +357,44 @@ border-bottom: none;
   opacity: 0.85;
 }
 
+/* Filtro por categoría */
+.panel-filtro-categoria {
+  position: sticky;
+  top: 0;
+  background: rgba(255,255,255,0.95);
+  padding: .5rem 1rem;
+  z-index: 50;
+  display: flex;
+  gap: .75rem;
+  align-items: center;
+  border-bottom: 1px solid #eee;
+  flex-wrap: wrap;
+  backdrop-filter: blur(6px);
+}
 
+.panel-filtro-categoria label {
+  font-weight: 600;
+}
+
+.panel-filtro-categoria .contador-categoria {
+  margin-left: auto;
+}
+
+.habitacion-btn.filtro-activo {
+  animation: boomCategoria .6s ease;
+  box-shadow: 0 0 12px rgba(0,180,255,.6);
+}
+
+.habitacion-btn.filtro-inactivo {
+  opacity: .25;
+  filter: grayscale(.2);
+}
+
+@keyframes boomCategoria {
+  0% { transform: scale(1); }
+  60% { transform: scale(1.18); }
+  100% { transform: scale(1); }
+}
 
 
   /* (ESTO CORRESPNDE AL PANEL DE LAS IMAGENES DE COSULTa */
@@ -373,7 +410,20 @@ border-bottom: none;
     <!-- Aquí se insertará el contenido dinámico -->
   </div>
 
+<!-- Panel de filtro por categoría -->
+<div class="panel-filtro-categoria">
+  <label for="filtro-categoria">Categoría:</label>
+  <select id="filtro-categoria">
+    <option value="">Todas</option>
+  </select>
 
+  <button id="btn-limpiar-filtro" type="button">Limpiar</button>
+
+  <span class="contador-categoria">
+    Coincidencias: <strong id="total-coincidencias-categoria">0</strong>
+  </span>
+</div>
+    
   <div class="zona-desplazable">
     
     <!-- Torre 1 -->
@@ -1222,7 +1272,64 @@ zona.addEventListener('mousemove', (e) => {
 }
 setInterval(actualizarHabitacionesSilenciosamente, 5000); // Se actualiza cada 5 segundos
 
-  </script> 
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+  const sel = document.getElementById('filtro-categoria');
+  const btnClear = document.getElementById('btn-limpiar-filtro');
+  const totalEl = document.getElementById('total-coincidencias-categoria');
+
+  let habitacionesData = null;
+
+  // Cargar JSON de habitaciones
+  async function cargarHabitaciones() {
+    if (!habitacionesData) {
+      const resp = await fetch('habitaciones.json');
+      habitacionesData = await resp.json();
+    }
+    return habitacionesData;
+  }
+
+  // Llenar select con categorías
+  async function initCategorias() {
+    const data = await cargarHabitaciones();
+    const categorias = new Set(Object.values(data).map(h => h.categoria).filter(Boolean));
+    [...categorias].sort().forEach(cat => {
+      const opt = document.createElement('option');
+      opt.value = cat;
+      opt.textContent = cat;
+      sel.appendChild(opt);
+    });
+  }
+
+  // Aplicar filtro visual
+  async function aplicarFiltro(categoria) {
+    const data = await cargarHabitaciones();
+    let count = 0;
+    document.querySelectorAll('.habitacion-btn').forEach(btn => {
+      const num = btn.dataset.num || btn.textContent.trim();
+      const habitacion = data[num];
+      const coincide = !categoria || (habitacion && habitacion.categoria === categoria);
+
+      btn.classList.toggle('filtro-activo', coincide);
+      btn.classList.toggle('filtro-inactivo', !coincide);
+
+      if (coincide) count++;
+    });
+    totalEl.textContent = count;
+  }
+
+  // Eventos
+  sel.addEventListener('change', e => aplicarFiltro(e.target.value));
+  btnClear.addEventListener('click', () => {
+    sel.value = '';
+    aplicarFiltro('');
+  });
+
+  // Inicializar
+  await initCategorias();
+  aplicarFiltro('');
+});
+</script>
 
 </body>
 </html>
