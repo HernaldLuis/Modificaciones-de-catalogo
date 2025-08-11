@@ -1283,21 +1283,30 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   // Aplicar filtro visual
-  async function aplicarFiltro(categoria) {
-    const data = await cargarHabitaciones();
-    let count = 0;
-    document.querySelectorAll('.habitacion-btn').forEach(btn => {
-      const num = btn.dataset.num || btn.textContent.trim();
-      const habitacion = data[num];
-      const coincide = !categoria || (habitacion && habitacion.categoria === categoria);
+async function aplicarFiltro(categoria) {
+  const data = await cargarHabitaciones();
+  let count = 0;
 
-      btn.classList.toggle('filtro-activo', coincide);
-      btn.classList.toggle('filtro-inactivo', !coincide);
+  // Normalizamos la categoría seleccionada
+  const catSel = (categoria || '').trim().toLowerCase();
 
-      if (coincide) count++;
-    });
-    totalEl.textContent = count;
-  }
+  document.querySelectorAll('.habitacion-btn').forEach(btn => {
+    const num = btn.dataset.num || btn.textContent.trim();
+    const habitacion = data[num];
+
+    // Normalizamos la categoría de la habitación
+    const catHab = ((habitacion && habitacion.categoria) || '').trim().toLowerCase();
+
+    const coincide = !catSel || (catHab === catSel);
+
+    btn.classList.toggle('filtro-activo', coincide);
+    btn.classList.toggle('filtro-inactivo', !coincide);
+
+    if (coincide) count++;
+  });
+
+  totalEl.textContent = count;
+}
 
   // Eventos
   sel.addEventListener('change', e => aplicarFiltro(e.target.value));
