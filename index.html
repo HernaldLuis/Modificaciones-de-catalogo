@@ -509,6 +509,74 @@ border-bottom: none;
     box-shadow: 0 0 16px rgba(0,170,255,0.45);
   }
 }
+/* Fondo oscuro */
+.modal-mejoras {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+/* Activo */
+.modal-mejoras.activo {
+  opacity: 1;
+  pointer-events: all;
+}
+
+/* Caja del modal */
+.modal-contenido {
+  background: #fff;
+  padding: 2rem;
+  border-radius: 12px;
+  max-width: 400px;
+  width: 90%;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+  text-align: left;
+  animation: aparecerModal 0.4s ease;
+}
+
+/* Título */
+.modal-contenido h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.4rem;
+  margin-bottom: 1rem;
+}
+
+/* Lista */
+.modal-contenido ul {
+  padding-left: 1.2rem;
+  margin-bottom: 1.5rem;
+}
+.modal-contenido li {
+  margin-bottom: 0.5rem;
+}
+
+/* Botón */
+.modal-contenido button {
+  background: linear-gradient(135deg, #00aaff, #0077cc);
+  color: #fff;
+  border: none;
+  padding: 0.5rem 1.2rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+}
+.modal-contenido button:hover {
+  background: linear-gradient(135deg, #0099dd, #0066aa);
+}
+
+/* Animación */
+@keyframes aparecerModal {
+  0% { transform: scale(0.8); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
 
   /* (ESTO CORRESPNDE AL PANEL DE LAS IMAGENES DE COSULTa */
 
@@ -1441,6 +1509,40 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Inicializar
   await initCategorias();
   aplicarFiltro('');
+});
+//<!-- Aquí va tu último contenido de la página -->
+
+//<!-- Bloque del modal -->
+<div id="modal-mejoras" class="modal-mejoras">
+  <div class="modal-contenido">
+    <h2>🆕 Novedades del Catálogo</h2>
+    <ul>
+      <li>✨ Panel de filtrado de categorías mejorado.</li>
+      <li>💓 Animación de latido para habitaciones filtradas.</li>
+      <li>🌗 Oscurecido de habitaciones no coincidentes.</li>
+      <li>🏷️ Nuevo título elegante con logo de Paradisus.</li>
+    </ul>
+    <button id="cerrar-modal">Cerrar</button>
+  </div>
+</div>
+
+<!-- Script del modal -->
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const modal = document.getElementById('modal-mejoras');
+  const btnCerrar = document.getElementById('cerrar-modal');
+
+  modal.classList.add('activo');
+
+  btnCerrar.addEventListener('click', () => {
+    modal.classList.remove('activo');
+  });
+
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) {
+      modal.classList.remove('activo');
+    }
+  });
 });
 </script>
 
