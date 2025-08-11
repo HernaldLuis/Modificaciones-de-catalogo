@@ -18,30 +18,52 @@ body {
       text-align: center;
       padding: 20px;
     }
-
-   .titulo-catalogo {
-  font-family: 'Playfair Display', serif; /* Elegante serif */
+.titulo-catalogo {
+  display: flex;
+  align-items: center;
+  justify-content: center; /* Centra texto y logo */
+  gap: 0.75rem;
+  flex-wrap: wrap; /* Para que en móvil no se corte raro */
+  
+  font-family: 'Playfair Display', serif;
   font-size: 2rem;
   font-weight: 700;
   letter-spacing: 0.5px;
+  color: #111;
   text-align: center;
-  color: #111; /* Negro elegante */
   margin: 1rem 0 1.5rem;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.25);
   position: relative;
-  text-shadow: 0 2px 4px rgba(0,0,0,0.25); /* Sombra suave */
 }
 
-/* Línea decorativa */
+.titulo-catalogo span {
+  display: inline-block;
+}
+
 .titulo-catalogo::after {
   content: '';
   display: block;
   width: 90px;
   height: 3px;
   margin: 0.5rem auto 0;
-  background: #111; /* Mismo color que el texto */
+  background: #111;
   border-radius: 2px;
+  position: absolute;
+  bottom: -0.5rem;
+  left: 50%;
+  transform: translateX(-50%);
 }
 
+.logo-catalogo {
+  height: 50px; /* Ajusta el tamaño del logo */
+  width: auto;
+}
+
+@media (max-width: 600px) {
+  .logo-catalogo {
+    height: 36px; /* Más pequeño en móviles */
+  }
+  
   .zona-desplazable,
 .zona-desplazable * {
   user-select: none;
@@ -493,8 +515,12 @@ border-bottom: none;
 <body>
 
   <h1 class="titulo-catalogo">
-  Paradisus By Melià Los Cabos · Colección Exclusiva de Habitaciones & Suites
+  <span>Paradisus · Colección Exclusiva de Habitaciones & Suites</span>
+  <img src="https://res.cloudinary.com/dor6za85u/image/upload/v1754887647/ChatGPT_Image_10_ago_2025_09_47_11_p.m._btrjfp.png" 
+       alt="Paradisus by Meliá" 
+       class="logo-catalogo">
 </h1>
+
 
 
   <div class="habitacion-info-panel" id="panelHabitacion">
