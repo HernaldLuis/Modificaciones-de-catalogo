@@ -20,13 +20,13 @@ body {
     }
 
    .titulo-catalogo {
-  font-family: 'Playfair Display', serif; /* tipografía elegante */
+  font-family: 'Playfair Display', serif; /* Tipografía elegante */
   font-size: 2rem;
   font-weight: 700;
   letter-spacing: 1px;
   text-align: center;
-  color: #003366;
-  background: linear-gradient(90deg, #0066aa, #00aaff);
+  color: #4b6e36; /* fallback si no carga el gradiente */
+  background: linear-gradient(90deg, #6E9C51, #8CC56A); /* Verde Paradisus */
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   margin: 1rem 0 1.5rem;
@@ -37,12 +37,13 @@ body {
 .titulo-catalogo::after {
   content: '';
   display: block;
-  width: 80px;
+  width: 90px;
   height: 3px;
   margin: 0.5rem auto 0;
-  background: linear-gradient(90deg, #0066aa, #00aaff);
+  background: linear-gradient(90deg, #6E9C51, #8CC56A);
   border-radius: 2px;
 }
+
  
 
   .zona-desplazable,
