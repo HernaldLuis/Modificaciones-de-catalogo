@@ -13,7 +13,7 @@ body {
   background-position: center;
   background-attachment: fixed;
   background-color: #f0f0f0; /* fallback si la imagen no carga */
-  
+ } 
     h1 {
       text-align: center;
       padding: 20px;
@@ -1147,11 +1147,6 @@ function cerrarPanelInferior() {
 }
 
 async function marcarHabitacionesDisponibles() {
-
-  const data = await response.json();
-  datosActuales = data; // Guardamos los datos para comparación futura
-
-
   try {
     const response = await fetch("habitaciones.json");
     const data = await response.json();
@@ -1193,19 +1188,19 @@ window.addEventListener("DOMContentLoaded", marcarHabitacionesDisponibles);
 
     let datosActuales = {}; // Aquí guardaremos los datos iniciales para comparar más adelante
 
-  document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", () => {
   const botones = document.querySelectorAll(".habitacion-btn");
   botones.forEach(boton => {
     boton.addEventListener("click", () => {
       const num = boton.dataset.num;
       mostrarInfo(num);
     });
+  });
+});
 
-    // Habilitar desplazamiento tipo mapa con el mouse (drag-scroll)
+// Drag-scroll solo una vez
 const zona = document.querySelector('.zona-desplazable');
-let isDown = false;
-let startX;
-let scrollLeft;
+let isDown = false, startX, scrollLeft;
 
 zona.addEventListener('mousedown', (e) => {
   isDown = true;
@@ -1213,25 +1208,14 @@ zona.addEventListener('mousedown', (e) => {
   startX = e.pageX - zona.offsetLeft;
   scrollLeft = zona.scrollLeft;
 });
-
-zona.addEventListener('mouseleave', () => {
-  isDown = false;
-  zona.classList.remove('arrastrando');
-});
-
-zona.addEventListener('mouseup', () => {
-  isDown = false;
-  zona.classList.remove('arrastrando');
-});
-
+zona.addEventListener('mouseleave', () => { isDown = false; zona.classList.remove('arrastrando'); });
+zona.addEventListener('mouseup', () => { isDown = false; zona.classList.remove('arrastrando'); });
 zona.addEventListener('mousemove', (e) => {
   if (!isDown) return;
   e.preventDefault();
   const x = e.pageX - zona.offsetLeft;
-  const walk = (x - startX) * 1; // Velocidad del scroll
-  zona.scrollLeft = scrollLeft - walk;
+  zona.scrollLeft = scrollLeft - (x - startX);
 });
-
   });
 });
 
