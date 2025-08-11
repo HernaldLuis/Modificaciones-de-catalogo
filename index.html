@@ -422,19 +422,27 @@ border-bottom: none;
 
 /* Animación de habitaciones */
 /* Latido continuo para habitaciones coincidentes con el filtro */
+/* ==== Habitaciones filtradas ==== */
+
+/* Coinciden con la categoría → boom inicial + latido continuo */
 .habitacion-btn.filtro-activo {
-  /* 1) Efecto de entrada + 2) latido continuo */
   animation: boomCategoria .35s ease, latidoHabitacion 1.4s ease-in-out .35s infinite;
   will-change: transform, box-shadow;
-  border-radius: 8px; /* por estética del glow */
+  border-radius: 8px;
 }
 
-/* Opcional: al pasar el mouse, pausa el latido para no marear */
+/* Atenuar las que NO pertenecen a la categoría */
+.habitacion-btn.filtro-inactivo {
+  opacity: 0.28;
+  filter: grayscale(.2) brightness(0.8);
+}
+
+/* Opcional: pausar latido al pasar el mouse */
 .habitacion-btn.filtro-activo:hover {
   animation-play-state: paused;
 }
 
-/* Respeta accesibilidad: si el usuario prefiere menos movimiento */
+/* Preferencias de accesibilidad: desactivar animaciones si el usuario lo pide */
 @media (prefers-reduced-motion: reduce) {
   .habitacion-btn.filtro-activo {
     animation: none;
@@ -442,7 +450,7 @@ border-bottom: none;
   }
 }
 
-/* Ya lo tenías, pero lo dejo aquí por claridad: “boom” inicial */
+/* Animación inicial de “boom” */
 @keyframes boomCategoria {
   0% { transform: scale(1); }
   60% { transform: scale(1.1); }
@@ -460,7 +468,6 @@ border-bottom: none;
     box-shadow: 0 0 16px rgba(0,170,255,0.45);
   }
 }
-
   /* (ESTO CORRESPNDE AL PANEL DE LAS IMAGENES DE COSULTa */
 
   </style>
