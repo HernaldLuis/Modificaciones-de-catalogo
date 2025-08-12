@@ -321,24 +321,22 @@ border-bottom: none;
 /* Estilo unificado para los bloques de “jardín / pasillo” */
 .jardin-simulada,
 .jardin-ficticio {
-  display: flex;                   /* 🔥 Activa Flexbox */
-  justify-content: center;        /* 🔄 Centra horizontalmente */
-  align-items: center;            /* 🔼 Centra verticalmente */
-  width: 100%;                    /* ✅ Ocupa el mismo ancho que la fila */
-  background: linear-gradient(to right, #e8ffe8, #e0f7ff);
-  color: #2e7d32;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  background: linear-gradient(to right, #d2b48c, #deb887, #f5deb3); /* Tonos arena */
+  color: #5c3a21; /* Marrón oscuro para contraste */
   font-weight: bold;
-  padding: 10px;
-  border: 2px dashed #81c784;
+  border: 2px dashed #c2a476; /* Arena más oscura */
   border-radius: 8px;
   margin-bottom: 8px;
   font-size: 14px;
-  box-shadow: inset 0 0 5px #b2dfdb;
-  box-sizing: border-box;         /* ✅ Evita que el padding agregue más ancho */
-  white-space: nowrap;            /* 🧠 Evita que el texto brinque de línea */
-  overflow: hidden;               /* 🙅‍♂️ Oculta cualquier exceso visual */
-  text-overflow: ellipsis;        /* (opcional) Muestra "..." si se pasa */
+  box-shadow: inset 0 0 5px rgba(92, 58, 33, 0.3), /* Sombras internas */
+              0 2px 6px rgba(0, 0, 0, 0.15);       /* Sombras externas suaves */
+  padding: 10px;
 }
+
 
       /* (PANTALLA FLOTANTE) */
 .mensaje-flotante {
