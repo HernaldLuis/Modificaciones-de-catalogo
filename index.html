@@ -224,7 +224,7 @@ border-bottom: none;
   background-color: rgba(0, 0, 0, 0.7);
   justify-content: center;
   align-items: center;
-  z-index: 1000;
+  z-index: 11000;
 }
 
 #zoom-overlay img {
@@ -1541,6 +1541,33 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 </script>
+    <script>
+function hacerZoom(src) {
+  const overlay = document.getElementById('zoom-overlay');
+  const img = document.getElementById('zoom-img');
+  img.src = src;
+  overlay.style.display = 'flex';        // mostrar
+  overlay.classList.remove('visor-oculto');
+  overlay.setAttribute('aria-hidden', 'false');
+}
+
+function cerrarZoom(event) {
+  const overlay = document.getElementById('zoom-overlay');
+  // Cerrar si: no hay evento, o se hace clic en el fondo, o en el botón de cerrar
+  if (!event || event.target === overlay || event.target.id === 'zoom-close') {
+    overlay.style.display = 'none';      // ocultar
+    overlay.classList.add('visor-oculto');
+    overlay.setAttribute('aria-hidden', 'true');
+    document.getElementById('zoom-img').src = '';
+  }
+}
+
+// Cerrar con tecla ESC
+document.addEventListener('keydown', (ev) => {
+  if (ev.key === 'Escape') cerrarZoom();
+});
+</script>
+
 
 </body>
 </html>
