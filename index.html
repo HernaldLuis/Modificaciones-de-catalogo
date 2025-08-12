@@ -16,7 +16,32 @@ body {
     h1 {
       text-align: center;
       padding: 20px;
-    }
+ }
+
+.btn-volver {
+  display: inline-block;
+  padding: 8px 14px;
+  background: linear-gradient(135deg, #6b4226, #a47148); /* Tonos tierra */
+  color: white;
+  font-weight: bold;
+  text-transform: uppercase;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+.btn-volver:hover {
+  background: linear-gradient(135deg, #a47148, #6b4226);
+  transform: scale(1.05);
+}
+
+.btn-volver:active {
+  transform: scale(0.97);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
 .titulo-catalogo {
   display: flex;
   align-items: center;
