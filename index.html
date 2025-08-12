@@ -8,7 +8,7 @@
 body {
   margin: 0;
   font-family: Arial, sans-serif;
-  background-image: url('https://raw.githubusercontent.com/HernaldLuis/Modificaciones-de-catalogo/main/FondoPag.jpg');
+  background-image: url('https://raw.githubusercontent.com/HernaldLuis/Catalogo-Paradisus-Habitaciones/main/Portada.jpeg');
   background-size: cover;
   background-position: center;
   background-color: #f0f0f0; /* fallback si la imagen no carga */
@@ -539,9 +539,6 @@ border-bottom: none;
   box-shadow: 0 8px 20px rgba(0,0,0,0.25);
   text-align: left;
   animation: aparecerModal 0.4s ease;
-  position: relative; /* 🔹 Necesario para que el video se posicione dentro */
- .modal-contenido { position: relative; }
-
 }
 
 /* Título */
@@ -579,14 +576,6 @@ border-bottom: none;
   0% { transform: scale(0.8); opacity: 0; }
   100% { transform: scale(1); opacity: 1; }
 }
-.video-corner{
-  position:absolute; top:12px; right:16px; width:280px; aspect-ratio:16/9;
-  background:#000; border-radius:12px; overflow:hidden; box-shadow:0 8px 28px rgba(0,0,0,.25); z-index:5;
-}
-.video-corner video{width:100%; height:100%; display:block;}
-.hidden{display:none;}
-@media (max-width:980px){ .video-corner{ position:static; width:100%; margin-top:8px; } }
-
 
   /* (ESTO CORRESPNDE AL PANEL DE LAS IMAGENES DE COSULTa */
 
@@ -1255,13 +1244,11 @@ border-bottom: none;
 
 
   <!-- Panel flotante inferior -->
-<div id="panelInferior" class="panel-inferior">
-  <div class="contenido-inferior">
-    <div id="video-corner" class="video-corner hidden"></div> <!-- AQUÍ dentro -->
-    <!-- Aquí va el resto de la info que llenas con mostrarInfo -->
-  </div>
+  <div id="panelInferior" class="panel-inferior">
+    <div id="mensajeSeleccion" class="mensaje-inicial">
+  ℹ️ Selecciona una habitación para ver más detalles.
 </div>
-
+</div>
 
   <!-- Lightbox de imagen -->
 <div id="zoom-overlay" class="visor-oculto" onclick="cerrarZoom(event)">
@@ -1394,7 +1381,6 @@ document.addEventListener("DOMContentLoaded", () => {
     boton.addEventListener("click", () => {
       const num = boton.dataset.num;
       mostrarInfo(num);
-      pintarVideo(num);
     });
   });
 });
@@ -1454,50 +1440,6 @@ zona.addEventListener('mousemove', (e) => {
   }
 }
 setInterval(actualizarHabitacionesSilenciosamente, 5000); // Se actualiza cada 5 segundos
-const videosPorHabitacion = {
-  "4328": "https://res.cloudinary.com/dor6za85u/video/upload/v1754942483/Ba%C3%B1o_Handicap_i1r6cg.mp4",
-  "4325": "https://res.cloudinary.com/dor6za85u/video/upload/v1754942483/Ba%C3%B1o_Handicap_i1r6cg.mp4",
-  "4321": "https://res.cloudinary.com/dor6za85u/video/upload/v1754942483/Ba%C3%B1o_Handicap_i1r6cg.mp4",
-  "4318": "https://res.cloudinary.com/dor6za85u/video/upload/v1754942483/Ba%C3%B1o_Handicap_i1r6cg.mp4"
-};
-
-function pintarVideo(num) {
-  const box = document.getElementById('video-corner');
-  const url = videosPorHabitacion[num];
-
-  if (url) {
-    box.innerHTML = `
-      <video src="${url}" autoplay muted playsinline loop controls preload="metadata"></video>
-    `;
-    box.classList.remove('hidden');
-  } else {
-    box.classList.add('hidden');
-    box.innerHTML = "";
-  }
-}
-function mostrarInfo(num) {
-  // ...tu código actual...
-  ensureVideoCornerInsideModal();
-  pintarVideo(num);
-}
-    function ensureVideoCornerInsideModal() {
-  const modal = document.querySelector('.modal-contenido'); // el cuadro blanco
-  if (!modal) return;
-
-  let box = document.getElementById('video-corner');
-  if (!box) {
-    box = document.createElement('div');
-    box.id = 'video-corner';
-    box.className = 'video-corner hidden';
-  }
-  // Si no es hijo directo del modal, lo movemos
-  if (box.parentElement !== modal) {
-    modal.appendChild(box);
-  }
-}
-
-// Llama esto antes de pintar el video (por ejemplo, al inicio de mostrarInfo)
-ensureVideoCornerInsideModal();
 
 document.addEventListener('DOMContentLoaded', async () => {
   const sel = document.getElementById('filtro-categoria');
