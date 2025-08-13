@@ -130,6 +130,8 @@ border-bottom: none;
       white-space: nowrap;
     }
 
+    
+
 .torre {
   flex: 0 0 auto;
   width: max-content;
@@ -685,9 +687,25 @@ border-bottom: none;
   100% { transform: scale(1); opacity: 1; }
 }
 
-  /* (ESTO CORRESPNDE AL PANEL DE LAS IMAGENES DE COSULTa */
+  @media (max-width: 768px) {
+    .zona-desplazable {
+      flex-wrap: wrap;
+      gap: 20px;
+      padding: 10px;
+    }
 
-  </style>
+    .torre {
+      min-width: 100%;
+      max-width: 100%;
+    }
+
+    .habitacion-btn {
+      font-size: 12px;
+      padding: 4px 6px;
+    }
+  }
+</style>
+
 </head>
 <body>
 
