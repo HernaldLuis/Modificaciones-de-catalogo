@@ -114,21 +114,23 @@ body {
   padding: 10px;
 }
 
-    .zona-desplazable {
-      display: flex;
-      flex-direction: row;
-      gap: 40px;
-      padding: 20px;
-      overflow-x: auto;
-      overflow-y: hidden;
-      scroll-behavior: smooth;
-background: transparent;  /* ¡ESTE COMANDO HACE QUE EL CONTENEDOR DEL CROQUIS SEA TRASNPARENTE! */
-border-top: none;
-border-bottom: none;
-      width: 100vw;
-      box-sizing: border-box;
-      white-space: nowrap;
-    }
+   .zona-desplazable {
+  display: flex;
+  flex-direction: row;
+  gap: 40px;
+  padding: 20px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  touch-action: pan-x;        /* 🔹 Permite solo desplazamiento horizontal en táctil */
+  -ms-touch-action: pan-x;    /* Compatibilidad IE/Edge antiguo */
+  scroll-behavior: smooth;
+  background: transparent;    /* ¡Este comando hace que el contenedor del croquis sea transparente! */
+  border-top: none;
+  border-bottom: none;
+  width: 100vw;
+  box-sizing: border-box;
+  white-space: nowrap;
+}
 
 .torre {
   flex: 0 0 auto;
@@ -1482,6 +1484,23 @@ zona.addEventListener('mousemove', (e) => {
   zona.scrollLeft = scrollLeft - (x - startX);
 });
 
+// --- DRAG SCROLL PARA TÁCTIL (móvil) ---
+let touchStartX = 0;
+let touchScrollLeft = 0;
+
+zona.addEventListener('touchstart', (e) => {
+  if (e.touches.length !== 1) return;           // ignora multi-touch
+  touchStartX = e.touches[0].pageX;
+  touchScrollLeft = zona.scrollLeft;
+}, { passive: true });
+
+zona.addEventListener('touchmove', (e) => {
+  if (e.touches.length !== 1) return;
+  const deltaX = e.touches[0].pageX - touchStartX;
+  zona.scrollLeft = touchScrollLeft - deltaX;
+}, { passive: true });
+
+    
     async function actualizarHabitacionesSilenciosamente() {
   try {
     const response = await fetch("habitaciones.json");
