@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Catálogo de Habitaciones</title>
   <style>
 body {
@@ -357,7 +357,26 @@ border-bottom: none;
 
 }
 
+    /* Móviles - ajustar para pantallas pequeñas */
+@media (max-width: 768px) {
+  .habitacion-btn {
+    width: 55px;
+    height: 50px;
+    font-size: 12px;
+  }
 
+  .zona-desplazable {
+    transform: scale(0.9); /* Opcional: reduce todo un poco */
+    transform-origin: top left;
+  }
+}
+
+    .zona-desplazable {
+  overflow-x: auto;
+  display: flex;
+  flex-wrap: nowrap;
+  touch-action: pan-x; /* Mejora para móviles */
+}
 
     .pasillo {
       width: 100%;
