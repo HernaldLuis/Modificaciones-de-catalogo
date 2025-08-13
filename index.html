@@ -595,13 +595,23 @@ img, video { max-width: 100%; height: auto; }
 
 .modal-contenido {
   box-sizing: border-box;
-  max-width: min(92vw, 520px);  /* limita el ancho del cuadro */
-  width: calc(100% - 2rem);     /* respeta márgenes laterales */
+  max-width: min(92vw, 520px); /* limita el ancho del cuadro */
+  width: calc(100% - 2rem);    /* respeta márgenes laterales */
   padding: 1.25rem;
-  overflow-wrap: anywhere;      /* por si hay listas con texto largo */
+
+  /* 🔹 Fondo blanco translúcido y blur elegante */
+  background: rgba(255, 255, 255, 0.85); 
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px); /* compatibilidad Safari */
+
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+
+  overflow-wrap: anywhere; /* por si hay listas con texto largo */
   word-break: break-word;
-  white-space: normal;          /* permite saltos de línea */
+  white-space: normal;     /* permite saltos de línea */
 }
+
 .modal-contenido ul { margin: 0 0 .5rem; padding-left: 1.1rem; }
 .modal-contenido li { margin-bottom: .35rem; }
 
