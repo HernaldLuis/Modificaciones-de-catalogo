@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Catálogo de Habitaciones</title>
   <style>
 body {
@@ -314,15 +314,26 @@ body {
    width: max-content;  /* ⬅️ esto fuerza a que se expanda lo necesario */
 }
 
-    .habitacion-btn {        
-      padding: 6px 12px;
-      background-color:#4caf50 ;   /*🔥 Estas seccion cambiar el color de las habitaciones vacias*/
-      color: white;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: bold;
-    }
+html, body { max-width: 100%; overflow-x: hidden; }
+
+img, video { max-width: 100%; height: auto; }
+
+.habitacion-btn {
+  padding: clamp(8px, 2.5vw, 12px) clamp(10px, 3vw, 14px);
+  border-radius: 12px;
+  font-size: clamp(12px, 3.2vw, 14px);
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+/* Solo para habitaciones vacías */
+.habitacion-vacia {
+  background-color: #4caf50;
+  border-radius: 6px;
+}
+
 
 /* Efecto común sin alterar el color base */
 .habitacion-btn:hover {
@@ -1478,6 +1489,7 @@ zona.addEventListener('mousedown', (e) => {
 zona.addEventListener('mouseleave', () => { isDown = false; zona.classList.remove('arrastrando'); });
 zona.addEventListener('mouseup', () => { isDown = false; zona.classList.remove('arrastrando'); });
 zona.addEventListener('mousemove', (e) => {
+  
   if (!isDown) return;
   e.preventDefault();
   const x = e.pageX - zona.offsetLeft;
@@ -1499,6 +1511,43 @@ zona.addEventListener('touchmove', (e) => {
   const deltaX = e.touches[0].pageX - touchStartX;
   zona.scrollLeft = touchScrollLeft - deltaX;
 }, { passive: true });
+
+    // --- UMBRAL Y BLOQUEO DE CLICK CUANDO HAY ARRASTRE ---
+let dragEnCurso = false;
+let dragUmbral = 8;       // píxeles
+let startXMouse = 0;
+let startXTouch = 0;
+
+zona.addEventListener('mousedown', (e) => {
+  startXMouse = e.pageX;
+  dragEnCurso = false;
+}, true);
+
+zona.addEventListener('mousemove', (e) => {
+  if (!isDown) return;
+  const delta = Math.abs(e.pageX - startXMouse);
+  if (delta > dragUmbral) dragEnCurso = true;
+}, true);
+
+zona.addEventListener('touchstart', (e) => {
+  if (e.touches.length !== 1) return;
+  startXTouch = e.touches[0].pageX;
+  dragEnCurso = false;
+}, { passive: true });
+
+zona.addEventListener('touchmove', (e) => {
+  if (e.touches.length !== 1) return;
+  const delta = Math.abs(e.touches[0].pageX - startXTouch);
+  if (delta > dragUmbral) dragEnCurso = true;
+}, { passive: true });
+
+zona.addEventListener('click', (e) => {
+  if (dragEnCurso) {
+    e.stopPropagation();
+    e.preventDefault();
+    dragEnCurso = false;
+  }
+}, true);
 
     
     async function actualizarHabitacionesSilenciosamente() {
