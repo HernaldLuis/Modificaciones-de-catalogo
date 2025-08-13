@@ -135,7 +135,8 @@ body {
 .torre {
   flex: 0 0 auto;
   width: max-content;
-  min-width: 420px;
+  min-width: clamp(300px, 80vw, 420px);
+
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -168,21 +169,20 @@ body {
     }
 
   /* <-- ESTO ES EL PANEL INFERIOR DONDE METEMOS IMAGENES Y DESCRIPCION */
-.panel-inferior {
-  position: fixed;
-  bottom: 30px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: rgba(255, 255, 255, 0.95);
-  padding: 40px 50px;
-  border-radius: 18px;
-  box-shadow: 0 12px 28px rgba(0,0,0,0.35);
-  z-index: 9999;
-  display: none;
-  max-width: 98vw;
-  width: 1000px; /* antes 600px, luego 800px */
-  color: black;
+.panel-inferior{
+  position: fixed; left:50%; bottom: 24px; transform: translateX(-50%);
+  background: rgba(255,255,255,.95); color:#000; z-index: 9999;
+  border-radius: 16px; box-shadow: 0 12px 28px rgba(0,0,0,.35);
+  display: none; width: min(100vw - 24px, 980px); padding: 24px;
 }
+@media (max-width: 768px){
+  .panel-inferior{
+    left:0; right:0; bottom:0; transform:none;
+    width:100vw; max-height: 62dvh; overflow:auto;
+    border-top-left-radius:16px; border-top-right-radius:16px; padding:16px;
+  }
+}
+
 
 
   .contenido-panel {
@@ -592,16 +592,7 @@ img, video { max-width: 100%; height: auto; }
 }
 
 /* Caja del modal */
-.modal-contenido {
-  background: #fff;
-  padding: 2rem;
-  border-radius: 12px;
-  max-width: 400px;
-  width: 90%;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.25);
-  text-align: left;
-  animation: aparecerModal 0.4s ease;
-}
+
 .modal-contenido {
   box-sizing: border-box;
   max-width: min(92vw, 520px);  /* limita el ancho del cuadro */
@@ -615,10 +606,7 @@ img, video { max-width: 100%; height: auto; }
 .modal-contenido li { margin-bottom: .35rem; }
 
 @media (max-width: 480px) {
-  .modal-contenido {
-    font-size: 0.9rem;   /* Texto más pequeño */
-    padding: 1rem;       /* Menos espacio interno */
-  }
+  
 }
 
 /* Título */
