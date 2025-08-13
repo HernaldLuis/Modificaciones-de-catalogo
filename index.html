@@ -314,22 +314,24 @@ border-bottom: none;
    width: max-content;  /* ⬅️ esto fuerza a que se expanda lo necesario */
 }
 
-    .habitacion-btn {        
-      padding: 6px 12px;
-      background-color:#4caf50 ;   /*🔥 Estas seccion cambiar el color de las habitaciones vacias*/
-      color: white;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: bold;
-    }
+/* Botón por defecto - habitaciones normales */
+.habitacion-btn {
+  padding: 6px 12px;
+  background-color: #f4caf5a0; /* Naranja pastel original */
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+}
 
-    .habitacion-btn:hover {
-      background-color: #388e3c ; /*🔥 Estas seccion cambiar el color de las habitaciones cuando pones el cursor*/
-    }
+.habitacion-btn:hover {
+  background-color: #009b94; /* Azul cuando pasas el cursor */
+}
 
-    .habitacion-btn.disponible {  
-  background-color:#e07b17;      /*🔥 Estas seccion cambiar el color de las habotaciones disponiblesx */
+/* Botón para habitaciones disponibles */
+.habitacion-btn.disponible {
+  background-color: #e07b17; /* Naranja fuerte */
   color: white;
   border: 2px solid #0056b3;
   font-weight: bold;
@@ -339,24 +341,14 @@ border-bottom: none;
   background-color: #0056b3;
 }
 
-    /* Tipo K - King */
+/* Tipo K - King (naranja terracota cálido) */
 .tipo-k {
-  background-color: #009B94 !important; /* Turquesa sofisticado */
-  color: white;
-  border: 1.5px solid #007f7a; /* Borde ligeramente más oscuro */
-  font-weight: 600;
-  box-shadow: 0 0 6px rgba(0, 0, 0, 0.2);
+  background-color: #f6aa1c;
 }
 
-
-/* Tipo D - Doble */
+/* Tipo D - Doble (tono suave que combine) */
 .tipo-d {
-  background-color: #c2fffc !important; /* Aqua muy claro */
-  color: #003c3a; /* Verde oscuro que contrasta bien */
-  border: 1.5px solid #9ee9e6;
-  font-weight: 600;
-  box-shadow: 0 0 6px rgba(0, 0, 0, 0.2);
-
+  background-color: #c2fffcb3; /* Azul muy suave - complementario */
 }
 
     /* Móviles - ajustar para pantallas pequeñas */
