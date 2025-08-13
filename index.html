@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Catálogo de Habitaciones</title>
   <style>
 body {
@@ -48,7 +48,7 @@ body {
   justify-content: center; /* Centra texto y logo */
   gap: 0.75rem;
   flex-wrap: wrap; /* Para que en móvil no se corte raro */
-  
+
   font-family: 'Playfair Display', serif;
   font-size: 2rem;
   font-weight: 700;
@@ -89,7 +89,7 @@ body {
     height: 62px; /* sigue siendo más grande que el texto pero no exagerado */
   }
 }
-  
+
   .zona-desplazable,
 .zona-desplazable * {
   user-select: none;
@@ -105,7 +105,7 @@ body {
   cursor: grabbing;
 }
 
-  
+
 .mensaje-inicial {
   text-align: center;
   font-weight: bold;
@@ -129,8 +129,6 @@ border-bottom: none;
       box-sizing: border-box;
       white-space: nowrap;
     }
-
-    
 
 .torre {
   flex: 0 0 auto;
@@ -224,7 +222,7 @@ border-bottom: none;
   flex-wrap: wrap; /* esto permite que salten a otra fila */
   margin-top: 20px;
 }
-  
+
 .bloque-imagen {
   text-align: center;
 }
@@ -305,7 +303,7 @@ border-bottom: none;
   cursor: zoom-out;
 }
 
-    
+
 
 .piso {
   display: flex;
@@ -314,24 +312,22 @@ border-bottom: none;
    width: max-content;  /* ⬅️ esto fuerza a que se expanda lo necesario */
 }
 
-/* Botón por defecto - habitaciones normales */
-.habitacion-btn {
-  padding: 6px 12px;
-  background-color: #f4caf5a0; /* Naranja pastel original */
-  color: white;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: bold;
-}
+    .habitacion-btn {        
+      padding: 6px 12px;
+      background-color:#4caf50 ;   /*🔥 Estas seccion cambiar el color de las habitaciones vacias*/
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+    }
 
-.habitacion-btn:hover {
-  background-color: #009b94; /* Azul cuando pasas el cursor */
-}
+    .habitacion-btn:hover {
+      background-color: #388e3c ; /*🔥 Estas seccion cambiar el color de las habitaciones cuando pones el cursor*/
+    }
 
-/* Botón para habitaciones disponibles */
-.habitacion-btn.disponible {
-  background-color: #e07b17; /* Naranja fuerte */
+    .habitacion-btn.disponible {  
+  background-color:#e07b17;      /*🔥 Estas seccion cambiar el color de las habotaciones disponiblesx */
   color: white;
   border: 2px solid #0056b3;
   font-weight: bold;
@@ -341,36 +337,18 @@ border-bottom: none;
   background-color: #0056b3;
 }
 
-/* Tipo K - King (naranja terracota cálido) */
-.tipo-k {
-  background-color: #f6aa1c;
+    /* Tipo K - King */
+.habitacion-btn.tipo-k {
+  background-color: #6b9ac4;  /* Azul suave */
+  border: 2px solid #3e5e8c;
 }
 
-/* Tipo D - Doble (tono suave que combine) */
-.tipo-d {
-  background-color: #c2fffcb3; /* Azul muy suave - complementario */
+/* Tipo D - Doble */
+.habitacion-btn.tipo-d {
+  background-color: #f4a261;  /* Naranja suave */
+  border: 2px solid #b76b3d;
 }
 
-    /* Móviles - ajustar para pantallas pequeñas */
-@media (max-width: 768px) {
-  .habitacion-btn {
-    width: 55px;
-    height: 50px;
-    font-size: 12px;
-  }
-
-  .zona-desplazable {
-    transform: scale(0.9); /* Opcional: reduce todo un poco */
-    transform-origin: top left;
-  }
-}
-
-    .zona-desplazable {
-  overflow-x: auto;
-  display: flex;
-  flex-wrap: nowrap;
-  touch-action: pan-x; /* Mejora para móviles */
-}
 
     .pasillo {
       width: 100%;
@@ -420,7 +398,7 @@ border-bottom: none;
   from { opacity: 0; transform: translateX(-50%) translateY(20px); }
   to { opacity: 1; transform: translateX(-50%) translateY(0); }
 }
-  
+
 .contenido-inferior {
   max-width: 100%;
   overflow-wrap: break-word; /* fuerza salto de línea si es necesario */
@@ -436,7 +414,7 @@ border-bottom: none;
   word-break: break-word;
 }
 
-  
+
 .conector-conectadas {
   display: inline-block;
   color: white;            /* Color blanco */
@@ -453,22 +431,6 @@ border-bottom: none;
   font-weight: normal;
   color: #f0f0f0;
   margin-top: 2px;
-}
-
-.tipo-k {
-  background-color: #004d40 !important; /* Verde jade oscuro */
-  color: #ffffff; /* Blanco */
-  border: 2px solid #26a69a; /* Turquesa elegante */
-  font-weight: 500;
-  box-shadow: 0 2px 6px rgba(0, 77, 64, 0.4);
-}
-
-.tipo-d {
-  background-color: #37474f !important; /* Gris piedra */
-  color: #ffffff; /* Blanco */
-  border: 2px solid #90a4ae; /* Gris claro */
-  font-weight: 500;
-  box-shadow: 0 2px 6px rgba(55, 71, 79, 0.4);
 }
 
   .habitacion-btn div {
@@ -492,13 +454,13 @@ border-bottom: none;
   align-items: center;
   flex-wrap: wrap;
   padding: 0.9rem 1.5rem;
-  
+
   background: rgba(255, 255, 255, 0.8);
   background: linear-gradient(135deg, rgba(255,255,255,0.85), rgba(245,245,245,0.85));
   backdrop-filter: blur(10px) saturate(180%);
   border-bottom: 1px solid rgba(255, 255, 255, 0.3);
   border-radius: 0 0 18px 18px;
-  
+
   box-shadow: 0 4px 20px rgba(0,0,0,0.08);
 }
 
@@ -679,25 +641,9 @@ border-bottom: none;
   100% { transform: scale(1); opacity: 1; }
 }
 
-  @media (max-width: 768px) {
-    .zona-desplazable {
-      flex-wrap: wrap;
-      gap: 20px;
-      padding: 10px;
-    }
+  /* (ESTO CORRESPNDE AL PANEL DE LAS IMAGENES DE COSULTa */
 
-    .torre {
-      min-width: 100%;
-      max-width: 100%;
-    }
-
-    .habitacion-btn {
-      font-size: 12px;
-      padding: 4px 6px;
-    }
-  }
-</style>
-
+  </style>
 </head>
 <body>
 
@@ -728,9 +674,9 @@ border-bottom: none;
     Coincidencias: <strong id="total-coincidencias-categoria">0</strong>
   </span>
 </div>
-    
+
   <div class="zona-desplazable">
-    
+
     <!-- Torre 1 -->
     <div class="torre">
       <h2>Torre 1</h2>
@@ -840,7 +786,7 @@ border-bottom: none;
 </div>
 
       <div class="pasillo"></div>
-      
+
       <div class="piso">
 <button class="habitacion-btn" data-num="1222">1222</button>
         <div class="conector-conectadas">⇄</div>  <!-- Flecha de doble punta -->
@@ -877,7 +823,7 @@ border-bottom: none;
 <button class="habitacion-btn" data-num="2408">2408</button>
 
     </div>
-    
+
     <div class="pasillo"></div>
 
     <!-- Piso 4 - Vista Externa -->
@@ -910,7 +856,7 @@ border-bottom: none;
     </div>
 
   <div class="pasillo"></div>
-  
+
   <!-- Piso 3 - Vista Externa -->
   <div class="piso">
 <button class="habitacion-btn" data-num="2318">2318</button>
@@ -999,7 +945,7 @@ border-bottom: none;
       </div>
 
        <div class="pasillo"></div>
-      
+
 <div class="fila-base">
 <button class="habitacion-btn" data-num="3330">3330</button>
 <button class="habitacion-btn" data-num="3329">3329</button>
@@ -1110,7 +1056,7 @@ border-bottom: none;
 
 
        <div class="pasillo"></div>
-      
+
 <div class="columna-derecha">
 <button class="habitacion-btn" data-num="3014">3014</button>
   <div class="conector-conectadas">⇄</div>  <!-- Flecha de doble punta -->
@@ -1142,7 +1088,7 @@ border-bottom: none;
         <div class="conector-conectadas">⇄</div>  <!-- Flecha de doble punta -->
 
 </div>
-      
+
     </div>
 
     <!-- Torre 4 -->
@@ -1164,7 +1110,7 @@ border-bottom: none;
 <button class="habitacion-btn" data-num="4518">4518</button>
 
 </div>
-  
+
   <div class="fila-base">
 <button class="habitacion-btn" data-num="4517">4517</button>
     <div class="conector-conectadas">⇄</div>  <!-- Flecha de doble punta -->
@@ -1462,14 +1408,14 @@ const num = boton.dataset.num || boton.textContent.trim();
         boton.classList.add("disponible");
 
         // Determinar tipo de cama
-const tipoCama = nuevaData.tipo_cama === "K" ? "K" : "D";
+        const tipoCama = habitacion.tipo_cama === "K" ? "K" : "D";
 
-boton.classList.remove("tipo-k", "tipo-d"); // Limpieza previa
+        if (habitacion.tipo_cama === "K") {
+  boton.classList.add("tipo-k");
+} else if (habitacion.tipo_cama === "D") {
+  boton.classList.add("tipo-d");
 
-if (nuevaData.tipo_cama === "K") {
-    boton.classList.add("tipo-k");
-} else if (nuevaData.tipo_cama === "D") {
-    boton.classList.add("tipo-d");
+
 }
 
 
