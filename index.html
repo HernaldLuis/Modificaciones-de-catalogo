@@ -337,6 +337,19 @@ border-bottom: none;
   background-color: #0056b3;
 }
 
+    /* Tipo K - King */
+.habitacion-btn.tipo-k {
+  background-color: #6b9ac4;  /* Azul suave */
+  border: 2px solid #3e5e8c;
+}
+
+/* Tipo D - Doble */
+.habitacion-btn.tipo-d {
+  background-color: #f4a261;  /* Naranja suave */
+  border: 2px solid #b76b3d;
+}
+
+
     .pasillo {
       width: 100%;
       border-top: 2px dashed #aaa;
@@ -1397,6 +1410,12 @@ const num = boton.dataset.num || boton.textContent.trim();
         // Determinar tipo de cama
         const tipoCama = habitacion.tipo_cama === "K" ? "K" : "D";
 
+        if (habitacion.tipo_cama === "K") {
+  boton.classList.add("tipo-k");
+} else if (habitacion.tipo_cama === "D") {
+  boton.classList.add("tipo-d");
+}
+
 
         // Verificar si tiene sofá cama
 const sofaIcon = `
@@ -1465,6 +1484,13 @@ zona.addEventListener('mousemove', (e) => {
 
       if (nuevaData && JSON.stringify(nuevaData) !== JSON.stringify(actualData)) {
         const tipoCama = nuevaData.tipo_cama === "K" ? "K" : "D";
+
+if (nuevaData.tipo_cama === "K") {
+  boton.classList.add("tipo-k");
+} else if (nuevaData.tipo_cama === "D") {
+  boton.classList.add("tipo-d");
+}
+
         const sofaIcon = `
           ${nuevaData.sofa ? '<img src="https://res.cloudinary.com/dor6za85u/image/upload/v1753173371/sof%C3%A0_pzyjdc.png" style="height: 18px; vertical-align: middle;" />' : ''}
           ${nuevaData.discapacidad ? '<span style="font-size: 1.2em;">♿</span>' : ''}
