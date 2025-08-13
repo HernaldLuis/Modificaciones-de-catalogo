@@ -327,8 +327,16 @@ border-bottom: none;
   transform: translateY(-1px);
   /* NO cambiar background-color aquí */
 }
+    .habitacion-btn.disponible {  
+  border: 2px solid #0056b3;
+  font-weight: bold;
+}
 
-/* Colores base por tipo de cama */
+.habitacion-btn.disponible:hover {
+  filter: brightness(1.06);
+}
+
+    /* Colores base por tipo de cama */
 .habitacion-btn.tipo-k {
   background: #ff7a00;    /* Naranja (K) */
   color: #ffffff;
@@ -349,18 +357,6 @@ border-bottom: none;
 .habitacion-btn:focus-visible {
   outline: 3px solid #0aa0ff;
   outline-offset: 2px;
-}
-
-
-    .habitacion-btn.disponible {  
-  background-color:#e07b17;      /*🔥 Estas seccion cambiar el color de las habotaciones disponiblesx */
-  color: white;
-  border: 2px solid #0056b3;
-  font-weight: bold;
-}
-
-.habitacion-btn.disponible:hover {
-  background-color: #0056b3;
 }
 
     .pasillo {
