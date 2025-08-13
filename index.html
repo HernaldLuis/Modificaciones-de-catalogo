@@ -663,7 +663,24 @@ img, video { max-width: 100%; height: auto; }
 
   /* (ESTO CORRESPNDE AL PANEL DE LAS IMAGENES DE COSULTa */
 
-  </style>
+  
+/* Pan & Pinch-zoom */
+.zona-desplazable{
+  overflow: hidden !important;
+  touch-action: none;
+  -webkit-overflow-scrolling: touch;
+  user-select: none;
+  cursor: grab;
+}
+.zona-desplazable.arrastrando{ cursor: grabbing; }
+#lienzo-panzoom{
+  transform-origin: 0 0;
+  --tx:0px; --ty:0px; --scale:1;
+  transform: translate3d(var(--tx),var(--ty),0) scale(var(--scale));
+  will-change: transform;
+}
+
+</style>
 </head>
 <body>
 
@@ -696,6 +713,7 @@ img, video { max-width: 100%; height: auto; }
 </div>
 
   <div class="zona-desplazable">
+  <div id="lienzo-panzoom">
 
     <!-- Torre 1 -->
     <div class="torre">
@@ -1328,7 +1346,9 @@ img, video { max-width: 100%; height: auto; }
 </div>
 
 
-  <!-- Panel flotante inferior -->
+  </div>
+
+<!-- Panel flotante inferior -->
   <div id="panelInferior" class="panel-inferior">
     <div id="mensajeSeleccion" class="mensaje-inicial">
   ℹ️ Selecciona una habitación para ver más detalles.
@@ -1721,6 +1741,30 @@ document.addEventListener('keydown', (ev) => {
 });
 </script>
 
+
+
+<script>
+(()=>{const vp=document.querySelector('.zona-desplazable'),cv=document.getElementById('lienzo-panzoom');
+if(!vp||!cv) return; let s=1,tx=0,ty=0; const Smin=.8,Smax=3,pts=new Map(); let drag=false, sx=0,sy=0, U=6;
+const apply=()=>{cv.style.setProperty('--scale',s);cv.style.setProperty('--tx',tx+'px');cv.style.setProperty('--ty',ty+'px');};
+
+vp.addEventListener('pointerdown',e=>{vp.setPointerCapture(e.pointerId);pts.set(e.pointerId,{x:e.clientX,y:e.clientY}); 
+  if(pts.size===1){drag=false; sx=e.clientX; sy=e.clientY;} vp.classList.add('arrastrando');});
+
+const centerDist=()=>{const a=[...pts.values()]; const cx=(a[0].x+a[1].x)/2, cy=(a[0].y+a[1].y)/2;
+  const dx=a[1].x-a[0].x, dy=a[1].y-a[0].y; return {cx,cy,dist:Math.hypot(dx,dy)};};
+
+vp.addEventListener('pointermove',e=>{if(!pts.has(e.pointerId)) return; pts.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  if(pts.size===1){ const dx=e.clientX-sx, dy=e.clientY-sy; if(!drag && (Math.abs(dx)>U||Math.abs(dy)>U)) drag=true;
+    if(drag){ tx+=dx; ty+=dy; apply(); sx=e.clientX; sy=e.clientY; } }
+  else if(pts.size===2){ const {cx,cy,dist}=centerDist(); if(!vp._sd){vp._sd=dist; vp._ss=s; vp._ax=(cx-tx)/s; vp._ay=(cy-ty)/s;}
+    let ns=vp._ss*dist/Math.max(1,vp._sd); ns=Math.max(Smin,Math.min(Smax,ns)); s=ns; tx=cx-vp._ax*s; ty=cy-vp._ay*s; apply(); }});
+
+function end(e){pts.delete(e.pointerId); vp._sd=null; vp.classList.remove('arrastrando'); if(drag){e.preventDefault();e.stopPropagation();drag=false;}}
+vp.addEventListener('pointerup',end); vp.addEventListener('pointercancel',end);
+vp.addEventListener('click',e=>{ if(drag){e.preventDefault(); e.stopPropagation(); drag=false;} }, true);
+apply();})();
+</script>
 
 </body>
 </html>
