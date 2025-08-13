@@ -1408,12 +1408,14 @@ const num = boton.dataset.num || boton.textContent.trim();
         boton.classList.add("disponible");
 
         // Determinar tipo de cama
-        const tipoCama = habitacion.tipo_cama === "K" ? "K" : "D";
+const tipoCama = nuevaData.tipo_cama === "K" ? "K" : "D";
 
-        if (habitacion.tipo_cama === "K") {
-  boton.classList.add("tipo-k");
-} else if (habitacion.tipo_cama === "D") {
-  boton.classList.add("tipo-d");
+boton.classList.remove("tipo-k", "tipo-d"); // Limpieza previa
+
+if (nuevaData.tipo_cama === "K") {
+    boton.classList.add("tipo-k");
+} else if (nuevaData.tipo_cama === "D") {
+    boton.classList.add("tipo-d");
 }
 
 
