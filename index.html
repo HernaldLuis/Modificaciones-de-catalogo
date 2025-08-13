@@ -322,9 +322,35 @@ border-bottom: none;
       font-weight: bold;
     }
 
-    .habitacion-btn:hover {
-      background-color: #388e3c ; /*🔥 Estas seccion cambiar el color de las habitaciones cuando pones el cursor*/
-    }
+/* Efecto común sin alterar el color base */
+.habitacion-btn:hover {
+  transform: translateY(-1px);
+  /* NO cambiar background-color aquí */
+}
+
+/* Colores base por tipo de cama */
+.habitacion-btn.tipo-k {
+  background: #ff7a00;    /* Naranja (K) */
+  color: #ffffff;
+}
+.habitacion-btn.tipo-d {
+  background: #ffb366;    /* Tono que combine (D) */
+  color: #1b1b1b;         /* Mejor contraste sobre el naranja claro */
+  border: 1px solid rgba(0,0,0,.12);
+}
+
+/* Hover por tipo (sin cambiar de color, solo brillo) */
+.habitacion-btn.tipo-k:hover,
+.habitacion-btn.tipo-d:hover {
+  filter: brightness(1.06);
+}
+
+/* Accesibilidad foco teclado */
+.habitacion-btn:focus-visible {
+  outline: 3px solid #0aa0ff;
+  outline-offset: 2px;
+}
+
 
     .habitacion-btn.disponible {  
   background-color:#e07b17;      /*🔥 Estas seccion cambiar el color de las habotaciones disponiblesx */
@@ -336,19 +362,6 @@ border-bottom: none;
 .habitacion-btn.disponible:hover {
   background-color: #0056b3;
 }
-
-    /* Tipo K - King */
-.habitacion-btn.tipo-k {
-  background-color: #6b9ac4;  /* Azul suave */
-  border: 2px solid #3e5e8c;
-}
-
-/* Tipo D - Doble */
-.habitacion-btn.tipo-d {
-  background-color: #f4a261;  /* Naranja suave */
-  border: 2px solid #b76b3d;
-}
-
 
     .pasillo {
       width: 100%;
