@@ -672,6 +672,16 @@ border-bottom: none;
 @media (max-width: 900px){
   .video-habitacion{ position:static; width:100%; max-width:100%; margin-bottom:12px; }
 }
+
+
+/* === Zoom de video === */
+.video-zoom-overlay{
+  display:none; position:fixed; inset:0; z-index:10000;
+  background:rgba(0,0,0,.85); align-items:center; justify-content:center;
+}
+.video-zoom-overlay.activo{ display:flex; }
+#zoom-video{ max-width:96vw; max-height:92vh; border-radius:12px; background:#000; outline:0; }
+
 </style>
 </head>
 <body>
@@ -1898,6 +1908,9 @@ function setVideoHabitacion(url){
     mp4.src = u;
     mp4.hidden = false;
     box.hidden = false;
+
+    // Click abre zoom como las imágenes
+    try{ mp4.onclick = (ev)=>{ ev.stopPropagation(); abrirZoomVideo(mp4.currentSrc || mp4.src); }; }catch(_e){}
     return;
   }
 }
@@ -1911,6 +1924,44 @@ window.VIDEOS_HAB = window.VIDEOS_HAB || {
 };
 // URL por defecto si quieres usar 1 solo video para las 4
 window.HANDICAP_VIDEO_URL = "https://res.cloudinary.com/dor6za85u/video/upload/v1754942483/Ba%C3%B1o_Handicap_i1r6cg.mp4"; // <-- opcional: pega aquí un enlace (YouTube/Vimeo o .mp4)
+
+
+// === Zoom de Video ===
+function abrirZoomVideo(src){
+  const overlay = document.getElementById('video-zoom-overlay');
+  const zv = document.getElementById('zoom-video');
+  if(!overlay || !zv) return;
+  // reset
+  zv.pause?.(); zv.removeAttribute('src'); zv.load?.();
+  zv.setAttribute('playsinline','');
+  zv.setAttribute('muted',''); // autoplay seguro; usuario puede activar sonido
+  zv.setAttribute('autoplay','');
+  zv.muted = true;
+  zv.src = src;
+  overlay.classList.add('activo');
+  overlay.setAttribute('aria-hidden','false');
+  const p = zv.play?.(); if (p && typeof p.catch==='function') p.catch(()=>{});
+}
+function cerrarZoomVideo(){
+  const overlay = document.getElementById('video-zoom-overlay');
+  const zv = document.getElementById('zoom-video');
+  if(!overlay || !zv) return;
+  zv.pause?.(); zv.removeAttribute('src'); zv.load?.();
+  overlay.classList.remove('activo');
+  overlay.setAttribute('aria-hidden','true');
+}
+// cerrar por click fuera o ESC
+document.addEventListener('DOMContentLoaded', () => {
+  const overlay = document.getElementById('video-zoom-overlay');
+  overlay?.addEventListener('click', (e)=>{ if(e.target===overlay) cerrarZoomVideo(); });
+  document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') cerrarZoomVideo(); });
+});
+
 </script>
+
+<!-- Overlay de ZOOM para video -->
+<div id="video-zoom-overlay" class="video-zoom-overlay" aria-hidden="true">
+  <video id="zoom-video" controls playsinline muted></video>
+</div>
 </body>
 </html>
