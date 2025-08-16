@@ -690,8 +690,13 @@ border-bottom: none;
   <option value="K">K</option>
   <option value="D">D</option>
 </select>
+<label for="filtro-prefijo">Recepción:</label>
+<select id="filtro-prefijo" title="Recepción">
 
-<label class="chk"><input type="checkbox" id="filtro-reserve"> The Reserve</label>
+  <option value="">Todas</option>
+  <option value="C">PLC - Paradisus</option>
+  <option value="S">THR - The Reserve</option>
+</select>
 <label class="chk"><input type="checkbox" id="filtro-handicap"> Handicap ♿</label>
 <label class="chk"><input type="checkbox" id="filtro-cocineta"> Cocineta</label>
 
@@ -1692,6 +1697,17 @@ async function ensureHabitacionesData(){
 }
 
 // ===== Helpers =====
+function obtenerCodigoCategoria(h) {
+  // Intenta encontrar un código tipo C2V / S6E dentro del título (después del "· " o en cualquier parte)
+  const t = (h.titulo || "").toUpperCase();
+  // Busca patrones comunes: C2V, C2E, S6E, etc. (letra C/S + 1-2 dígitos + 0-2 letras)
+  const m = t.match(/\b[CS]\d{1,2}[A-Z]{0,2}\b/);
+  return m ? m[0] : "";
+}
+function prefijoDeCodigo(h) {
+  const code = obtenerCodigoCategoria(h);
+  return code ? code[0] : "";
+}
 function esTheReserve(h){ return (h.categoria || '').toLowerCase().includes('reserve'); }
 function tieneCocineta(h){
   const arr = (h.caracteristicas || []).map(x => String(x).toLowerCase());
@@ -1705,9 +1721,8 @@ function torreDe(numStr){
 
 // ===== Referencias a controles =====
 const selCategoria    = document.getElementById('filtro-categoria');
-const selCama         = document.getElementById('filtro-cama');
-const cbReserve       = document.getElementById('filtro-reserve');
-const cbHandicap      = document.getElementById('filtro-handicap');
+const selPrefijo     = document.getElementById('filtro-prefijo');
+const selCama         = document.getElementById('filtro-cama');const cbHandicap      = document.getElementById('filtro-handicap');
 const cbCocineta      = document.getElementById('filtro-cocineta');
 const coincidenciasEl = document.getElementById('total-coincidencias-categoria');
 const resumenEl       = document.getElementById('totales-resumen');
@@ -1737,10 +1752,9 @@ async function aplicarFiltrosBoss(){
   const data = await ensureHabitacionesData();
 
   const categoria = (selCategoria?.value || '').trim().toLowerCase(); // "" = todas
-  const cama      = (selCama?.value || '').toUpperCase();             // "", "K", "D"
-  const fReserve  = !!cbReserve?.checked;
-  const fHC       = !!cbHandicap?.checked;
+  const cama      = (selCama?.value || '').toUpperCase();             // "", "K", "D"const fHC       = !!cbHandicap?.checked;
   const fCoc      = !!cbCocineta?.checked;
+  const prefijo   = (selPrefijo?.value || '').toUpperCase();
 
   let coincidencias = 0;
   const stats = {
@@ -1757,10 +1771,14 @@ async function aplicarFiltrosBoss(){
 
     let ok = true;
     if(categoria){ ok = ok && ((h.categoria||'').toLowerCase() === categoria); }
-    if(cama){      ok = ok && ((h.tipo_cama||'').toUpperCase() === cama); }
-    if(fReserve){  ok = ok && esTheReserve(h); }
-    if(fHC){       ok = ok && !!h.discapacidad; }
+    if(cama){      ok = ok && ((h.tipo_cama||'').toUpperCase() === cama); }if(fHC){       ok = ok && !!h.discapacidad; }
     if(fCoc){      ok = ok && tieneCocineta(h); }
+
+    if(prefijo){
+      const pfx = prefijoDeCodigo(h);
+      ok = ok && (pfx === prefijo);
+    }
+
 
     btn.classList.toggle('filtro-inactivo', !ok);
     btn.classList.toggle('filtro-activo', ok);
@@ -1786,15 +1804,13 @@ async function aplicarFiltrosBoss(){
 }
 
 // ===== Eventos =====
-[selCategoria, selCama, cbReserve, cbHandicap, cbCocineta].forEach(el => {
+[selCategoria, selCama, cbHandicap, cbCocineta].forEach(el => {
   if(el) el.addEventListener('change', aplicarFiltrosBoss);
 });
 if(btnLimpiar){
   btnLimpiar.addEventListener('click', () => {
     if(selCategoria) selCategoria.value = '';
-    if(selCama) selCama.value = '';
-    if(cbReserve) cbReserve.checked = false;
-    if(cbHandicap) cbHandicap.checked = false;
+    if(selCama) selCama.value = '';if(cbHandicap) cbHandicap.checked = false;
     if(cbCocineta) cbCocineta.checked = false;
     aplicarFiltrosBoss();
   });
