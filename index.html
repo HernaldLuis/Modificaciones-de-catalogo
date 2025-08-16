@@ -1804,13 +1804,14 @@ async function aplicarFiltrosBoss(){
 }
 
 // ===== Eventos =====
-[selCategoria, selCama, cbHandicap, cbCocineta].forEach(el => {
+[selCategoria, selCama, selPrefijo, cbHandicap, cbCocineta].forEach(el => {
   if(el) el.addEventListener('change', aplicarFiltrosBoss);
 });
 if(btnLimpiar){
   btnLimpiar.addEventListener('click', () => {
     if(selCategoria) selCategoria.value = '';
-    if(selCama) selCama.value = '';if(cbHandicap) cbHandicap.checked = false;
+    if(selCama) selCama.value = '';
+    if(selPrefijo) selPrefijo.value = '';if(cbHandicap) cbHandicap.checked = false;
     if(cbCocineta) cbCocineta.checked = false;
     aplicarFiltrosBoss();
   });
