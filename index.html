@@ -1699,22 +1699,29 @@ async function ensureHabitacionesData(){
 
 // ===== Detectores robustos =====
 function getTipoCama(h){
-  const cand = [
-    (h.tipo_cama ?? h.tipoCama ?? h.cama ?? h.bed ?? h.tipo ?? '').toString().toUpperCase(),
-    (h.titulo ?? '').toUpperCase(),
-    (h.descripcion ?? '').toUpperCase()
+  const rawCandidates = [
+    (h.tipo_cama ?? h.tipoCama ?? h.cama ?? h.bed ?? h.tipo ?? '').toString(),
+    (h.titulo ?? ''),
+    (h.descripcion ?? '')
   ];
-  // Busca 'K' o 'D' como tipo, prioriza campo explícito
-  const v = cand[0].match(/[KD]/) ? cand[0] : (cand[1].match(/\b[KD]\b/)?.[0] || cand[2].match(/\b[KD]\b/)?.[0] || '');
-  return v === 'K' ? 'K' : (v === 'D' ? 'D' : '');
+  const all = rawCandidates.join(' ').toUpperCase();
+  // Heurística: KING, KS, KING SIZE => K | MATRI, MATRIMONIAL, DOUBLE, DOBLE, 2DBL, 2 DBL => D
+  if (/\bKING\b|\bKS\b|KING SIZE|K\s*SIZE/.test(all)) return 'K';
+  if (/\bMATRI\b|MATRIMONIAL|\bDOUBLE\b|\bDOBLE\b|2\s*DBL|2\s*DOUBLE|2\s*D\b/.test(all)) return 'D';
+  const m = all.match(/\b[KD]\b/);
+  if (m) return m[0];
+  return '';
 }
 function esHandicap(h){
-  return !!(h.discapacidad === true || h.handicap === true || h.ada === true || h.accessible === true);
+  const b = (h.discapacidad === true || h.handicap === true || h.ada === true || h.accessible === true);
+  if (b) return true;
+  const text = [h.titulo, h.descripcion, ...(h.caracteristicas||[])].join(' ').toLowerCase();
+  return /handicap|discap|accesib|accessible|ada/.test(text);
 }
 function tieneCocineta(h){
-  if(h.cocineta === true) return true;
-  const txt = [h.titulo, h.descripcion, ...(h.caracteristicas||[])].join(' ').toLowerCase();
-  return /cocineta|kitchenette|cocina/.test(txt);
+  if (h.cocineta === true || h.kitchenette === true) return true;
+  const text = [h.titulo, h.descripcion, ...(h.caracteristicas||[])].join(' ').toLowerCase();
+  return /cocineta|kitchenette|cocina\b/.test(text);
 }
 function obtenerCodigoCategoria(h){
   // Prioriza campos explícitos si existen
