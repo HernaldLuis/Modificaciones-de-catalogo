@@ -666,6 +666,11 @@ border-bottom: none;
   box-shadow:0 2px 8px rgba(0,0,0,.12); margin-left:.5rem;
 }
 .btn-reporte:hover{ filter:brightness(.95); }
+
+/* Intro dentro del modal */
+.intro-creditos{ color:#444; font-size:.9rem; opacity:.85; margin-top:.35rem; }
+.intro-actions{ display:flex; gap:.6rem; align-items:center; margin-top:.6rem; flex-wrap:wrap; }
+.intro-nomostrar{ display:flex; align-items:center; gap:.4rem; color:#333; font-size:.95rem; }
 </style>
 </head>
 <body>
@@ -712,7 +717,7 @@ border-bottom: none;
   <span id="totales-resumen" class="contador-categoria">
     K: 0 · D: 0 · Total: 0 — Reserve: 0 · ♿: 0 · Cocineta: 0
   </span>
-  <a href="Introducci%C3%B3n%20Proyecto%20Cat%C3%A1logo%20de%20Habitaciones%20%C2%B7%20Paradisus%20desarrollado%20por%20Luis%20Hernaldo%202025.pdf.pdf" download class="btn-reporte" title="Descargar reporte PDF">📄 Descargar PDF</a>
+  <a href="Introducción Proyecto Catálogo de Habitaciones · Paradisus desarrollado por Luis Hernaldo 2025.pdf.pdf" download class="btn-reporte" title="Descargar reporte PDF">📄 Descargar PDF</a>
 
 <button id="btn-limpiar-filtro" type="button">Limpiar</button>
 
@@ -1637,37 +1642,55 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 <div id="modal-mejoras" class="modal-mejoras">
   <div class="modal-contenido">
-    <h2>🆕BIENVENID@ - Novedades del Catálogo</h2>
-    <ul>
-      <li>✨ Panel de filtrado de categorías mejorado.</li>
-      <li>💓 Animación de latido para habitaciones filtradas.</li>
-      <li>🌗 Oscurecido de habitaciones no coincidentes.</li>
-      <li>🏷️ Nuevo título elegante con logo de Paradisus.</li>
-      <li> 👌 Gracias por ser parte de la Mejora😊.</li>
-    </ul>
-    <button id="cerrar-modal">Cerrar</button>
-  </div>
+<h2>🆕 BIENVENID@ - Novedades del Catálogo</h2>
+<ul>
+  <li>🛏️ Filtro por <strong>Cama</strong> (K / D).</li>
+  <li>🏷️ Filtro de <strong>Recepción</strong> (PLC - Paradisus / THR - The Reserve).</li>
+  <li>♿ y 🍳 Checks de <strong>Handicap</strong> y <strong>Cocineta</strong>.</li>
+  <li>📊 <strong>Resumen</strong> en la barra: K, D, Total — THR, ♿, Cocineta.</li>
+  <li>🏢 <strong>Totales por Torre</strong> (1–4) debajo del panel de filtros.</li>
+  <li>🧹 <strong>Limpiar</strong> reinicia Categoría, Cama, Recepción, ♿ y Cocineta.</li>
+  <li>📄 <strong>Descargar PDF</strong> desde el panel de interacción.</li>
+  <li>✨ Animación de latido y oscurecido de no coincidentes.</li>
+  <li>🖼️ Nuevo título elegante con logo de Paradisus.</li>
+  <li>🙌 ¡Gracias por ser parte de la mejora!</li>
+</ul>
+<button id="cerrar-modal">Cerrar</button>
 </div>
-
+</div>
 <!-- Script del modal -->
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-  const modal = document.getElementById('modal-mejoras');
+  const VERSION = '2025.08.16-novedades-simples-v2';
+  const KEY = 'modal_mejoras_version';
+
+  const modal     = document.getElementById('modal-mejoras');
   const btnCerrar = document.getElementById('cerrar-modal');
 
-  modal.classList.add('activo');
+  if (modal && localStorage.getItem(KEY) !== VERSION) {
+    modal.removeAttribute('hidden');
+    modal.classList.add('activo');
+  }
 
-  btnCerrar.addEventListener('click', () => {
-    modal.classList.remove('activo');
-  });
+  function cerrar() {
+    modal?.classList.remove('activo');
+    modal?.setAttribute('hidden', '');
+    localStorage.setItem(KEY, VERSION);
+  }
 
-  modal.addEventListener('click', (e) => {
-    if (e.target === modal) {
-      modal.classList.remove('activo');
-    }
-  });
+  btnCerrar?.addEventListener('click', cerrar);
+  modal?.addEventListener('click', (e) => { if (e.target === modal) cerrar(); });
+
+  // Abrir manualmente desde fuera si se necesita:
+  window.abrirNovedades = () => { modal?.removeAttribute('hidden'); modal?.classList.add('activo'); };
 });
 </script>
+
+
+
+</div>
+
+
     <script>
 function hacerZoom(src) {
   const overlay = document.getElementById('zoom-overlay');
