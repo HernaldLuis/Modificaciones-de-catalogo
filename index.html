@@ -640,37 +640,25 @@ border-bottom: none;
   0% { transform: scale(0.8); opacity: 0; }
   100% { transform: scale(1); opacity: 1; }
 }
-    .panel-filtro-categoria .chk {
-  display: inline-flex;
-  align-items: center;
-  gap: .35rem;
-  padding: 4px 6px;
-  border-radius: 8px;
-  background: rgba(255,255,255,0.6);
-}
-
-.totales-tabla table{
-  width: 100%;
-  border-collapse: collapse;
-  background: rgba(255,255,255,0.85);
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 4px 14px rgba(0,0,0,.08);
-}
-.totales-tabla th, .totales-tabla td{
-  padding: .5rem .7rem;
-  border-bottom: 1px solid rgba(0,0,0,.06);
-  text-align: center;
-}
-.totales-tabla thead th{
-  background: linear-gradient(135deg, #00aaff22, #0077cc22);
-  font-weight: 700;
-}
-.totales-tabla tbody tr:last-child td{ border-bottom: 0; }
 
   /* (ESTO CORRESPNDE AL PANEL DE LAS IMAGENES DE COSULTa */
 
-  </style>
+  
+/* === Filtros extra & tabla por torres (anexado) === */
+.panel-filtro-categoria .chk {
+  display: inline-flex; align-items: center; gap: .35rem;
+  padding: 4px 6px; border-radius: 8px; background: rgba(255,255,255,0.6);
+}
+.totales-tabla table{
+  width: 100%; border-collapse: collapse; background: rgba(255,255,255,0.85);
+  border-radius: 12px; overflow: hidden; box-shadow: 0 4px 14px rgba(0,0,0,.08);
+}
+.totales-tabla th, .totales-tabla td{
+  padding: .5rem .7rem; border-bottom: 1px solid rgba(0,0,0,.06); text-align: center;
+}
+.totales-tabla thead th{ background: linear-gradient(135deg, #00aaff22, #0077cc22); font-weight: 700; }
+.totales-tabla tbody tr:last-child td{ border-bottom: 0; }
+</style>
 </head>
 <body>
 
@@ -694,8 +682,9 @@ border-bottom: none;
   <select id="filtro-categoria">
     <option value="">Todas</option>
   </select>
+
   
-  <label for="filtro-cama">Cama:</label>
+<label for="filtro-cama">Cama:</label>
 <select id="filtro-cama">
   <option value="">Todas</option>
   <option value="K">K</option>
@@ -706,18 +695,18 @@ border-bottom: none;
 <label class="chk"><input type="checkbox" id="filtro-handicap"> Handicap ♿</label>
 <label class="chk"><input type="checkbox" id="filtro-cocineta"> Cocineta</label>
 
-<!-- Resumen compacto en la misma barra -->
-<span id="totales-resumen" class="contador-categoria">K: 0 · D: 0 · Total: 0 — Reserve: 0 · ♿: 0 · Cocineta: 0</span>
+<span id="totales-resumen" class="contador-categoria">
+  K: 0 · D: 0 · Total: 0 — Reserve: 0 · ♿: 0 · Cocineta: 0
+</span>
 
-
-  <button id="btn-limpiar-filtro" type="button">Limpiar</button>
+<button id="btn-limpiar-filtro" type="button">Limpiar</button>
 
   <span class="contador-categoria">
     Coincidencias: <strong id="total-coincidencias-categoria">0</strong>
   </span>
 </div>
+<div id="totales-tabla" class="totales-tabla" style="padding: 10px 16px;"></div>
 
-    <div id="totales-tabla" class="totales-tabla" style="padding: 10px 16px;"></div>
 
   <div class="zona-desplazable">
 
@@ -1580,23 +1569,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Llenar select con categorías
   async function initCategorias() {
     const data = await cargarHabitaciones();
-
-    <script>
-// --- Helpers de detección ---
-function esTheReserve(h) {
-  return (h.categoria || "").toLowerCase().includes("reserve");
-}
-function tieneCocineta(h) {
-  const arr = (h.caracteristicas || []).map(x => String(x).toLowerCase());
-  // Detecta 'cocineta', 'kitchenette' o 'cocina' en características
-  return arr.some(x => x.includes("cocineta") || x.includes("kitchenette") || x.includes("cocina"));
-}
-function torreDe(num) {
-  const n = String(num).trim();
-  const t = parseInt(n[0], 10);
-  return [1,2,3,4].includes(t) ? t : 0;
-}
-
     const categorias = new Set(Object.values(data).map(h => h.categoria).filter(Boolean));
     [...categorias].sort().forEach(cat => {
       const opt = document.createElement('option');
@@ -1707,21 +1679,47 @@ document.addEventListener('keydown', (ev) => {
 });
 </script>
 
-    <script>
-const camaSel     = document.getElementById('filtro-cama');
-const cbReserve   = document.getElementById('filtro-reserve');
-const cbHandicap  = document.getElementById('filtro-handicap');
-const cbCocineta  = document.getElementById('filtro-cocineta');
-const resumenEl   = document.getElementById('totales-resumen');
-const tablaEl     = document.getElementById('totales-tabla');
+
+
+<script>
+// ===== Reusar tu JSON si ya existe; si no, lo cargamos =====
+async function ensureHabitacionesData(){
+  if(!window.habitacionesData){
+    const resp = await fetch('habitaciones.json', {cache:'no-store'});
+    window.habitacionesData = await resp.json();
+  }
+  return window.habitacionesData;
+}
+
+// ===== Helpers =====
+function esTheReserve(h){ return (h.categoria || '').toLowerCase().includes('reserve'); }
+function tieneCocineta(h){
+  const arr = (h.caracteristicas || []).map(x => String(x).toLowerCase());
+  return arr.some(x => x.includes('cocineta') || x.includes('kitchenette') || x.includes('cocina'));
+}
+function torreDe(numStr){
+  const n = String(numStr).trim();
+  const t = parseInt(n[0], 10);
+  return [1,2,3,4].includes(t) ? t : 0;
+}
+
+// ===== Referencias a controles =====
+const selCategoria    = document.getElementById('filtro-categoria');
+const selCama         = document.getElementById('filtro-cama');
+const cbReserve       = document.getElementById('filtro-reserve');
+const cbHandicap      = document.getElementById('filtro-handicap');
+const cbCocineta      = document.getElementById('filtro-cocineta');
+const coincidenciasEl = document.getElementById('total-coincidencias-categoria');
+const resumenEl       = document.getElementById('totales-resumen');
+const tablaEl         = document.getElementById('totales-tabla');
+const btnLimpiar      = document.getElementById('btn-limpiar-filtro');
 
 function renderTabla(stats){
   const t = stats.towers;
+  if(!tablaEl) return;
   tablaEl.innerHTML = `
     <table>
-      <thead>
-        <tr><th>Torre</th><th>K</th><th>D</th><th>Total</th></tr>
-      </thead>
+      <thead><tr><th>Torre</th><th>K</th><th>D</th><th>Total</th></tr></thead>
       <tbody>
         ${[1,2,3,4].map(i => `
           <tr>
@@ -1731,26 +1729,19 @@ function renderTabla(stats){
             <td><strong>${t[i].total}</strong></td>
           </tr>`).join('')}
       </tbody>
-    </table>
-  `;
+    </table>`;
 }
 
-async function aplicarFiltros(){
-  // Asegura datos
-  if(!habitacionesData){
-    const resp = await fetch('habitaciones.json');
-    habitacionesData = await resp.json();
-  }
-  const data = habitacionesData;
+// ===== Filtro combinado =====
+async function aplicarFiltrosBoss(){
+  const data = await ensureHabitacionesData();
 
-  // Lee filtros
-  const categoria   = (sel.value || "").trim().toLowerCase();
-  const cama        = (camaSel.value || "").toUpperCase(); // "", "K", "D"
-  const onlyReserve = cbReserve.checked;
-  const onlyHC      = cbHandicap.checked;
-  const onlyCoc     = cbCocineta.checked;
+  const categoria = (selCategoria?.value || '').trim().toLowerCase(); // "" = todas
+  const cama      = (selCama?.value || '').toUpperCase();             // "", "K", "D"
+  const fReserve  = !!cbReserve?.checked;
+  const fHC       = !!cbHandicap?.checked;
+  const fCoc      = !!cbCocineta?.checked;
 
-  // Totales
   let coincidencias = 0;
   const stats = {
     overall: { K:0, D:0, total:0 },
@@ -1758,63 +1749,59 @@ async function aplicarFiltros(){
     flags:   { reserve:0, handicap:0, cocineta:0 }
   };
 
-  // Aplica filtro en botones y contabiliza
   document.querySelectorAll('.habitacion-btn').forEach(btn => {
     const num = btn.dataset.num || btn.textContent.trim();
     const h   = data[num];
-    let activo = !!h;
 
-    if(h){
-      if(categoria)  activo = activo && ((h.categoria || "").toLowerCase() === categoria);
-      if(cama)       activo = activo && ((h.tipo_cama || "").toUpperCase() === cama);
-      if(onlyReserve) activo = activo && esTheReserve(h);
-      if(onlyHC)      activo = activo && !!h.discapacidad;
-      if(onlyCoc)     activo = activo && tieneCocineta(h);
-    }
+    if(!h){ btn.classList.add('filtro-inactivo'); btn.classList.remove('filtro-activo'); return; }
 
-    btn.classList.toggle('filtro-activo', activo);
-    btn.classList.toggle('filtro-inactivo', !activo);
+    let ok = true;
+    if(categoria){ ok = ok && ((h.categoria||'').toLowerCase() === categoria); }
+    if(cama){      ok = ok && ((h.tipo_cama||'').toUpperCase() === cama); }
+    if(fReserve){  ok = ok && esTheReserve(h); }
+    if(fHC){       ok = ok && !!h.discapacidad; }
+    if(fCoc){      ok = ok && tieneCocineta(h); }
 
-    if(activo && h){
+    btn.classList.toggle('filtro-inactivo', !ok);
+    btn.classList.toggle('filtro-activo', ok);
+
+    if(ok){
       coincidencias++;
-      const tIdx = torreDe(num);
-      const kd = ((h.tipo_cama || "").toUpperCase() === "K") ? "K" : "D";
+      const kd = ((h.tipo_cama||'').toUpperCase() === 'K') ? 'K' : 'D';
       stats.overall[kd]++; stats.overall.total++;
-      if(tIdx){ stats.towers[tIdx][kd]++; stats.towers[tIdx].total++; }
+      const t = torreDe(num);
+      if(t){ stats.towers[t][kd]++; stats.towers[t].total++; }
       if(esTheReserve(h)) stats.flags.reserve++;
       if(h.discapacidad)  stats.flags.handicap++;
       if(tieneCocineta(h)) stats.flags.cocineta++;
     }
   });
 
-  // Pinta contadores
-  totalEl.textContent = coincidencias;
-  resumenEl.textContent = `K: ${stats.overall.K} · D: ${stats.overall.D} · Total: ${stats.overall.total} — Reserve: ${stats.flags.reserve} · ♿: ${stats.flags.handicap} · Cocineta: ${stats.flags.cocineta}`;
+  if(coincidenciasEl) coincidenciasEl.textContent = coincidencias;
+  if(resumenEl) resumenEl.textContent =
+    `K: ${stats.overall.K} · D: ${stats.overall.D} · Total: ${stats.overall.total} — ` +
+    `Reserve: ${stats.flags.reserve} · ♿: ${stats.flags.handicap} · Cocineta: ${stats.flags.cocineta}`;
+
   renderTabla(stats);
 }
 
-// Eventos de cambios
-[camaSel, cbReserve, cbHandicap, cbCocineta].forEach(el => el.addEventListener('change', aplicarFiltros));
-sel.addEventListener('change', aplicarFiltros);
-
-// Botón limpiar
-btnClear.addEventListener('click', () => {
-  sel.value = '';
-  camaSel.value = '';
-  cbReserve.checked = false;
-  cbHandicap.checked = false;
-  cbCocineta.checked = false;
-  aplicarFiltros();
+// ===== Eventos =====
+[selCategoria, selCama, cbReserve, cbHandicap, cbCocineta].forEach(el => {
+  if(el) el.addEventListener('change', aplicarFiltrosBoss);
 });
+if(btnLimpiar){
+  btnLimpiar.addEventListener('click', () => {
+    if(selCategoria) selCategoria.value = '';
+    if(selCama) selCama.value = '';
+    if(cbReserve) cbReserve.checked = false;
+    if(cbHandicap) cbHandicap.checked = false;
+    if(cbCocineta) cbCocineta.checked = false;
+    aplicarFiltrosBoss();
+  });
+}
 
-// Inicializa categorías y aplica una vez
-document.addEventListener('DOMContentLoaded', async () => {
-  // ya tienes initCategorias(); mantenlo, solo asegúrate de llamar aplicarFiltros al final
-  // Si no lo tenías: vuelve a llenar opciones de categorías con tu método actual
-  await aplicarFiltros();
-});
+// ===== Primera pasada =====
+document.addEventListener('DOMContentLoaded', aplicarFiltrosBoss);
 </script>
-
-
 </body>
 </html>
