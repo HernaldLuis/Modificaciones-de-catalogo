@@ -1627,37 +1627,60 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 <div id="modal-mejoras" class="modal-mejoras">
   <div class="modal-contenido">
-    <h2>🆕BIENVENID@ - Novedades del Catálogo</h2>
+<h2>🆕 BIENVENID@ — Novedades del Catálogo</h2>
     <ul>
-      <li>✨ Panel de filtrado de categorías mejorado.</li>
-      <li>💓 Animación de latido para habitaciones filtradas.</li>
-      <li>🌗 Oscurecido de habitaciones no coincidentes.</li>
-      <li>🏷️ Nuevo título elegante con logo de Paradisus.</li>
-      <li> 👌 Gracias por ser parte de la Mejora😊.</li>
+      <li>Filtro por <strong>Cama</strong> (K / D).</li>
+      <li>Filtro de <strong>Recepción</strong> (<strong>PLC - Paradisus</strong> / <strong>THR - The Reserve</strong>).</li>
+      <li>Checks de <strong>Handicap ♿</strong> y <strong>Cocineta</strong>.</li>
+      <li><strong>Resumen</strong> en la barra: K, D, Total — THR, ♿, Cocineta.</li>
+      <li><strong>Totales por Torre</strong> (1–4) debajo del panel de filtros.</li>
+      <li><strong>Limpiar</strong> reinicia Categoría, Cama, Recepción, ♿ y Cocineta.</li>
     </ul>
-    <button id="cerrar-modal">Cerrar</button>
-  </div>
-</div>
 
+    <label class="modal-no-mostrar" style="display:flex;gap:.5rem;align-items:center;margin:.5rem 0 .75rem;">
+      <input type="checkbox" id="no-mostrar-novedades">
+      No volver a mostrar
+    </label>
+
+    <button id="cerrar-modal">Cerrar</button>
+</div>
+</div>
 <!-- Script del modal -->
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-  const modal = document.getElementById('modal-mejoras');
-  const btnCerrar = document.getElementById('cerrar-modal');
+  const VERSION = '2025.08.16-plc-thr-kd';
+  const KEY = 'modal_mejoras_version';
 
-  modal.classList.add('activo');
+  const modal        = document.getElementById('modal-mejoras');
+  const btnCerrar    = document.getElementById('cerrar-modal');
+  const chkNoMostrar = document.getElementById('no-mostrar-novedades');
 
-  btnCerrar.addEventListener('click', () => {
-    modal.classList.remove('activo');
-  });
+  // Mostrar SOLO si la versión guardada es distinta
+  if (modal && localStorage.getItem(KEY) !== VERSION) {
+    modal.classList.add('activo');
+  }
 
-  modal.addEventListener('click', (e) => {
-    if (e.target === modal) {
-      modal.classList.remove('activo');
+  function cerrar() {
+    modal?.classList.remove('activo');
+    if (chkNoMostrar?.checked) {
+      localStorage.setItem(KEY, VERSION);
     }
+  }
+
+  btnCerrar?.addEventListener('click', cerrar);
+
+  // Cerrar si clic en el overlay (fuera de la tarjeta)
+  modal?.addEventListener('click', (e) => {
+    if (e.target === modal) cerrar();
   });
+
+  // (Opcional) abrir manualmente desde algún botón:
+  window.abrirNovedades = () => modal?.classList.add('activo');
 });
 </script>
+
+
+
     <script>
 function hacerZoom(src) {
   const overlay = document.getElementById('zoom-overlay');
