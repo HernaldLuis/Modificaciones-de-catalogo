@@ -658,6 +658,14 @@ border-bottom: none;
 }
 .totales-tabla thead th{ background: linear-gradient(135deg, #00aaff22, #0077cc22); font-weight: 700; }
 .totales-tabla tbody tr:last-child td{ border-bottom: 0; }
+
+/* Botón de reporte PDF */
+.btn-reporte{
+  display:inline-block; padding:.45rem .8rem; border-radius:10px;
+  background:#0ea5e9; color:#fff; text-decoration:none; font-weight:600;
+  box-shadow:0 2px 8px rgba(0,0,0,.12); margin-left:.5rem;
+}
+.btn-reporte:hover{ filter:brightness(.95); }
 </style>
 </head>
 <body>
@@ -704,6 +712,8 @@ border-bottom: none;
   <span id="totales-resumen" class="contador-categoria">
     K: 0 · D: 0 · Total: 0 — Reserve: 0 · ♿: 0 · Cocineta: 0
   </span>
+  <a href="Introducci%C3%B3n%20Proyecto%20Cat%C3%A1logo%20de%20Habitaciones%20%C2%B7%20Paradisus%20desarrollado%20por%20Luis%20Hernaldo%202025.pdf.pdf" download class="btn-reporte" title="Descargar reporte PDF">📄 Descargar PDF</a>
+
 <button id="btn-limpiar-filtro" type="button">Limpiar</button>
 
   <span class="contador-categoria">
@@ -1627,60 +1637,37 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 <div id="modal-mejoras" class="modal-mejoras">
   <div class="modal-contenido">
-<h2>🆕 BIENVENID@ — Novedades del Catálogo</h2>
+    <h2>🆕BIENVENID@ - Novedades del Catálogo</h2>
     <ul>
-      <li>Filtro por <strong>Cama</strong> (K / D).</li>
-      <li>Filtro de <strong>Recepción</strong> (<strong>PLC - Paradisus</strong> / <strong>THR - The Reserve</strong>).</li>
-      <li>Checks de <strong>Handicap ♿</strong> y <strong>Cocineta</strong>.</li>
-      <li><strong>Resumen</strong> en la barra: K, D, Total — THR, ♿, Cocineta.</li>
-      <li><strong>Totales por Torre</strong> (1–4) debajo del panel de filtros.</li>
-      <li><strong>Limpiar</strong> reinicia Categoría, Cama, Recepción, ♿ y Cocineta.</li>
+      <li>✨ Panel de filtrado de categorías mejorado.</li>
+      <li>💓 Animación de latido para habitaciones filtradas.</li>
+      <li>🌗 Oscurecido de habitaciones no coincidentes.</li>
+      <li>🏷️ Nuevo título elegante con logo de Paradisus.</li>
+      <li> 👌 Gracias por ser parte de la Mejora😊.</li>
     </ul>
-
-    <label class="modal-no-mostrar" style="display:flex;gap:.5rem;align-items:center;margin:.5rem 0 .75rem;">
-      <input type="checkbox" id="no-mostrar-novedades">
-      No volver a mostrar
-    </label>
-
     <button id="cerrar-modal">Cerrar</button>
+  </div>
 </div>
-</div>
+
 <!-- Script del modal -->
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-  const VERSION = '2025.08.16-plc-thr-kd';
-  const KEY = 'modal_mejoras_version';
+  const modal = document.getElementById('modal-mejoras');
+  const btnCerrar = document.getElementById('cerrar-modal');
 
-  const modal        = document.getElementById('modal-mejoras');
-  const btnCerrar    = document.getElementById('cerrar-modal');
-  const chkNoMostrar = document.getElementById('no-mostrar-novedades');
+  modal.classList.add('activo');
 
-  // Mostrar SOLO si la versión guardada es distinta
-  if (modal && localStorage.getItem(KEY) !== VERSION) {
-    modal.classList.add('activo');
-  }
-
-  function cerrar() {
-    modal?.classList.remove('activo');
-    if (chkNoMostrar?.checked) {
-      localStorage.setItem(KEY, VERSION);
-    }
-  }
-
-  btnCerrar?.addEventListener('click', cerrar);
-
-  // Cerrar si clic en el overlay (fuera de la tarjeta)
-  modal?.addEventListener('click', (e) => {
-    if (e.target === modal) cerrar();
+  btnCerrar.addEventListener('click', () => {
+    modal.classList.remove('activo');
   });
 
-  // (Opcional) abrir manualmente desde algún botón:
-  window.abrirNovedades = () => modal?.classList.add('activo');
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) {
+      modal.classList.remove('activo');
+    }
+  });
 });
 </script>
-
-
-
     <script>
 function hacerZoom(src) {
   const overlay = document.getElementById('zoom-overlay');
