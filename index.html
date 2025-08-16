@@ -1969,5 +1969,47 @@ document.addEventListener('DOMContentLoaded', () => {
 <div id="video-zoom-overlay" class="video-zoom-overlay" aria-hidden="true">
   <video id="zoom-video" controls playsinline muted></video>
 </div>
+
+
+<!-- Fallback inteligente para descargar el PDF en GitHub Pages -->
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const btn = document.getElementById('btn-descargar-pdf');
+  if (!btn) return;
+
+  const base = new URL('.', location.href).href;
+
+  const candidates = [
+    'introduccion_paradisus_2025.pdf',
+    'Introducción Proyecto Catálogo de Habitaciones · Paradisus desarrollado por Luis Hernaldo 2025.pdf',
+    'Introduccion Proyecto Catalogo de Habitaciones - Paradisus desarrollado por Luis Hernaldo 2025.pdf',
+    'assets/introduccion_paradisus_2025.pdf',
+    'pdf/introduccion_paradisus_2025.pdf'
+  ];
+
+  async function headOk(url){
+    try{
+      const res = await fetch(url, { method:'HEAD', cache:'no-store' });
+      return res.ok;
+    }catch(_){ return false; }
+  }
+
+  btn.addEventListener('click', async (e) => {
+    // Permite ctrl/cmd click normal
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    e.preventDefault();
+
+    for (const c of candidates){
+      const url = new URL(encodeURI(c), base).href;
+      if (await headOk(url)){
+        window.open(url, '_blank', 'noopener');
+        return;
+      }
+    }
+    alert('No se encontró el PDF. Sube una copia llamada "introduccion_paradisus_2025.pdf" en el mismo folder del index o usa la carpeta assets/pdf indicada.');
+  });
+});
+</script>
+
 </body>
 </html>
