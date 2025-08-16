@@ -1709,10 +1709,7 @@ function getTipoCama(h){
   return v === 'K' ? 'K' : (v === 'D' ? 'D' : '');
 }
 function esHandicap(h){
-  const b = (h.discapacidad ?? h.handicap ?? h.accesible ?? h.accessible ?? h.ada ?? false);
-  if(b) return true;
-  const txt = [h.titulo, h.descripcion, ...(h.caracteristicas||[])].join(' ').toLowerCase();
-  return /handicap|discap|accesib|accessible|ada/.test(txt);
+  return !!(h.discapacidad === true || h.handicap === true || h.ada === true || h.accessible === true);
 }
 function tieneCocineta(h){
   if(h.cocineta === true) return true;
@@ -1720,13 +1717,29 @@ function tieneCocineta(h){
   return /cocineta|kitchenette|cocina/.test(txt);
 }
 function obtenerCodigoCategoria(h){
-  const t = (h.titulo || '').toUpperCase();
+  // Prioriza campos explícitos si existen
+  const direct = (h.codigo || h.code || h.clave || "").toString().toUpperCase();
+  if(/^[CS]\d/.test(direct)) return direct;
+  // Intenta extraer del título (C2V/S6E...)
+  const t = (h.titulo || "").toUpperCase();
   const m = t.match(/\b[CS]\d{1,2}[A-Z]{0,2}\b/);
-  return m ? m[0] : '';
+  return m ? m[0] : "";
 }
-function prefijoDeCodigo(h){
-  const c = obtenerCodigoCategoria(h);
-  return c ? c[0] : '';
+function prefijoRecepcion(h){
+  // Preferimos un campo explícito de recepción/línea
+  let r = (h.recepcion || h.reception || h.linea || h.line || "").toString().toUpperCase().trim();
+  if(r === "PLC") return "C";
+  if(r === "THR") return "S";
+  if(r === "C" || r === "S") return r;
+  // Si no hay, usamos el código C*/S* si existe
+  const code = obtenerCodigoCategoria(h);
+  if(code) return code[0];
+  // Fallback: si la categoría incluye 'reserve' => THR(S), si no => PLC(C)
+  const cat = (h.categoria || "").toLowerCase();
+  return cat.includes("reserve") ? "S" : "C";
+}
+[A-Z]{0,2}\b/);
+  return m ? m[0] : '';
 }
 function torreDe(numStr){
   const s = String(numStr).trim(); const t = parseInt(s[0],10);
@@ -1761,7 +1774,7 @@ async function aplicarFiltrosBoss(){
   const data = await ensureHabitacionesData();
   const categoria = (selCategoria?.value || '').trim().toLowerCase();
   const cama      = (selCama?.value || '').toUpperCase();
-  const prefijo   = (selPrefijo?.value || '').toUpperCase();
+  const prefijo   = (selPrefijo?.value || '').toUpperCase(); // PLC(C) o THR(S)
   const fHC       = !!cbHandicap?.checked;
   const fCoc      = !!cbCocineta?.checked;
 
@@ -1785,7 +1798,7 @@ async function aplicarFiltrosBoss(){
       ok = ok && (tc === cama);
     }
     if(prefijo){
-      const p = prefijoDeCodigo(h);
+      const p = prefijoRecepcion(h);
       ok = ok && (p === prefijo);
     }
     if(fHC){ ok = ok && esHandicap(h); }
@@ -1802,7 +1815,7 @@ async function aplicarFiltrosBoss(){
       stats.overall[kd]++; stats.overall.total++;
       const t = torreDe(num);
       if(t){ stats.towers[t][kd]++; stats.towers[t].total++; }
-      if((h.categoria||'').toLowerCase().includes('reserve')) stats.flags.reserve++;
+      if(prefijoRecepcion(h) === 'S') stats.flags.reserve++;
       if(esHandicap(h)) stats.flags.handicap++;
       if(tieneCocineta(h)) stats.flags.cocineta++;
     }
