@@ -644,7 +644,7 @@ border-bottom: none;
   /* (ESTO CORRESPNDE AL PANEL DE LAS IMAGENES DE COSULTa */
 
   
-/* === Anexos de filtros y tabla (no altera tu estilo base) === */
+/* === Anexos (no altera tu estilo base) === */
 .panel-filtro-categoria .chk {
   display: inline-flex; align-items: center; gap: .35rem;
   padding: 4px 6px; border-radius: 8px; background: rgba(255,255,255,0.6);
@@ -1687,7 +1687,7 @@ document.addEventListener('keydown', (ev) => {
 
 
 <script>
-// ===== Cache de datos =====
+// ===== Carga JSON (tal cual) =====
 window.habitacionesData = window.habitacionesData || null;
 async function ensureHabitacionesData(){
   if(!window.habitacionesData){
@@ -1697,63 +1697,46 @@ async function ensureHabitacionesData(){
   return window.habitacionesData;
 }
 
-// ===== Detectores robustos =====
+// ===== Utilidades específicas a tu JSON =====
 function getTipoCama(h){
-  const rawCandidates = [
-    (h.tipo_cama ?? h.tipoCama ?? h.cama ?? h.bed ?? h.tipo ?? '').toString(),
-    (h.titulo ?? ''),
-    (h.descripcion ?? '')
-  ];
-  const all = rawCandidates.join(' ').toUpperCase();
-  // Heurística: KING, KS, KING SIZE => K | MATRI, MATRIMONIAL, DOUBLE, DOBLE, 2DBL, 2 DBL => D
-  if (/\bKING\b|\bKS\b|KING SIZE|K\s*SIZE/.test(all)) return 'K';
-  if (/\bMATRI\b|MATRIMONIAL|\bDOUBLE\b|\bDOBLE\b|2\s*DBL|2\s*DOUBLE|2\s*D\b/.test(all)) return 'D';
-  const m = all.match(/\b[KD]\b/);
-  if (m) return m[0];
+  // En tu JSON viene como "K" o "D" (campo tipo_cama)
+  const v = (h.tipo_cama || '').toString().toUpperCase();
+  if (v === 'K' || v === 'D') return v;
+  // Fallback por si un día viene texto
+  const txt = [h.titulo||'', h.descripcion||'', ...(h.caracteristicas||[])].join(' ').toUpperCase();
+  if (/\bKING\b|KING SIZE|\bKS\b/.test(txt)) return 'K';
+  if (/\bDOUBLE\b|\bDOBLE\b|\bMATRIMONIAL\b|\bMATRI\b|2\s*DBL/.test(txt)) return 'D';
   return '';
 }
-function esHandicap(h){
-  const b = (h.discapacidad === true || h.handicap === true || h.ada === true || h.accessible === true);
-  if (b) return true;
-  const text = [h.titulo, h.descripcion, ...(h.caracteristicas||[])].join(' ').toLowerCase();
-  return /handicap|discap|accesib|accessible|ada/.test(text);
-}
-function tieneCocineta(h){
-  if (h.cocineta === true || h.kitchenette === true) return true;
-  const text = [h.titulo, h.descripcion, ...(h.caracteristicas||[])].join(' ').toLowerCase();
-  return /cocineta|kitchenette|cocina\b/.test(text);
-}
-function obtenerCodigoCategoria(h){
-  // Prioriza campos explícitos si existen
-  const direct = (h.codigo || h.code || h.clave || "").toString().toUpperCase();
-  if(/^[CS]\d/.test(direct)) return direct;
-  // Intenta extraer del título (C2V/S6E...)
-  const t = (h.titulo || "").toUpperCase();
-  const m = t.match(/\b[CS]\d{1,2}[A-Z]{0,2}\b/);
-  return m ? m[0] : "";
-}
+
 function prefijoRecepcion(h){
-  // Preferimos un campo explícito de recepción/línea
-  let r = (h.recepcion || h.reception || h.linea || h.line || "").toString().toUpperCase().trim();
-  if(r === "PLC") return "C";
-  if(r === "THR") return "S";
-  if(r === "C" || r === "S") return r;
-  // Si no hay, usamos el código C*/S* si existe
-  const code = obtenerCodigoCategoria(h);
-  if(code) return code[0];
-  // Fallback: si la categoría incluye 'reserve' => THR(S), si no => PLC(C)
-  const cat = (h.categoria || "").toLowerCase();
-  return cat.includes("reserve") ? "S" : "C";
+  // Deriva C/S del código en el título (C2V, C2W, S6E, SE1, SE2, SE4, ...)
+  const t = (h.titulo || '').toUpperCase();
+  const m = t.match(/\b([CS](?:E)?\d*[A-Z]?)\b/); // S6E, SE1, C2V, C2W...
+  if (m && m[1]) return m[1].startsWith('S') ? 'S' : 'C';
+  // Fallback: por categoría
+  const cat = (h.categoria||'').toLowerCase();
+  return cat.includes('the reserve') ? 'S' : 'C';
 }
-[A-Z]{0,2}\b/);
-  return m ? m[0] : '';
+
+function esHandicap(h){
+  // Tu JSON trae booleano 'discapacidad'
+  return h.discapacidad === true;
 }
+
+function tieneCocineta(h){
+  if (h.cocineta === true) return true;
+  const list = (h.caracteristicas || []).map(x => String(x).toLowerCase());
+  return list.some(x => /\bcocineta\b|kitchenette|\bcocina\b/.test(x));
+}
+
 function torreDe(numStr){
-  const s = String(numStr).trim(); const t = parseInt(s[0],10);
+  const s = String(numStr).trim();
+  const t = parseInt(s[0], 10);
   return [1,2,3,4].includes(t) ? t : 0;
 }
 
-// ===== Refs a controles =====
+// ===== Refs =====
 const selCategoria = document.getElementById('filtro-categoria');
 const selCama      = document.getElementById('filtro-cama');
 const selPrefijo   = document.getElementById('filtro-prefijo');
@@ -1780,8 +1763,8 @@ function renderTabla(stats){
 async function aplicarFiltrosBoss(){
   const data = await ensureHabitacionesData();
   const categoria = (selCategoria?.value || '').trim().toLowerCase();
-  const cama      = (selCama?.value || '').toUpperCase();
-  const prefijo   = (selPrefijo?.value || '').toUpperCase(); // PLC(C) o THR(S)
+  const cama      = (selCama?.value || '').toUpperCase();   // "" | K | D
+  const prefijo   = (selPrefijo?.value || '').toUpperCase(); // "" | C | S
   const fHC       = !!cbHandicap?.checked;
   const fCoc      = !!cbCocineta?.checked;
 
@@ -1792,12 +1775,12 @@ async function aplicarFiltrosBoss(){
     flags:{reserve:0, handicap:0, cocineta:0}
   };
 
+  // Recorremos cada botón de habitación
   document.querySelectorAll('.habitacion-btn').forEach(btn => {
     const num = btn.dataset.num || btn.textContent.trim();
     const h = data[num];
     if(!h){ btn.classList.add('filtro-inactivo'); btn.classList.remove('filtro-activo'); return; }
 
-    // Condiciones
     let ok = true;
     if(categoria){ ok = ok && ((h.categoria||'').toLowerCase() === categoria); }
     if(cama){
@@ -1811,20 +1794,18 @@ async function aplicarFiltrosBoss(){
     if(fHC){ ok = ok && esHandicap(h); }
     if(fCoc){ ok = ok && tieneCocineta(h); }
 
-    // Marcas visuales
     btn.classList.toggle('filtro-inactivo', !ok);
     btn.classList.toggle('filtro-activo', ok);
 
-    // Conteos
     if(ok){
       matches++;
       const kd = (getTipoCama(h) === 'K') ? 'K' : 'D';
       stats.overall[kd]++; stats.overall.total++;
       const t = torreDe(num);
       if(t){ stats.towers[t][kd]++; stats.towers[t].total++; }
-      if(prefijoRecepcion(h) === 'S') stats.flags.reserve++;
-      if(esHandicap(h)) stats.flags.handicap++;
-      if(tieneCocineta(h)) stats.flags.cocineta++;
+      if (prefijoRecepcion(h) === 'S') stats.flags.reserve++;
+      if (esHandicap(h)) stats.flags.handicap++;
+      if (tieneCocineta(h)) stats.flags.cocineta++;
     }
   });
 
@@ -1848,7 +1829,6 @@ document.getElementById('btn-limpiar-filtro')?.addEventListener('click', () => {
   aplicarFiltrosBoss();
 });
 
-// Primera pasada
 document.addEventListener('DOMContentLoaded', aplicarFiltrosBoss);
 </script>
 </body>
