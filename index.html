@@ -661,16 +661,10 @@ border-bottom: none;
 
 /* --- Video en detalle de habitación (handicap) --- */
 .video-habitacion{ position:absolute; top:16px; right:16px; width:520px; max-width:44%; background:#fff; border-radius:12px; box-shadow:0 12px 30px rgba(0,0,0,.18); overflow:hidden; }
-.video-ratio{ position:relative; padding-top: var(--video-padding, 177.77%); background:#000; } /* 9:16 vertical */
+.video-ratio{ position:relative; padding-top: var(--video-padding, 56.25%); background:#000; } /* 16:9 */
 .video-ratio iframe, .video-ratio video{ position:absolute; inset:0; width:100%; height:100%; border:0; object-fit:contain; }
-.video-ratio video{ object-fit:contain; background:#000; }
+.video-ratio video{ object-fit:cover; background:#000; }
 .contenido-inferior{ position:relative; } /* tarjeta blanca del detalle */
-    /* cuando hay video flotante, la tarjeta blanca se corre a la izquierda
-   para no quedar tapada */
-.contenido-inferior.con-video{
-  padding-right: calc(var(--video-width, 360px) + 24px);
-  transition: padding-right .2s ease;
-}
 @media (max-width: 900px){
   .video-habitacion{ position:static; width:100%; max-width:100%; margin-bottom:12px; }
 }
@@ -1437,44 +1431,14 @@ panel.innerHTML = `
 `;
     
     // --- Video handicap (arriba-derecha) ---
-try {
-  if (habitacion && (habitacion.discapacidad === true)) {
-    const v = (window.VIDEOS_HAB && window.VIDEOS_HAB[num]) || window.HANDICAP_VIDEO_URL || "";
-    setVideoHabitacion(v);
-
-    // 🟢 Autoplay + mute aquí
-    const video = document.querySelector("#video-mp4");
-    if(video){
-      video.muted = true;        // 🔇 requerido en móviles
-      video.setAttribute("muted","");
-      video.playsInline = true;  // evita fullscreen en iOS
-      video.autoplay = true;     // autoplay
-      video.loop = true;         // 🔁 se repite al terminar
-      video.currentTime = 0;
-
-      const p = video.play();
-      if(p && typeof p.catch === "function") p.catch(()=>{});
-    }
-
-  } else {
-    stopVideoHabitacion();
-    setVideoHabitacion(""); // oculta
-  }
-  // Quita la reserva de espacio
-const cont = document.querySelector('.contenido-inferior');
-if (cont){
-  cont.classList.remove('con-video');
-  cont.style.removeProperty('--video-width');
-}
-
-  // Reserva espacio en la tarjeta blanca
-const cont = document.querySelector('.contenido-inferior');
-if (cont){
-  cont.classList.add('con-video');
-  cont.style.setProperty('--video-width', '360px'); // ancho del video
-}
-
-}catch(e){}
+    try{
+      if (habitacion && (habitacion.discapacidad === true)) {
+        const v = (window.VIDEOS_HAB && window.VIDEOS_HAB[num]) || window.HANDICAP_VIDEO_URL || "";
+        setVideoHabitacion(v);
+      } else {
+        stopVideoHabitacion(); setVideoHabitacion(""); // oculta
+      }
+    }catch(e){}
 } else {
       panel.innerHTML = `
         <div class="contenido-inferior">
