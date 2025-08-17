@@ -1460,6 +1460,20 @@ try {
     stopVideoHabitacion();
     setVideoHabitacion(""); // oculta
   }
+  // Quita la reserva de espacio
+const cont = document.querySelector('.contenido-inferior');
+if (cont){
+  cont.classList.remove('con-video');
+  cont.style.removeProperty('--video-width');
+}
+
+  // Reserva espacio en la tarjeta blanca
+const cont = document.querySelector('.contenido-inferior');
+if (cont){
+  cont.classList.add('con-video');
+  cont.style.setProperty('--video-width', '360px'); // ancho del video
+}
+
 }catch(e){}
 } else {
       panel.innerHTML = `
