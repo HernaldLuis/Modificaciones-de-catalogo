@@ -1431,14 +1431,30 @@ panel.innerHTML = `
 `;
     
     // --- Video handicap (arriba-derecha) ---
-    try{
-      if (habitacion && (habitacion.discapacidad === true)) {
-        const v = (window.VIDEOS_HAB && window.VIDEOS_HAB[num]) || window.HANDICAP_VIDEO_URL || "";
-        setVideoHabitacion(v);
-      } else {
-        stopVideoHabitacion(); setVideoHabitacion(""); // oculta
-      }
-    }catch(e){}
+try {
+  if (habitacion && (habitacion.discapacidad === true)) {
+    const v = (window.VIDEOS_HAB && window.VIDEOS_HAB[num]) || window.HANDICAP_VIDEO_URL || "";
+    setVideoHabitacion(v);
+
+    // 🟢 Autoplay + mute aquí
+    const video = document.querySelector("#video-mp4");
+    if(video){
+      video.muted = true;        // 🔇 requerido en móviles
+      video.setAttribute("muted","");
+      video.playsInline = true;  // evita fullscreen en iOS
+      video.autoplay = true;     // autoplay
+      video.loop = true;         // 🔁 se repite al terminar
+      video.currentTime = 0;
+
+      const p = video.play();
+      if(p && typeof p.catch === "function") p.catch(()=>{});
+    }
+
+  } else {
+    stopVideoHabitacion();
+    setVideoHabitacion(""); // oculta
+  }
+}catch(e){}
 } else {
       panel.innerHTML = `
         <div class="contenido-inferior">
