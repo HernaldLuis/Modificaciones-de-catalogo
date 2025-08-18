@@ -689,6 +689,26 @@ O7.77%); background:#000; } /* 16:9 */
 }
 .btn-reporte:hover{ filter:brightness(.95); }
 </style>
+
+<style>
+.modal-contenido video {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    transform: scale(0.85); /* escala ajustable */
+    transform-origin: top right;
+    transition: transform 0.3s ease;
+    cursor: zoom-in;
+    max-width: 90%;
+    max-height: 90%;
+    border-radius: 8px;
+}
+.modal-contenido video.zoomed {
+    transform: scale(1.6); /* zoom al hacer clic */
+    cursor: zoom-out;
+}
+</style>
+
 </head>
 <body>
 
@@ -2026,6 +2046,18 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     alert('No se encontró el PDF. Sube una copia llamada "introduccion_paradisus_2025.pdf" en el mismo folder del index o usa la carpeta assets/pdf indicada.');
   });
+});
+</script>
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const videos = document.querySelectorAll(".modal-contenido video");
+    videos.forEach(video => {
+        video.addEventListener("click", () => {
+            video.classList.toggle("zoomed");
+        });
+    });
 });
 </script>
 
