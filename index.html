@@ -688,13 +688,6 @@ O7.77%); background:#000; } /* 16:9 */
   box-shadow:0 2px 8px rgba(0,0,0,.12); margin-left:.5rem;
 }
 .btn-reporte:hover{ filter:brightness(.95); }
-.modal-video {
-    width: 100%;
-    max-width: 60%; /* 👈 Ajusta aquí el porcentaje de escala */
-    height: auto;
-    border-radius: 8px;
-    cursor: pointer;
-}
 </style>
 
 <style>
@@ -713,13 +706,6 @@ O7.77%); background:#000; } /* 16:9 */
 .modal-contenido video.zoomed {
     transform: scale(1.6); /* zoom al hacer clic */
     cursor: zoom-out;
-}
-.modal-video {
-    width: 100%;
-    max-width: 60%; /* 👈 Ajusta aquí el porcentaje de escala */
-    height: auto;
-    border-radius: 8px;
-    cursor: pointer;
 }
 </style>
 
@@ -1451,7 +1437,7 @@ async function mostrarInfo(num) {
       galeriaHTML += '</div>';
 
 panel.innerHTML = `
-  <div class="contenido-inferior">\n<aside id="video-habitacion" class="video-habitacion" hidden>\n  <div class="video-ratio">\n    <iframe id="video-embed" src="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen hidden></iframe>\n    <video class=\"modal-video\" id="video-mp4" controls playsinline hidden></video>\n  </div>\n</aside>\n
+  <div class="contenido-inferior">\n<aside id="video-habitacion" class="video-habitacion" hidden>\n  <div class="video-ratio">\n    <iframe id="video-embed" src="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen hidden></iframe>\n    <video id="video-mp4" controls playsinline hidden></video>\n  </div>\n</aside>\n
     <h3>${habitacion.titulo}</h3>
     <p><strong>Categoría:</strong> ${habitacion.categoria} · ${habitacion.vista}</p>
     <p><strong>Habitación conectada:</strong> ${habitacion.habitacion_conectada ? habitacion.habitacion_conectada : 'No aplica'}</p>
@@ -2019,7 +2005,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <!-- Overlay de ZOOM para video -->
 <div id="video-zoom-overlay" class="video-zoom-overlay" aria-hidden="true">
-  <video class=\"modal-video\" id="zoom-video" controls playsinline muted></video>
+  <video id="zoom-video" controls playsinline muted></video>
 </div>
 
 
