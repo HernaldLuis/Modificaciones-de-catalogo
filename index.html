@@ -571,14 +571,13 @@ border-bottom: none;
 
 /* Caja del modal */
 .modal-contenido {
-   background: rgba(255, 255, 255, 0.2); /* ← Transparente con 20% de blanco */
-   backdrop-filter: blur(8px);            /* ← efecto vidrio elegante */
+  background: #fff;
   padding: 2rem;
   border-radius: 12px;
   max-width: 400px;
   width: 90%;
-  box-shadow: none; /* ✅ Sin sombra para que no se vea la caja */
-  text-align: right; /* ✅ Justifica contenido (video) a la derecha */
+  box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+  text-align: left;
   animation: aparecerModal 0.4s ease;
 }
 .modal-contenido {
@@ -714,6 +713,13 @@ O7.77%); background:#000; } /* 16:9 */
 .modal-contenido video.zoomed {
     transform: scale(1.6); /* zoom al hacer clic */
     cursor: zoom-out;
+}
+.modal-video {
+    width: 100%;
+    max-width: 60%; /* 👈 Ajusta aquí el porcentaje de escala */
+    height: auto;
+    border-radius: 8px;
+    cursor: pointer;
 }
 </style>
 
