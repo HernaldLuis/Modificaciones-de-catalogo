@@ -759,6 +759,41 @@ border-bottom: none;
 .bloque-imagen { width: min(100%, 360px); }
 .bloque-imagen img { width: 100%; height: auto; display: block; }
 
+
+/* === Galería: 3 imágenes corridas y alineadas en una fila === */
+.galeria-habitacion{
+  display: grid !important;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  align-items: start;
+  justify-items: center;
+  width: 100%;
+}
+
+.bloque-imagen{ 
+  width: 100% !important; 
+  max-width: none !important;
+}
+
+.bloque-imagen img{
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Si el viewport se vuelve muy estrecho, mantenemos 3 columnas con scroll horizontal
+   (solo si fuera necesario). Descomenta si quieres forzar 3 en móvil también.
+@media (max-width: 720px){
+  .galeria-habitacion{ 
+    display: grid !important;
+    grid-auto-flow: column;
+    grid-auto-columns: 80vw;
+    overflow-x: auto;
+    grid-template-columns: none;
+  }
+}
+*/
+
 </style>
 
 <style>
