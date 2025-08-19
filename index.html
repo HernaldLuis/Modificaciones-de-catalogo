@@ -713,6 +713,52 @@ border-bottom: none;
   .contenido-inferior { padding-right: 40vw; }
 }
 
+
+/* === Fix desbordamiento de tercera imagen en la galería === */
+.galeria-habitacion {
+  justify-content: flex-start; /* alinear a la izquierda */
+}
+
+/* Garantizar que las imágenes nunca excedan su bloque */
+.bloque-imagen {
+  flex: 0 0 auto;
+}
+.bloque-imagen img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Si el ancho fijo de 280px genera corte, permite reducir levemente en pantallas medias */
+@media (max-width: 1024px){
+  .bloque-imagen img { width: 260px; }
+}
+@media (max-width: 800px){
+  .bloque-imagen img { width: 220px; }
+}
+
+
+/* === Ajuste: reservar espacio solo para los primeros textos; galería a ancho completo === */
+/* Quita el padding-right global previo en el contenedor */
+.contenido-inferior { padding-right: 0 !important; }
+
+/* Aplica el espacio a la derecha SOLO al título y a los primeros 8 <p> (hasta "Características") */
+.contenido-inferior > h3,
+.contenido-inferior > p:nth-of-type(-n+8){
+  padding-right: 364px; /* ≈ ancho del video escalado */
+}
+@media (max-width: 600px){
+  .contenido-inferior > h3,
+  .contenido-inferior > p:nth-of-type(-n+8){
+    padding-right: 40vw;
+  }
+}
+
+/* Galería responsive: que ninguna imagen se desborde */
+.galeria-habitacion { justify-content: flex-start; }
+.bloque-imagen { width: min(100%, 360px); }
+.bloque-imagen img { width: 100%; height: auto; display: block; }
+
 </style>
 
 <style>
