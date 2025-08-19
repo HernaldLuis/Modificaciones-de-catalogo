@@ -794,20 +794,6 @@ border-bottom: none;
 }
 */
 
-
-/* === Robustez: contenedor de relación para video Handicap === */
-.video-ratio { position: relative; aspect-ratio: 16 / 9; background:#000; }
-.video-ratio iframe, .video-ratio video { position:absolute; inset:0; width:100%; height:100%; border:0; object-fit:contain; }
-
-
-/* === Unificación no invasiva del modal === */
-.modal-contenido { 
-  box-sizing: border-box; 
-  max-width: min(92vw, 520px); 
-  width: 90%;
-  padding: 1.25rem; 
-}
-
 </style>
 
 <style>
@@ -1560,7 +1546,7 @@ panel.innerHTML = `
   <div class="contenido-inferior">\n<aside id="video-habitacion" class="video-habitacion" hidden>\n  <div class="video-ratio">\n    <iframe id="video-embed" src="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen hidden></iframe>\n    <video id="video-mp4" controls playsinline hidden></video>\n  </div>\n</aside>\n
     <h3>${habitacion.titulo}</h3>
     <p><strong>Categoría:</strong> ${habitacion.categoria} · ${habitacion.vista}</p>
-    <p><strong>Habitación conectada:</strong> ${habitacion.habitacion_conectada ? `<a href="#" onclick="mostrarInfo(\'${habitacion.habitacion_conectada}\');return false;">${habitacion.habitacion_conectada}</a>` : 'No aplica'}</p>
+    <p><strong>Habitación conectada:</strong> ${habitacion.habitacion_conectada ? habitacion.habitacion_conectada : 'No aplica'}</p>
     <p><strong>Piso:</strong> ${habitacion.piso}</p>
     <p><strong>Capacidad:</strong> ${habitacion.capacidad} · ${habitacion.fumadores ? '' : 'No fumadores'}</p>
     <p><strong>Tipo de cama:</strong> ${habitacion.tipo_cama}</p>
@@ -1825,20 +1811,15 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 <div id="modal-mejoras" class="modal-mejoras" role="dialog" aria-modal="true" aria-labelledby="titulo-novedades">
   <div class="modal-contenido">
-    <h2 id="titulo-novedades">🆕 Bienvenid@ · Novedades del Catálogo <small style="font-weight:600; opacity:.8;">v2025.08.19</small></h2>
-    
-<ul>
-  <li>✔️ Video Handicap anclado arriba‑derecha y escalado.</li>
-  <li>✔️ Texto alineado a la izquierda y flujo bajo el video.</li>
-  <li>✔️ Galería en 3 columnas corridas y alineadas.</li>
-  <li>✔️ Cierre con ESC y clic fuera en visor de imágenes y video.</li>
-  <li>✔️ Drag/scroll táctil (Pointer Events) en el croquis móvil.</li>
-  <li>✔️ Botón de PDF listo para fallback por ID.</li>
-  <li>✔️ Accesibilidad del modal (role/aria) y foco mejorado.</li>
-</ul>
-<button id="cerrar-modal" class="btn-volver" type="button" onclick="document.getElementById('modal-mejoras').classList.remove('activo'); document.getElementById('modal-mejoras').classList.remove('abierto'); return false;">Cerrar</button>
-
-    
+    <h2>🆕BIENVENID@ - Novedades del Catálogo</h2>
+    <ul>
+      <li>✨ Panel de filtrado de categorías mejorado.</li>
+      <li>💓 Animación de latido para habitaciones filtradas.</li>
+      <li>🌗 Oscurecido de habitaciones no coincidentes.</li>
+      <li>🏷️ Nuevo título elegante con logo de Paradisus.</li>
+      <li> 👌 Gracias por ser parte de la Mejora😊.</li>
+    </ul>
+    <button id="cerrar-modal">Cerrar</button>
   </div>
 </div>
 
@@ -1847,24 +1828,16 @@ document.addEventListener('DOMContentLoaded', async () => {
 document.addEventListener('DOMContentLoaded', () => {
   const modal = document.getElementById('modal-mejoras');
   const btnCerrar = document.getElementById('cerrar-modal');
-  if (!modal) return;
-  // Mostrar una sola vez al cargar
+
   modal.classList.add('activo');
-  if (btnCerrar) {
-    btnCerrar.addEventListener('click', () => {
-      modal.classList.remove('activo'); modal.classList.remove('abierto');
-    });
-  }
-  // Clic en fondo cierra
+
+  btnCerrar.addEventListener('click', () => {
+    modal.classList.remove('activo');
+  });
+
   modal.addEventListener('click', (e) => {
     if (e.target === modal) {
-      modal.classList.remove('activo'); modal.classList.remove('abierto');
-    }
-  });
-  // ESC cierra (respaldo)
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
-      modal.classList.remove('activo'); modal.classList.remove('abierto');
+      modal.classList.remove('activo');
     }
   });
 });
@@ -2214,119 +2187,6 @@ document.addEventListener("DOMContentLoaded", function() {
       observer.observe(modal, { attributes: true });
     }
   } catch(e) {}
-})();
-</script>
-
-
-<script>
-// === Mejora: soporte táctil universal para arrastre horizontal (Pointer Events) ===
-(function(){
-  try {
-    var zona = document.querySelector('.zona-desplazable');
-    if (!zona || !window.PointerEvent) return; // no tocar si no aplica
-    var activo = false, startX = 0, scrollLeft = 0;
-    zona.addEventListener('pointerdown', function(e){
-      activo = true;
-      startX = e.clientX;
-      scrollLeft = zona.scrollLeft;
-      try { zona.setPointerCapture(e.pointerId); } catch(err){}
-    });
-    zona.addEventListener('pointermove', function(e){
-      if (!activo) return;
-      var dx = e.clientX - startX;
-      zona.scrollLeft = scrollLeft - dx;
-    });
-    function fin(e){ 
-      if (!activo) return;
-      activo = false; 
-      try { zona.releasePointerCapture(e.pointerId); } catch(err){} 
-    }
-    zona.addEventListener('pointerup', fin);
-    zona.addEventListener('pointercancel', fin);
-  } catch(e){}
-})();
-</script>
-
-
-<script>
-
-// === Mejora: cerrar modal de novedades con ESC y clic afuera (compat: .activo/.abierto) ===
-(function(){
-  try {
-    var modal = document.getElementById('modal-mejoras');
-    if (!modal) return;
-    function cerrar(){ modal.classList.remove('activo'); modal.classList.remove('abierto'); }
-    document.addEventListener('keydown', function(e){
-      if (e.key === 'Escape') {
-        if (modal.classList && (modal.classList.contains('activo') || modal.classList.contains('abierto'))) {
-          cerrar();
-        }
-      }
-    });
-    modal.addEventListener('click', function(ev){
-      if (ev.target === modal) cerrar();
-    });
-  } catch(e){}
-})();
-</script>
-
-
-<script>
-// === Mejora: overlay de video con apertura por clic, ESC y clic fuera ===
-(function(){
-  try {
-    var aside = document.getElementById('video-habitacion') || document.querySelector('.video-habitacion');
-    if (!aside) return;
-
-    // Crea overlay una vez
-    var overlay = document.createElement('div');
-    overlay.className = 'video-zoom-overlay';
-    overlay.style.cssText = 'position:fixed; inset:0; background:rgba(0,0,0,.65); display:none; align-items:center; justify-content:center; z-index: 9999;';
-    var caja = document.createElement('div');
-    caja.style.cssText = 'max-width:90vw; max-height:88vh; width: min(960px, 90vw); background:#000; border-radius:10px; overflow:hidden; box-shadow:0 20px 60px rgba(0,0,0,.5); position:relative;';
-    overlay.appendChild(caja);
-    document.body.appendChild(overlay);
-
-    function cerrarOverlay(){
-      overlay.style.display = 'none';
-      caja.innerHTML = '';
-    }
-    overlay.addEventListener('click', function(ev){
-      if (ev.target === overlay) cerrarOverlay();
-    });
-    document.addEventListener('keydown', function(ev){
-      if (ev.key === 'Escape' && overlay.style.display !== 'none') cerrarOverlay();
-    });
-
-    function abrirOverlayDesdeFuente(url, esIframe){
-      caja.innerHTML = '';
-      if (esIframe) {
-        var ifr = document.createElement('iframe');
-        ifr.src = url;
-        ifr.allow = 'autoplay; encrypted-media; fullscreen; picture-in-picture';
-        ifr.style.cssText = 'width:100%; height:70vh; border:0;';
-        caja.appendChild(ifr);
-      } else {
-        var vid = document.createElement('video');
-        vid.src = url; vid.controls = true; vid.autoplay = true; vid.playsInline = true;
-        vid.style.cssText = 'width:100%; height:auto; max-height:80vh; display:block;';
-        caja.appendChild(vid);
-      }
-      overlay.style.display = 'flex';
-    }
-
-    aside.addEventListener('click', function(){
-      // Detecta la fuente actual ya configurada en tu panel (iframe o video MP4)
-      var ifr = document.getElementById('video-embed');
-      var mp4 = document.getElementById('video-mp4');
-      var url = '';
-      if (ifr && ifr.src) url = ifr.src;
-      else if (mp4 && mp4.getAttribute('src')) url = mp4.getAttribute('src');
-      if (!url) return;
-      var esIframe = !!(ifr && ifr.src);
-      abrirOverlayDesdeFuente(url, esIframe);
-    });
-  } catch(e){}
 })();
 </script>
 
