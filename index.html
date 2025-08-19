@@ -794,6 +794,20 @@ border-bottom: none;
 }
 */
 
+
+/* === Robustez: contenedor de relación para video Handicap === */
+.video-ratio { position: relative; aspect-ratio: 16 / 9; background:#000; }
+.video-ratio iframe, .video-ratio video { position:absolute; inset:0; width:100%; height:100%; border:0; object-fit:contain; }
+
+
+/* === Unificación no invasiva del modal === */
+.modal-contenido { 
+  box-sizing: border-box; 
+  max-width: min(92vw, 520px); 
+  width: 90%;
+  padding: 1.25rem; 
+}
+
 </style>
 
 <style>
@@ -1546,7 +1560,7 @@ panel.innerHTML = `
   <div class="contenido-inferior">\n<aside id="video-habitacion" class="video-habitacion" hidden>\n  <div class="video-ratio">\n    <iframe id="video-embed" src="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen hidden></iframe>\n    <video id="video-mp4" controls playsinline hidden></video>\n  </div>\n</aside>\n
     <h3>${habitacion.titulo}</h3>
     <p><strong>Categoría:</strong> ${habitacion.categoria} · ${habitacion.vista}</p>
-    <p><strong>Habitación conectada:</strong> ${habitacion.habitacion_conectada ? habitacion.habitacion_conectada : 'No aplica'}</p>
+    <p><strong>Habitación conectada:</strong> ${habitacion.habitacion_conectada ? `<a href="#" onclick="mostrarInfo(\'${habitacion.habitacion_conectada}\');return false;">${habitacion.habitacion_conectada}</a>` : 'No aplica'}</p>
     <p><strong>Piso:</strong> ${habitacion.piso}</p>
     <p><strong>Capacidad:</strong> ${habitacion.capacidad} · ${habitacion.fumadores ? '' : 'No fumadores'}</p>
     <p><strong>Tipo de cama:</strong> ${habitacion.tipo_cama}</p>
@@ -2187,6 +2201,118 @@ document.addEventListener("DOMContentLoaded", function() {
       observer.observe(modal, { attributes: true });
     }
   } catch(e) {}
+})();
+</script>
+
+
+<script>
+// === Mejora: soporte táctil universal para arrastre horizontal (Pointer Events) ===
+(function(){
+  try {
+    var zona = document.querySelector('.zona-desplazable');
+    if (!zona || !window.PointerEvent) return; // no tocar si no aplica
+    var activo = false, startX = 0, scrollLeft = 0;
+    zona.addEventListener('pointerdown', function(e){
+      activo = true;
+      startX = e.clientX;
+      scrollLeft = zona.scrollLeft;
+      try { zona.setPointerCapture(e.pointerId); } catch(err){}
+    });
+    zona.addEventListener('pointermove', function(e){
+      if (!activo) return;
+      var dx = e.clientX - startX;
+      zona.scrollLeft = scrollLeft - dx;
+    });
+    function fin(e){ 
+      if (!activo) return;
+      activo = false; 
+      try { zona.releasePointerCapture(e.pointerId); } catch(err){} 
+    }
+    zona.addEventListener('pointerup', fin);
+    zona.addEventListener('pointercancel', fin);
+  } catch(e){}
+})();
+</script>
+
+
+<script>
+// === Mejora: cerrar modal de novedades con ESC y clic afuera ===
+(function(){
+  try {
+    var modal = document.getElementById('modal-mejoras');
+    if (!modal) return;
+    document.addEventListener('keydown', function(e){
+      if (e.key === 'Escape' && modal.classList && modal.classList.contains('abierto')) {
+        modal.classList.remove('abierto');
+      }
+    });
+    // Cierre por clic afuera si hay backdrop
+    modal.addEventListener('click', function(ev){
+      if (ev.target === modal) { // clic en el fondo
+        modal.classList.remove('abierto');
+      }
+    });
+  } catch(e){}
+})();
+</script>
+
+
+<script>
+// === Mejora: overlay de video con apertura por clic, ESC y clic fuera ===
+(function(){
+  try {
+    var aside = document.getElementById('video-habitacion') || document.querySelector('.video-habitacion');
+    if (!aside) return;
+
+    // Crea overlay una vez
+    var overlay = document.createElement('div');
+    overlay.className = 'video-zoom-overlay';
+    overlay.style.cssText = 'position:fixed; inset:0; background:rgba(0,0,0,.65); display:none; align-items:center; justify-content:center; z-index: 9999;';
+    var caja = document.createElement('div');
+    caja.style.cssText = 'max-width:90vw; max-height:88vh; width: min(960px, 90vw); background:#000; border-radius:10px; overflow:hidden; box-shadow:0 20px 60px rgba(0,0,0,.5); position:relative;';
+    overlay.appendChild(caja);
+    document.body.appendChild(overlay);
+
+    function cerrarOverlay(){
+      overlay.style.display = 'none';
+      caja.innerHTML = '';
+    }
+    overlay.addEventListener('click', function(ev){
+      if (ev.target === overlay) cerrarOverlay();
+    });
+    document.addEventListener('keydown', function(ev){
+      if (ev.key === 'Escape' && overlay.style.display !== 'none') cerrarOverlay();
+    });
+
+    function abrirOverlayDesdeFuente(url, esIframe){
+      caja.innerHTML = '';
+      if (esIframe) {
+        var ifr = document.createElement('iframe');
+        ifr.src = url;
+        ifr.allow = 'autoplay; encrypted-media; fullscreen; picture-in-picture';
+        ifr.style.cssText = 'width:100%; height:70vh; border:0;';
+        caja.appendChild(ifr);
+      } else {
+        var vid = document.createElement('video');
+        vid.src = url; vid.controls = true; vid.autoplay = true; vid.playsInline = true;
+        vid.style.cssText = 'width:100%; height:auto; max-height:80vh; display:block;';
+        caja.appendChild(vid);
+      }
+      overlay.style.display = 'flex';
+    }
+
+    aside.addEventListener('click', function(){
+      // Detecta la fuente actual ya configurada en tu panel (iframe o video MP4)
+      var ifr = document.getElementById('video-embed');
+      var mp4 = document.getElementById('video-mp4');
+      var url = '';
+      if (ifr && ifr.src) url = ifr.src;
+      else if (mp4 && mp4.getAttribute('src')) url = mp4.getAttribute('src');
+      if (!url) return;
+      var esIframe = !!(ifr && ifr.src);
+      abrirOverlayDesdeFuente(url, esIframe);
+    });
+  } catch(e){}
 })();
 </script>
 
