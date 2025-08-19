@@ -691,10 +691,27 @@ border-bottom: none;
 
 /* === Ajuste puntual: reducir 25% el video Handicap anclado arriba-derecha === */
 #video-habitacion, .video-habitacion{
-  transform: scale(0.75);
+  transform: scale(0.65);
   transform-origin: top right;
 }
 /* (Opcional) Si se necesita diferente escala por viewport, ajustar aquí con media queries */
+
+
+/* === Ajustes de texto y flujo bajo el video === */
+.contenido-inferior p,
+.contenido-inferior h3 { 
+  text-align: left;
+}
+
+/* Reservar espacio a la derecha para que el texto no quede debajo del video */
+.contenido-inferior {
+  padding-right: 364px; /* ≈ 520px * 0.65 + holgura */
+}
+
+/* Opcional: en pantallas estrechas, reducir el padding para no comer demasiado ancho */
+@media (max-width: 600px){
+  .contenido-inferior { padding-right: 40vw; }
+}
 
 </style>
 
