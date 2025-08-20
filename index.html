@@ -2201,7 +2201,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 
-<!-- ===== Inventario Supervisoras: botón dentro de características + PIN ===== -->
+<!-- ===== Inventario Supervisoras en MODAL (botón dentro del modal de vistas) ===== -->
 <style>
 .btn-inventario{
   display:inline-flex; align-items:center; gap:.4rem;
@@ -2211,9 +2211,7 @@ document.addEventListener('DOMContentLoaded', () => {
 .btn-inventario:active{ transform: translateY(1px); }
 .btn-inventario .dot{ width:8px; height:8px; border-radius:50%; background:#79d28a; }
 
-.inv-modal-overlay{
-  position:fixed; inset:0; background:rgba(0,0,0,.5); display:none; z-index:11000;
-}
+.inv-modal-overlay{ position:fixed; inset:0; background:rgba(0,0,0,.5); display:none; z-index:11000; }
 .inv-modal{
   position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
   background:#fff; width:min(92vw,360px); border-radius:12px; padding:1rem 1.1rem;
@@ -2248,8 +2246,11 @@ document.addEventListener('DOMContentLoaded', () => {
 (function(){
   // ===== CONFIG =====
   const SUP_PIN = '246810';              // Cambia este PIN cuando gustes
-  const SESSION_KEY = 'inv_session_ok';  // Bandera de sesión
-  const SESSION_TTL_MS = 8*60*60*1000;   // 8h
+  const SESSION_KEY = 'inv_session_ok';
+  const SESSION_TTL_MS = 8*60*60*1000;   // 8 horas
+  // Selectores del modal de vistas/galería (ajustables si tu HTML usa otros)
+  const MODAL_SELECTOR = '.modal-contenido, .modal, .galeria-modal, .modal-vistas';
+  const MODAL_HEADER_CANDIDATES = 'header, .modal-header, h3, h2';
 
   // ===== Sesión =====
   function setSessionOK(){ sessionStorage.setItem(SESSION_KEY, String(Date.now())); updateLogoutVisibility(); }
@@ -2267,82 +2268,87 @@ document.addEventListener('DOMContentLoaded', () => {
   function showPIN(onSuccess){
     $overlay.classList.remove('inv-hide');
     $modal.classList.remove('inv-hide');
-    $input.value = '';
-    $input.focus();
-    function success(){
-      hidePIN(); setSessionOK();
-      if(typeof onSuccess==='function') onSuccess();
-    }
-    function tryPIN(){
-      if($input.value === SUP_PIN){ success(); }
-      else { $input.select(); $input.focus(); }
-    }
-    $ok.onclick = tryPIN;
-    $input.onkeydown = (e)=>{ if(e.key==='Enter') tryPIN(); };
-    $cancel.onclick = hidePIN;
+    $input.value = ''; $input.focus();
+    function success(){ hidePIN(); setSessionOK(); if(typeof onSuccess==='function') onSuccess(); }
+    function tryPIN(){ if($input.value === SUP_PIN) success(); else { $input.select(); $input.focus(); } }
+    $ok.onclick = tryPIN; $input.onkeydown = (e)=>{ if(e.key==='Enter') tryPIN(); }; $cancel.onclick = hidePIN;
   }
   function hidePIN(){ $overlay.classList.add('inv-hide'); $modal.classList.add('inv-hide'); }
   function updateLogoutVisibility(){ if(hasValidSession()) $logout.classList.remove('inv-hide'); else $logout.classList.add('inv-hide'); }
   $logout.onclick = ()=>{ clearSession(); hidePIN(); };
 
-  // ===== Inserción del botón dentro de CARACTERÍSTICAS =====
-  const SELECTOR_CARACT = '.panel-info .caracteristicas, .panel-info .caracteristicas-list, .panel-info ul, .panel-info';
-
-  function ensureBtnInCaracteristicas(){
-    const cont = document.querySelector(SELECTOR_CARACT);
-    if(!cont) return;
-    // Evitar duplicado
-    if(cont.querySelector('.btn-inventario')) return;
-
+  // ===== Inyección del botón dentro del MODAL =====
+  function placeButtonInModal(modalEl){
+    if(!modalEl || modalEl.querySelector('.btn-inventario')) return;
     const btn = document.createElement('button');
     btn.className = 'btn-inventario';
     btn.type = 'button';
     btn.innerHTML = '<span class="dot"></span> Inventario';
 
-    const ul = cont.querySelector('ul');
-    if(ul){
-      const li = document.createElement('li');
-      li.appendChild(btn);
-      ul.appendChild(li);
+    // Buscar un header para colocarlo a la derecha / después
+    const header = modalEl.querySelector(MODAL_HEADER_CANDIDATES);
+    if(header){
+      header.insertAdjacentElement('beforeend', btn);
     } else {
-      cont.appendChild(btn);
+      modalEl.insertAdjacentElement('afterbegin', btn);
     }
 
     btn.addEventListener('click', ()=>{
       const abrir = ()=>{
-        // Señal temporal: cambiar texto del botón.
         btn.innerHTML = '<span class="dot"></span> Inventario (abierto)';
-        // TODO: aquí montaremos el panel inventario real
+        // TODO: aquí montaremos el panel Inventario real dentro del modal
       };
       if(hasValidSession()) abrir();
       else showPIN(abrir);
     });
   }
 
-  // ===== Integración con mostrarInfo =====
-  function patchMostrarInfo(){
-    if(typeof window.mostrarInfo !== 'function') return false;
-    if(window.mostrarInfo.__invEmbedPatched) return true;
-    const original = window.mostrarInfo;
-    const patched = async function(num){
-      const r = await original.apply(this, arguments);
-      requestAnimationFrame(ensureBtnInCaracteristicas);
-      return r;
-    };
-    patched.__invEmbedPatched = true;
-    window.mostrarInfo = patched;
-    return true;
+  function isVisible(el){
+    const st = getComputedStyle(el);
+    return st && st.display!=='none' && st.visibility!=='hidden' && st.opacity!=='0';
   }
 
-  // Intentar y reintentar
-  if(!patchMostrarInfo()){
-    const t = setInterval(()=>{ if(patchMostrarInfo()) clearInterval(t); }, 250);
+  function scanAndInject(){
+    const modals = document.querySelectorAll(MODAL_SELECTOR);
+    modals.forEach(m=>{
+      // Solo si está visible en pantalla (o dentro de un overlay visible)
+      if(isVisible(m) || m.closest('.modal-overlay, .overlay, .backdrop')){
+        placeButtonInModal(m);
+      }
+    });
   }
-  document.addEventListener('DOMContentLoaded', ()=> setTimeout(ensureBtnInCaracteristicas, 700));
-  updateLogoutVisibility();
+
+  // Observar cambios del DOM para detectar apertura de modal
+  const obs = new MutationObserver((mut)=>{
+    for(const m of mut){
+      if(m.addedNodes && m.addedNodes.length){
+        scanAndInject();
+      }
+    }
+  });
+  document.addEventListener('DOMContentLoaded', ()=>{
+    setTimeout(scanAndInject, 300);
+    obs.observe(document.documentElement, {childList:true, subtree:true});
+    updateLogoutVisibility();
+  });
+
+  // Si existe una función que abre la galería, vuelve a inyectar tras usarla
+  const openFns = ['abrirGaleria','abrirModal','mostrarZoom','abrirVistas'];
+  openFns.forEach(name=>{
+    if(typeof window[name] === 'function' && !window[name].__invPinWrapped){
+      const orig = window[name];
+      const wrapped = function(){
+        const out = orig.apply(this, arguments);
+        setTimeout(scanAndInject, 50);
+        return out;
+      };
+      wrapped.__invPinWrapped = true;
+      window[name] = wrapped;
+    }
+  });
 })();
 </script>
-<!-- ===== /Inventario Supervisoras ===== -->
+<!-- ===== /Inventario Supervisoras en MODAL ===== -->
 
 </body>
 </html>
