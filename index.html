@@ -813,6 +813,23 @@ border-bottom: none;
 
 <link rel="stylesheet" href="inventario.css">
 <script src="inventario.js" defer></script>
+<style>
+/* === Inventario: botón y contenedor básico (Paso 1) === */
+.inventario-tab-btn{
+  display:inline-block; margin-left:.5rem; padding:.35rem .6rem;
+  border-radius:10px; font-size:.9rem; line-height:1;
+  border:1px solid rgba(0,0,0,.12); background:#f7f7f7; cursor:pointer;
+}
+.inventario-tab-btn:active{ transform: translateY(1px); }
+
+.inventario-panel{
+  display:none; margin-top:.75rem; padding:.75rem; border-radius:10px;
+  border:1px solid rgba(0,0,0,.08); background:#fff; box-shadow:0 2px 8px rgba(0,0,0,.06);
+}
+.inventario-panel.activa{ display:block; }
+
+.inventario-placeholder{ color:#666; font-size:.95rem; }
+</style>
 </head>
 <body>
 
@@ -2201,6 +2218,102 @@ document.addEventListener('DOMContentLoaded', () => {
     if(e.key === 'Escape' && typeof cerrarZoom === 'function'){ cerrarZoom(e); }
   });
 });
+</script>
+<script>
+/*! Auto-integración Inventario: envuelve mostrarInfo y monta Inventario con defaults seguros */
+(function(){
+  // Supervisora por defecto (puedes cambiarla al hacer login real)
+  window.SUPERVISORA_ACTUAL = window.SUPERVISORA_ACTUAL || 'Supervisora';
+
+  function tryPatch(){
+    if (typeof window.mostrarInfo !== 'function') return;
+    const original = window.mostrarInfo;
+    if (original.__inventarioPatched) return;
+    const fuentes = ['habitaciones','HABITACIONES','habitacionesData','dataHabitaciones'];
+
+    const patched = async function(num){
+      // Ejecuta tu función original primero para que el panel se pinte
+      const result = await original.apply(this, arguments);
+      try{
+        const panel = document.querySelector('.panel-info') || document.querySelector('#panel-info') || document.body;
+        if(!panel || !window.Inventario || typeof window.Inventario.mountInventario!=='function'){ return result; }
+        // 1) Intenta obtener datos desde algún mapa global con la llave num
+        let datos = null;
+        for (const key of fuentes){
+          const ref = window[key];
+          if (ref && typeof ref === 'object' && ref[num]) { datos = ref[num]; break; }
+        }
+        // 2) Derivar tipo de cama
+        let tipo = 'K';
+        if (datos && datos.tipo_cama){ tipo = String(datos.tipo_cama).toUpperCase(); }
+        else {
+          const m = (panel.textContent||'').match(/tipo\s*de\s*cama\s*[:=]\s*([KD])/i);
+          if (m) tipo = m[1].toUpperCase();
+        }
+        // 3) Determinar categoría INVENTARIO (Normal/Swing Up/Master Suite)
+        //    Si tu JSON trae 'categoria_inventario' úsala; si no, usa 'Normal' como seguro (se puede cambiar después).
+        let categoriaInv = 'Normal';
+        if (datos && (datos.categoria_inventario || datos.categoriaInventario)) {
+          categoriaInv = datos.categoria_inventario || datos.categoriaInventario;
+        } else if (typeof window.CATEGORIA_INV === 'string') {
+          categoriaInv = window.CATEGORIA_INV;
+        }
+        // 4) Montar Inventario
+        window.Inventario.mountInventario(panel, { habitacion: num, categoria: categoriaInv, tipo_cama: tipo });
+      }catch(e){ /* silencioso para no romper flujo */ }
+      return result;
+    };
+    patched.__inventarioPatched = true;
+    window.mostrarInfo = patched;
+    clearInterval(timer);
+  }
+  const timer = setInterval(tryPatch, 200);
+})();
+</script>
+<script>
+/*! Paso 1: solo botón Inventario + contenedor vacío */
+(function(){
+  function ensureInventarioBasics(){
+    const panel = document.querySelector('.panel-info') || document.querySelector('#panel-info');
+    if(!panel) return;
+    if(panel.querySelector('.inventario-tab-btn')) return;
+
+    const btn = document.createElement('button');
+    btn.className='inventario-tab-btn';
+    btn.type='button';
+    btn.textContent='Inventario';
+
+    const h3 = panel.querySelector('h3');
+    if(h3) h3.insertAdjacentElement('afterend', btn); else panel.prepend(btn);
+
+    let cont = document.createElement('div');
+    cont.className='inventario-panel';
+    cont.innerHTML = '<div class="inventario-placeholder">Inventario listo para configurar…</div>';
+    btn.insertAdjacentElement('afterend', cont);
+
+    btn.addEventListener('click', ()=> cont.classList.toggle('activa'));
+  }
+
+  function patchMostrarInfo(){
+    if(typeof window.mostrarInfo !== 'function') return false;
+    if(window.mostrarInfo.__invBtnPatched) return true;
+    const original = window.mostrarInfo;
+    const patched = async function(num){
+      const result = await original.apply(this, arguments);
+      requestAnimationFrame(ensureInventarioBasics);
+      return result;
+    };
+    patched.__invBtnPatched = true;
+    window.mostrarInfo = patched;
+    return true;
+  }
+
+  if(!patchMostrarInfo()){
+    const timer = setInterval(()=>{ if(patchMostrarInfo()) clearInterval(timer); }, 200);
+  }
+
+  document.addEventListener('DOMContentLoaded', ()=> { setTimeout(ensureInventarioBasics, 700); });
+})();
 </script>
 </body>
 </html>
