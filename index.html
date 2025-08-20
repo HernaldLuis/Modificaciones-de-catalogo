@@ -99,6 +99,9 @@ body {
 
 .zona-desplazable {
   cursor: grab;
+
+  touch-action: pan-x pinch-zoom;
+  -webkit-overflow-scrolling: touch;
 }
 
 .zona-desplazable.arrastrando {
@@ -570,33 +573,26 @@ border-bottom: none;
 }
 
 /* Caja del modal */
-.modal-contenido {
+.modal-contenido{
+  box-sizing: border-box;
   background: #fff;
-  padding: 2rem;
+  padding: 1.25rem;
   border-radius: 12px;
-  max-width: 400px;
-  width: 90%;
+  max-width: min(92vw, 520px);
+  width: calc(100% - 2rem);
   box-shadow: 0 8px 20px rgba(0,0,0,0.25);
   text-align: left;
-  animation: aparecerModal 0.4s ease;
-}
-.modal-contenido {
-  box-sizing: border-box;
-  max-width: min(92vw, 520px);  /* limita el ancho del cuadro */
-  width: calc(100% - 2rem);     /* respeta márgenes laterales */
-  padding: 1.25rem;
-  overflow-wrap: anywhere;      /* por si hay listas con texto largo */
+  overflow-wrap: anywhere;
   word-break: break-word;
-  white-space: normal;          /* permite saltos de línea */
+  white-space: normal;
+  animation: aparecerModal .4s ease;
 }
+
 .modal-contenido ul { margin: 0 0 .5rem; padding-left: 1.1rem; }
 .modal-contenido li { margin-bottom: .35rem; }
 
 @media (max-width: 480px) {
-  .modal-contenido {
-    font-size: 0.9rem;   /* Texto más pequeño */
-    padding: 1rem;       /* Menos espacio interno */
-  }
+  
 }
 
 /* Título */
@@ -661,7 +657,16 @@ border-bottom: none;
 
 /* --- Video en detalle de habitación (handicap) --- */
 .video-habitacion{ position:absolute; top:16px; right:16px; width:520px; max-width:44%; background:#fff; border-radius:12px; box-shadow:0 12px 30px rgba(0,0,0,.18); overflow:hidden; }
-07.77%); background:#000; } /* 16:9 */
+
+.video-ratio{
+  position: relative;
+  padding-top: 56.25%; /* 16:9 correcto */
+  background:#000;
+}
+.video-ratio iframe,
+.video-ratio video{
+  position:absolute; inset:0; width:100%; height:100%; border:0; object-fit:contain;
+}
 .video-ratio iframe, .video-ratio video{ position:absolute; inset:0; width:100%; height:100%; border:0; object-fit:contain; }
 .video-ratio video{ object-fit: contain; background:#000; }
 .contenido-inferior{ position:relative; }
@@ -820,7 +825,7 @@ border-bottom: none;
 
   <h1 class="titulo-catalogo">
   <span>Paradisus · Colección Exclusiva de Habitaciones & Suites</span>
-  <img src="https://res.cloudinary.com/dor6za85u/image/upload/v1754887647/ChatGPT_Image_10_ago_2025_09_47_11_p.m._btrjfp.png" 
+  <img loading="lazy" src="https://res.cloudinary.com/dor6za85u/image/upload/v1754887647/ChatGPT_Image_10_ago_2025_09_47_11_p.m._btrjfp.png" 
        alt="Paradisus by Meliá" 
        class="logo-catalogo">
 </h1>
@@ -1514,7 +1519,7 @@ border-bottom: none;
   <!-- Lightbox de imagen -->
 <div id="zoom-overlay" class="visor-oculto" onclick="cerrarZoom(event)">
   <span id="zoom-close" onclick="cerrarZoom(event)" style="position: absolute; top: 20px; right: 30px; font-size: 30px; cursor: pointer; color: white;">❌</span>
-  <img id="zoom-img" src="" alt="Zoom" />
+  <img loading="lazy" id="zoom-img" src="" alt="Zoom" />
 </div>
 
   <script>
@@ -1535,7 +1540,7 @@ async function mostrarInfo(num) {
       habitacion.imagenes.forEach((imagen) => {
         galeriaHTML += `
           <div class="bloque-imagen">
-            <img src="${imagen.src}" alt="${imagen.etiqueta}" onclick="hacerZoom(this.src)" />
+            <img loading="lazy" src="${imagen.src}" alt="${imagen.etiqueta}" onclick="hacerZoom(this.src)" />
             <p><strong>${imagen.etiqueta}</strong></p>
           </div>
         `;
@@ -1643,7 +1648,7 @@ const num = boton.dataset.num || boton.textContent.trim();
 
         // Verificar si tiene sofá cama
 const sofaIcon = `
-  ${habitacion.sofa ? '<img src="https://res.cloudinary.com/dor6za85u/image/upload/v1753173371/sof%C3%A0_pzyjdc.png" style="height: 18px; vertical-align: middle;" />' : ''}
+  ${habitacion.sofa ? '<img loading="lazy" src="https://res.cloudinary.com/dor6za85u/image/upload/v1753173371/sof%C3%A0_pzyjdc.png" style="height: 18px; vertical-align: middle;" />' : ''}
   ${habitacion.discapacidad ? '<span style="font-size: 1.2em;">♿</span>' : ''}
 `;
 
@@ -1716,7 +1721,7 @@ if (nuevaData.tipo_cama === "K") {
 }
 
         const sofaIcon = `
-          ${nuevaData.sofa ? '<img src="https://res.cloudinary.com/dor6za85u/image/upload/v1753173371/sof%C3%A0_pzyjdc.png" style="height: 18px; vertical-align: middle;" />' : ''}
+          ${nuevaData.sofa ? '<img loading="lazy" src="https://res.cloudinary.com/dor6za85u/image/upload/v1753173371/sof%C3%A0_pzyjdc.png" style="height: 18px; vertical-align: middle;" />' : ''}
           ${nuevaData.discapacidad ? '<span style="font-size: 1.2em;">♿</span>' : ''}
         `;
 
@@ -2190,5 +2195,19 @@ document.addEventListener("DOMContentLoaded", function() {
 })();
 </script>
 
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.habitacion-btn').forEach(btn => {
+    const n = btn.getAttribute('data-num') || btn.textContent.trim();
+    if(n && !btn.hasAttribute('onclick')){
+      btn.setAttribute('onclick', `mostrarInfo('${n}')`);
+    }
+  });
+  // ESC to close zoom if function exists
+  document.addEventListener('keydown', e => {
+    if(e.key === 'Escape' && typeof cerrarZoom === 'function'){ cerrarZoom(e); }
+  });
+});
+</script>
 </body>
 </html>
