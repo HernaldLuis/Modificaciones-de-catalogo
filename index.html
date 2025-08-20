@@ -811,6 +811,45 @@ border-bottom: none;
 }
 </style>
 
+<style>
+/* === Inventario: botón sobre tarjeta + panel lateral dentro del modal === */
+.inv-btn-card{
+  position:absolute; top:.5rem; right:.5rem; z-index:6;
+  display:inline-flex; align-items:center; gap:.35rem;
+  padding:.35rem .6rem; border-radius:999px;
+  background:#17a2ff; color:#fff; font-weight:700; font-size:.9rem;
+  border:none; cursor:pointer; box-shadow:0 6px 18px rgba(0,0,0,.25);
+}
+.bloque-imagen{ position:relative; }
+
+.inv-side{
+  position:absolute; top:0; right:0; height:100%; width:min(92vw, 360px);
+  background:#fff; border-left:1px solid rgba(0,0,0,.12);
+  box-shadow: -10px 0 30px rgba(0,0,0,.18);
+  transform: translateX(100%); transition: transform .28s ease;
+  padding: .9rem; overflow:auto; z-index:7;
+}
+.inv-side.activa{ transform: translateX(0%); }
+.inv-side h3{ margin:.2rem 0 .6rem; font-size:1.05rem; }
+.inv-side .muted{ color:#666; font-size:.92rem; }
+
+/* PIN modal Housekeeping */
+.hkpin-overlay{ position:fixed; inset:0; background:rgba(0,0,0,.5); display:none; z-index:12000; }
+.hkpin-modal{
+  position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
+  background:#fff; width:min(92vw,360px); border-radius:12px; padding:1rem 1.1rem;
+  box-shadow:0 10px 30px rgba(0,0,0,.25); z-index:12001;
+}
+.hkpin-modal h3{ margin:.2rem 0 .8rem; font-size:1.05rem; }
+.hkpin-row{ display:flex; gap:.5rem; }
+.hkpin-modal input{
+  flex:1; padding:.55rem .7rem; border:1px solid rgba(0,0,0,.15); border-radius:10px; font-size:1rem;
+}
+.hkpin-modal button{
+  padding:.55rem .75rem; border:1px solid rgba(0,0,0,.15); border-radius:10px; background:#f3f3f3; cursor:pointer;
+}
+.hk-hide{ display:none !important; }
+</style>
 </head>
 <body>
 
@@ -2201,154 +2240,141 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 
-<!-- ===== Inventario Supervisoras en MODAL (botón dentro del modal de vistas) ===== -->
-<style>
-.btn-inventario{
-  display:inline-flex; align-items:center; gap:.4rem;
-  padding:.4rem .65rem; border-radius:10px; border:1px solid rgba(0,0,0,.15);
-  background:#f6f6f6; cursor:pointer; font-size:.9rem;
-}
-.btn-inventario:active{ transform: translateY(1px); }
-.btn-inventario .dot{ width:8px; height:8px; border-radius:50%; background:#79d28a; }
-
-.inv-modal-overlay{ position:fixed; inset:0; background:rgba(0,0,0,.5); display:none; z-index:11000; }
-.inv-modal{
-  position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
-  background:#fff; width:min(92vw,360px); border-radius:12px; padding:1rem 1.1rem;
-  box-shadow:0 10px 30px rgba(0,0,0,.25); z-index:11001;
-}
-.inv-modal h3{ margin:.2rem 0 .8rem; font-size:1.05rem; }
-.inv-modal .row{ display:flex; gap:.5rem; }
-.inv-modal input{
-  flex:1; padding:.55rem .7rem; border:1px solid rgba(0,0,0,.15); border-radius:10px; font-size:1rem;
-}
-.inv-modal button{
-  padding:.55rem .75rem; border:1px solid rgba(0,0,0,.15); border-radius:10px; background:#f3f3f3; cursor:pointer;
-}
-.inv-hide{ display:none !important; }
-</style>
-
-<div id="inv-pin-overlay" class="inv-modal-overlay inv-hide"></div>
-<div id="inv-pin-modal" class="inv-modal inv-hide" role="dialog" aria-modal="true" aria-labelledby="inv-pin-title">
-  <h3 id="inv-pin-title">Acceso supervisoras</h3>
+<!-- ===== Inventario Housekeeping: botón en modal de vistas + PIN + panel lateral ===== -->
+<div id="hkpin-overlay" class="hkpin-overlay hk-hide"></div>
+<div id="hkpin-modal" class="hkpin-modal hk-hide" role="dialog" aria-modal="true" aria-labelledby="hkpin-title">
+  <h3 id="hkpin-title">Acceso Housekeeping</h3>
   <p style="margin:.2rem 0 .8rem; color:#555">Ingresa el PIN para abrir Inventario.</p>
-  <div class="row" style="margin-bottom:.75rem">
-    <input id="inv-pin-input" type="password" maxlength="6" placeholder="PIN (6 dígitos)" inputmode="numeric" />
-    <button id="inv-pin-ok">OK</button>
+  <div class="hkpin-row" style="margin-bottom:.75rem">
+    <input id="hkpin-input" type="password" maxlength="6" placeholder="PIN (6 dígitos)" inputmode="numeric" />
+    <button id="hkpin-ok">OK</button>
   </div>
-  <div class="row" style="justify-content:space-between">
-    <button id="inv-pin-cancel">Cancelar</button>
-    <button id="inv-pin-logout" class="inv-hide">Cerrar sesión</button>
+  <div class="hkpin-row" style="justify-content:space-between">
+    <button id="hkpin-cancel">Cancelar</button>
+    <button id="hkpin-logout" class="hk-hide">Cerrar sesión</button>
   </div>
 </div>
 
 <script>
 (function(){
-  // ===== CONFIG =====
-  const SUP_PIN = '246810';              // Cambia este PIN cuando gustes
-  const SESSION_KEY = 'inv_session_ok';
-  const SESSION_TTL_MS = 8*60*60*1000;   // 8 horas
-  // Selectores del modal de vistas/galería (ajustables si tu HTML usa otros)
-  const MODAL_SELECTOR = '.modal-contenido, .modal, .galeria-modal, .modal-vistas';
-  const MODAL_HEADER_CANDIDATES = 'header, .modal-header, h3, h2';
+  const SUP_PIN = '246810';                // PIN temporal
+  const SESSION_KEY = 'hk_inv_session_ok'; // bandera de sesión
+  const SESSION_TTL_MS = 8*60*60*1000;     // 8h
+  let HAB_ACTUAL = null;
 
-  // ===== Sesión =====
-  function setSessionOK(){ sessionStorage.setItem(SESSION_KEY, String(Date.now())); updateLogoutVisibility(); }
+  function now(){ return Date.now(); }
+  function hasValidSession(){ const t = +sessionStorage.getItem(SESSION_KEY)||0; return (now()-t) < SESSION_TTL_MS; }
+  function setSessionOK(){ sessionStorage.setItem(SESSION_KEY, String(now())); updateLogoutVisibility(); }
   function clearSession(){ sessionStorage.removeItem(SESSION_KEY); updateLogoutVisibility(); }
-  function hasValidSession(){ const t = Number(sessionStorage.getItem(SESSION_KEY)||0); return (Date.now()-t) < SESSION_TTL_MS; }
 
-  // ===== Modal PIN =====
-  const $overlay = document.getElementById('inv-pin-overlay');
-  const $modal   = document.getElementById('inv-pin-modal');
-  const $input   = document.getElementById('inv-pin-input');
-  const $ok      = document.getElementById('inv-pin-ok');
-  const $cancel  = document.getElementById('inv-pin-cancel');
-  const $logout  = document.getElementById('inv-pin-logout');
+  const $overlay = document.getElementById('hkpin-overlay');
+  const $modal   = document.getElementById('hkpin-modal');
+  const $input   = document.getElementById('hkpin-input');
+  const $ok      = document.getElementById('hkpin-ok');
+  const $cancel  = document.getElementById('hkpin-cancel');
+  const $logout  = document.getElementById('hkpin-logout');
 
   function showPIN(onSuccess){
-    $overlay.classList.remove('inv-hide');
-    $modal.classList.remove('inv-hide');
-    $input.value = ''; $input.focus();
+    $overlay.classList.remove('hk-hide');
+    $modal.classList.remove('hk-hide');
+    $input.value=''; $input.focus();
     function success(){ hidePIN(); setSessionOK(); if(typeof onSuccess==='function') onSuccess(); }
-    function tryPIN(){ if($input.value === SUP_PIN) success(); else { $input.select(); $input.focus(); } }
-    $ok.onclick = tryPIN; $input.onkeydown = (e)=>{ if(e.key==='Enter') tryPIN(); }; $cancel.onclick = hidePIN;
+    function tryPIN(){ if($input.value===SUP_PIN){ success(); } else { $input.select(); $input.focus(); } }
+    $ok.onclick = tryPIN;
+    $input.onkeydown = (e)=>{ if(e.key==='Enter') tryPIN(); };
+    $cancel.onclick = hidePIN;
   }
-  function hidePIN(){ $overlay.classList.add('inv-hide'); $modal.classList.add('inv-hide'); }
-  function updateLogoutVisibility(){ if(hasValidSession()) $logout.classList.remove('inv-hide'); else $logout.classList.add('inv-hide'); }
+  function hidePIN(){ $overlay.classList.add('hk-hide'); $modal.classList.add('hk-hide'); }
+  function updateLogoutVisibility(){ if(hasValidSession()) $logout.classList.remove('hk-hide'); else $logout.classList.add('hk-hide'); }
   $logout.onclick = ()=>{ clearSession(); hidePIN(); };
 
-  // ===== Inyección del botón dentro del MODAL =====
-  function placeButtonInModal(modalEl){
-    if(!modalEl || modalEl.querySelector('.btn-inventario')) return;
-    const btn = document.createElement('button');
-    btn.className = 'btn-inventario';
-    btn.type = 'button';
-    btn.innerHTML = '<span class="dot"></span> Inventario';
+  function obtenerDatosHabitacion(num){
+    const fuentes = ['habitaciones','HABITACIONES','habitacionesData','dataHabitaciones'];
+    let datos = null;
+    for(const k of fuentes){ const ref = window[k]; if(ref && typeof ref==='object' && ref[num]){ datos = ref[num]; break; } }
+    const panel = document.querySelector('.panel-info') || document.querySelector('#panel-info');
+    let tipo = (datos && datos.tipo_cama) ? String(datos.tipo_cama).toUpperCase() : 'K';
+    if(panel){ const m = (panel.textContent||'').match(/Tipo\s*de\s*cama\s*:\s*([KD])/i); if(m) tipo = m[1].toUpperCase(); }
+    let catInv = (datos && (datos.categoria_inventario || datos.categoriaInventario)) || 'Normal';
+    return { habitacion: String(num||'?'), categoria: catInv, tipo_cama: tipo };
+  }
 
-    // Buscar un header para colocarlo a la derecha / después
-    const header = modalEl.querySelector(MODAL_HEADER_CANDIDATES);
-    if(header){
-      header.insertAdjacentElement('beforeend', btn);
+  function getModalRoot(){
+    return document.querySelector('.modal-contenido, .galeria-modal, .modal-vistas, .lightbox, .modal, .modal-content');
+  }
+  function getCards(root){ return root ? root.querySelectorAll('.bloque-imagen') : []; }
+
+  // Configurable: caption objetivo o índice
+  const TARGET_CAPTION = 'Handicap';
+  const FALLBACK_CARD_INDEX = 0;
+
+  function elegirTarjeta(cards){
+    let target=null;
+    for(const card of cards){
+      const cap=(card.querySelector('p')?.innerText||'').trim();
+      if(cap && TARGET_CAPTION && cap.toLowerCase()===TARGET_CAPTION.toLowerCase()){ target=card; break; }
+    }
+    if(!target && cards.length){ target = cards[Math.max(0, Math.min(FALLBACK_CARD_INDEX, cards.length-1))]; }
+    return target;
+  }
+
+  function ensureSidePanel(root){
+    let side = root.querySelector('.inv-side'); if(side) return side;
+    side = document.createElement('aside');
+    side.className='inv-side';
+    side.innerHTML = '<h3>Inventario</h3><div class="muted" id="inv-side-status">Cargando…</div><div id="inv-side-body" class="muted">Panel listo.</div>';
+    root.appendChild(side);
+    return side;
+  }
+
+  function mountInventarioEnSide(side, datos){
+    const status = side.querySelector('#inv-side-status');
+    const body = side.querySelector('#inv-side-body');
+    status.textContent = `Hab. ${datos.habitacion} · ${datos.categoria} · Cama ${datos.tipo_cama}`;
+    if(window.Inventario && typeof window.Inventario.mountInventario==='function'){
+      const cont = document.createElement('div');
+      body.replaceWith(cont);
+      window.Inventario.mountInventario(cont, { habitacion: datos.habitacion, categoria: datos.categoria, tipo_cama: datos.tipo_cama });
     } else {
-      modalEl.insertAdjacentElement('afterbegin', btn);
+      body.innerHTML = 'Incluye <code>inventario.js</code> para ver el formulario real.';
     }
+  }
 
+  function inyectarBotonInventario(){
+    const root = getModalRoot(); if(!root) return;
+    const cards = getCards(root); const target = elegirTarjeta(cards); if(!target) return;
+    if(target.querySelector('.inv-btn-card')) return;
+    const btn = document.createElement('button');
+    btn.className='inv-btn-card'; btn.type='button'; btn.textContent='Inventario';
+    target.appendChild(btn);
     btn.addEventListener('click', ()=>{
-      const abrir = ()=>{
-        btn.innerHTML = '<span class="dot"></span> Inventario (abierto)';
-        // TODO: aquí montaremos el panel Inventario real dentro del modal
-      };
-      if(hasValidSession()) abrir();
-      else showPIN(abrir);
+      const datos = obtenerDatosHabitacion(HAB_ACTUAL);
+      const abrir = ()=>{ const side = ensureSidePanel(root); side.classList.add('activa'); btn.textContent='Inventario (abierto)'; mountInventarioEnSide(side, datos); };
+      if(hasValidSession()) abrir(); else showPIN(abrir);
     });
   }
 
-  function isVisible(el){
-    const st = getComputedStyle(el);
-    return st && st.display!=='none' && st.visibility!=='hidden' && st.opacity!=='0';
+  function patchMostrarInfo(){
+    if(typeof window.mostrarInfo!=='function') return false;
+    if(window.mostrarInfo.__hkInvPatched) return true;
+    const orig = window.mostrarInfo;
+    window.mostrarInfo = async function(num){
+      HAB_ACTUAL = num;
+      const r = await orig.apply(this, arguments);
+      setTimeout(inyectarBotonInventario, 250);
+      return r;
+    };
+    window.mostrarInfo.__hkInvPatched = true;
+    return true;
   }
-
-  function scanAndInject(){
-    const modals = document.querySelectorAll(MODAL_SELECTOR);
-    modals.forEach(m=>{
-      // Solo si está visible en pantalla (o dentro de un overlay visible)
-      if(isVisible(m) || m.closest('.modal-overlay, .overlay, .backdrop')){
-        placeButtonInModal(m);
-      }
-    });
+  if(!patchMostrarInfo()){
+    const t=setInterval(()=>{ if(patchMostrarInfo()) clearInterval(t); }, 250);
   }
-
-  // Observar cambios del DOM para detectar apertura de modal
-  const obs = new MutationObserver((mut)=>{
-    for(const m of mut){
-      if(m.addedNodes && m.addedNodes.length){
-        scanAndInject();
-      }
-    }
-  });
-  document.addEventListener('DOMContentLoaded', ()=>{
-    setTimeout(scanAndInject, 300);
-    obs.observe(document.documentElement, {childList:true, subtree:true});
-    updateLogoutVisibility();
-  });
-
-  // Si existe una función que abre la galería, vuelve a inyectar tras usarla
-  const openFns = ['abrirGaleria','abrirModal','mostrarZoom','abrirVistas'];
-  openFns.forEach(name=>{
-    if(typeof window[name] === 'function' && !window[name].__invPinWrapped){
-      const orig = window[name];
-      const wrapped = function(){
-        const out = orig.apply(this, arguments);
-        setTimeout(scanAndInject, 50);
-        return out;
-      };
-      wrapped.__invPinWrapped = true;
-      window[name] = wrapped;
-    }
-  });
+  document.addEventListener('DOMContentLoaded', ()=> setTimeout(inyectarBotonInventario, 600));
+  updateLogoutVisibility();
 })();
 </script>
-<!-- ===== /Inventario Supervisoras en MODAL ===== -->
+<!-- ===== /Inventario Housekeeping ===== -->
 
 </body>
 </html>
