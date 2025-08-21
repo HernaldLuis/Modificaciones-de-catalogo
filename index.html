@@ -6,6 +6,32 @@
   <title>Catálogo de Habitaciones</title>
   <style>
 
+/* Patch: sin pseudo-icono en el botón Inventario */
+.boton-inventario::before{ content:none !important; }
+
+
+
+/* Patch: padding de texto condicionado por presencia de video */
+.contenido-inferior{ padding-right:0 !important; }
+.contenido-inferior.con-video > h3,
+.contenido-inferior.con-video > p:nth-of-type(-n+8){
+  padding-right:364px;
+}
+@media (max-width:600px){
+  .contenido-inferior.con-video > h3,
+  .contenido-inferior.con-video > p:nth-of-type(-n+8){
+    padding-right:40vw;
+  }
+}
+
+
+
+/* Patch: ratio de video 16:9 robusto */
+.video-ratio{ position:relative; padding-top:56.25%; background:#000; }
+.video-ratio iframe, .video-ratio video{ position:absolute; inset:0; width:100%; height:100%; border:0; object-fit:contain; }
+
+
+
 /* === Inventario: Botón premium & Modal PIN elegante === */
 .boton-inventario{
   display:inline-flex; align-items:center; gap:.55rem;
@@ -713,7 +739,7 @@ border-bottom: none;
 
 /* --- Video en detalle de habitación (handicap) --- */
 .video-habitacion{ position:absolute; top:16px; right:16px; width:520px; max-width:44%; background:#fff; border-radius:12px; box-shadow:0 12px 30px rgba(0,0,0,.18); overflow:hidden; }
-07.77%); background:#000; } /* 16:9 */
+56.25%); background:#000; } /* 16:9 */
 .video-ratio iframe, .video-ratio video{ position:absolute; inset:0; width:100%; height:100%; border:0; object-fit:contain; }
 .video-ratio video{ object-fit: contain; background:#000; }
 .contenido-inferior{ position:relative; }
@@ -890,29 +916,6 @@ border-bottom: none;
 .hk-inv-muted { color: #666; font-size: .92rem; }
 /* Asegurar que las tarjetas del modal puedan albergar overlay sin romper layout */
 .bloque-imagen { position: relative; }
-</style>
-
-
-<style>
-.boton-inventario {
-  display: inline-block;
-  padding: 10px 18px;
-  font-size: 15px;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  font-style: italic;
-  font-weight: 600;
-  color: #fff;
-  background: linear-gradient(45deg, #d4af37, #b22222);
-  border: none;
-  border-radius: 30px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.25);
-  cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-.boton-inventario:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 14px rgba(0,0,0,0.35);
-}
 </style>
 
 </head>
@@ -2529,6 +2532,66 @@ window.HK_CTX = window.HK_CTX || { habitacionActual: null };
     // Fallback simple
     alert('Inventario para Habitación ' + num + ' (stub). Integra abrirInventarioHK(num).');
   };
+})();
+</script>
+
+
+<script>
+// Patch: asegurar clase .con-video si hay video en el panel de detalle
+(function(){
+  function applyConVideo(){
+    try{
+      const cont = document.querySelector('.contenido-inferior');
+      const hasVideo = document.querySelector('.video-habitacion, .video-ratio, .video-handicap, .detalle-video');
+      if(cont){
+        if(hasVideo) cont.classList.add('con-video');
+        else cont.classList.remove('con-video');
+      }
+    }catch(e){}
+  }
+  // Intentos al abrir/actualizar el panel
+  document.addEventListener('click', function(e){
+    if (e.target.closest('.habitacion-btn')) setTimeout(applyConVideo, 60);
+  });
+  // También al cargar
+  setTimeout(applyConVideo, 200);
+})();
+</script>
+
+
+<script>
+// Patch: focus-trap y botón de cierre accesible para el modal PIN (hkpin2-overlay)
+(function(){
+  const OVER = document.getElementById('hkpin2-overlay');
+  if(!OVER) return;
+  // insertar botón de cierre si no existe
+  const modal = OVER.querySelector('.hkpin2');
+  if(modal && !modal.querySelector('#hkpin2-close')){
+    const closeBtn = document.createElement('button');
+    closeBtn.id = 'hkpin2-close';
+    closeBtn.className = 'hkbtn';
+    closeBtn.setAttribute('aria-label','Cerrar');
+    closeBtn.textContent = '✕';
+    closeBtn.style.float = 'right';
+    modal.insertBefore(closeBtn, modal.firstChild);
+    closeBtn.addEventListener('click', ()=> OVER.style.display='none');
+  }
+
+  function focusable(){
+    return OVER.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+  }
+
+  OVER.addEventListener('keydown', (e)=>{
+    if(e.key !== 'Tab') return;
+    const nodes = Array.from(focusable());
+    if(nodes.length === 0) return;
+    const first = nodes[0], last = nodes[nodes.length-1];
+    if(e.shiftKey && document.activeElement === first){
+      last.focus(); e.preventDefault();
+    } else if(!e.shiftKey && document.activeElement === last){
+      first.focus(); e.preventDefault();
+    }
+  });
 })();
 </script>
 
