@@ -6,6 +6,18 @@
   <title>Catálogo de Habitaciones</title>
   <style>
 
+/* Botón Inventario flotante dentro del modal */
+.btn-inventario-float{
+  position:absolute; top:10px; right:10px; z-index:9999;
+  padding:.5rem .9rem; border-radius:.6rem; 
+  border:1px solid rgba(0,0,0,.12); background:#ffffffcc; 
+  backdrop-filter:saturate(180%) blur(4px);
+  font-weight:700; cursor:pointer; box-shadow:0 2px 6px rgba(0,0,0,.18);
+}
+.btn-inventario-float:hover{ filter:brightness(.98); }
+
+
+
 /* Toolbar modal Inventario */
 .modal-toolbar{display:flex;gap:.5rem;align-items:center;margin:.5rem 0 1rem;}
 .btn{padding:.45rem .8rem;border-radius:.6rem;border:1px solid rgba(0,0,0,.12);background:#fff;cursor:pointer;box-shadow:0 1px 2px rgba(0,0,0,.08);}
@@ -2404,6 +2416,75 @@ window.HK_CTX = window.HK_CTX || { habitacionActual: null };
     const modal=document.getElementById('modal-detalle')||document.querySelector('.modal-contenedor,.modal');
     if(modal) modal.classList.remove('activo','abierto');
   });
+})();
+</script>
+
+
+<script>
+// Inyección robusta de botón Inventario flotante dentro del modal
+window.HK_CTX = window.HK_CTX || { habitacionActual: null };
+
+(function(){
+  function ensureInventoryButton(num){
+    const modal = document.getElementById('modal-detalle') || document.querySelector('.modal-contenedor,.modal');
+    if(!modal) return;
+    // intenta usar el primer contenedor interno
+    const host = modal.querySelector('.modal-contenido') || modal;
+    let btn = host.querySelector('#btn-inventario-float');
+    if(!btn){
+      btn = document.createElement('button');
+      btn.id = 'btn-inventario-float';
+      btn.className = 'btn-inventario-float';
+      host.style.position = host.style.position || 'relative';
+      host.appendChild(btn);
+      btn.addEventListener('click', async ()=>{
+        const n = window.HK_CTX.habitacionActual || modal.dataset?.habitacion;
+        if(!n){ alert('Abre primero una habitación.'); return; }
+        const ok = await validarPinHK(); if(!ok) return;
+        abrirPanelInventario(n);
+      });
+    }
+    btn.textContent = 'Inventario · ' + (num||'');
+    btn.style.display = num ? 'inline-block' : 'none';
+  }
+
+  // Wrapper de mostrarInfo
+  const _mostrarInfo_original = window.mostrarInfo;
+  window.mostrarInfo = function(num){
+    window.HK_CTX.habitacionActual = String(num);
+    const modal = document.getElementById('modal-detalle') || document.querySelector('.modal-contenedor,.modal');
+    if (modal) modal.dataset.habitacion = String(num);
+    if (typeof _mostrarInfo_original === 'function') _mostrarInfo_original(num);
+    ensureInventoryButton(num);
+  };
+
+  // Validador PIN simple (reemplazar por el tuyo si existe)
+  async function validarPinHK(){
+    const KEY='HK_PIN_OK'; try{ if(sessionStorage.getItem(KEY)==='1') return true; }catch(e){}
+    const pin=prompt('PIN de Housekeeping:');
+    if(pin==='246810'){ try{ sessionStorage.setItem(KEY,'1'); }catch(e){} return true; }
+    alert('PIN incorrecto.'); return false;
+  }
+
+  // Abrir panel inventario: usa tu función si existe
+  function abrirPanelInventario(num){
+    if(typeof window.abrirInventarioHK==='function') return window.abrirInventarioHK(num);
+    const panel = document.getElementById('panel-inventario') || document.querySelector('.hk-inventario-panel');
+    if(panel){
+      panel.classList.add('abierto','activo');
+      const lbl = panel.querySelector('#inv-room-label'); if(lbl) lbl.textContent = 'Habitación ' + num;
+      const hidden = panel.querySelector('input[name="habitacion_num"]'); if(hidden) hidden.value = num;
+    } else {
+      alert('Inventario para Habitación '+num+' (stub). Integra abrirInventarioHK(num).');
+    }
+  }
+
+  // Si el modal ya estaba abierto al cargar, intenta inyectar el botón
+  setTimeout(()=>{
+    const modal = document.getElementById('modal-detalle') || document.querySelector('.modal-contenedor,.modal');
+    const num = modal?.dataset?.habitacion || window.HK_CTX.habitacionActual;
+    if(num) ensureInventoryButton(num);
+  }, 500);
 })();
 </script>
 
