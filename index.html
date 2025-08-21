@@ -1,11 +1,18 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Catálogo de Habitaciones</title>
   <style>
+
+/* Toolbar modal Inventario */
+.modal-toolbar{display:flex;gap:.5rem;align-items:center;margin:.5rem 0 1rem;}
+.btn{padding:.45rem .8rem;border-radius:.6rem;border:1px solid rgba(0,0,0,.12);background:#fff;cursor:pointer;box-shadow:0 1px 2px rgba(0,0,0,.08);}
+.btn.hk{font-weight:600;}
+.btn:hover{filter:brightness(0.98);}
+
+
 body {
   margin: 0;
   font-family: Arial, sans-serif;
@@ -366,7 +373,7 @@ border-bottom: none;
   display: flex;
   justify-content: center;
   align-items: center;
-  Z0px;
+  min-width: 380px;
   width: max-content;
   box-sizing: border-box;
 
@@ -658,7 +665,7 @@ border-bottom: none;
 
 /* --- Video en detalle de habitación (handicap) --- */
 .video-habitacion{ position:absolute; top:16px; right:16px; width:520px; max-width:44%; background:#fff; border-radius:12px; box-shadow:0 12px 30px rgba(0,0,0,.18); overflow:hidden; }
-56.25%); background:#000; } /* 16:9 */
+07.77%); background:#000; } /* 16:9 */
 .video-ratio iframe, .video-ratio video{ position:absolute; inset:0; width:100%; height:100%; border:0; object-fit:contain; }
 .video-ratio video{ object-fit: contain; background:#000; }
 .contenido-inferior{ position:relative; }
@@ -879,7 +886,7 @@ border-bottom: none;
   <label class="chk"><input type="checkbox" id="filtro-handicap"> Handicap ♿</label>
   <label class="chk"><input type="checkbox" id="filtro-cocineta"> Cocineta</label>
 
-  <span id="totales-resumen" class="contador-categoria" aria-live="polite">
+  <span id="totales-resumen" class="contador-categoria">
     K: 0 · D: 0 · Total: 0 — Reserve: 0 · ♿: 0 · Cocineta: 0
   </span>
   <a id="btn-descargar-pdf" href="introduccion_paradisus_2025.pdf" download class="btn-reporte" title="Descargar reporte PDF" target="_blank">📄 Descargar PDF</a>
@@ -1759,7 +1766,7 @@ if (nuevaData.tipo_cama === "K") {
     console.warn("No se pudo actualizar habitaciones en segundo plano:", error);
   }
 }
-setInterval(actualizarHabitacionesSilenciosamente, 30000); // Se actualiza cada 5 segundos
+setInterval(actualizarHabitacionesSilenciosamente, 5000); // Se actualiza cada 5 segundos
 
 document.addEventListener('DOMContentLoaded', async () => {
   const sel = document.getElementById('filtro-categoria');
@@ -1833,6 +1840,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 <div id="modal-mejoras" class="modal-mejoras" role="dialog" aria-modal="true" aria-labelledby="titulo-novedades">
   <div class="modal-contenido">
+
+  <div class="modal-toolbar">
+    <button id="btn-inventario" class="btn hk" hidden>Inventario</button>
+    <button id="btn-limpiar" class="btn">Limpiar</button>
+    <button id="btn-cerrar-modal" class="btn">Cerrar</button>
+  </div>
+
+
     <h2>🆕BIENVENID@ - Novedades del Catálogo</h2>
     <ul>
       <li>✨ Panel de filtrado de categorías mejorado.</li>
@@ -2351,6 +2366,46 @@ document.addEventListener('DOMContentLoaded', () => {
 })();
 </script>
 <!-- HK-INVENTARIO-END -->
+
+
+<script>
+window.HK_CTX = window.HK_CTX || { habitacionActual: null };
+(function(){
+  const _mostrarInfo_original = window.mostrarInfo;
+  window.mostrarInfo = function(num){
+    window.HK_CTX.habitacionActual = String(num);
+    const modal = document.getElementById('modal-detalle') || document.querySelector('.modal-contenedor,.modal');
+    if (modal) modal.dataset.habitacion = String(num);
+    if (typeof _mostrarInfo_original === 'function') _mostrarInfo_original(num);
+    const btnInv = document.getElementById('btn-inventario');
+    if (btnInv){ btnInv.hidden = false; btnInv.textContent = 'Inventario · ' + num; }
+  };
+  async function validarPinHK(){
+    const KEY='HK_PIN_OK'; if (sessionStorage.getItem(KEY)==='1') return true;
+    const pin=prompt('PIN de Housekeeping:'); if (pin==='246810'){ sessionStorage.setItem(KEY,'1'); return true; }
+    alert('PIN incorrecto.'); return false;
+  }
+  function abrirPanelInventario(num){
+    if (typeof window.abrirInventarioHK==='function') return window.abrirInventarioHK(num);
+    alert('Inventario para Habitación '+num+' (stub). Integra abrirInventarioHK(num).');
+  }
+  document.getElementById('btn-inventario')?.addEventListener('click', async()=>{
+    const modal=document.getElementById('modal-detalle')||document.querySelector('.modal-contenedor,.modal');
+    const num=window.HK_CTX.habitacionActual||modal?.dataset?.habitacion;
+    if(!num) return alert('Abre primero una habitación.');
+    const ok=await validarPinHK(); if(!ok) return; abrirPanelInventario(num);
+  });
+  document.getElementById('btn-cerrar-modal')?.addEventListener('click',()=>{
+    const modal=document.getElementById('modal-detalle')||document.querySelector('.modal-contenedor,.modal');
+    if(modal) modal.classList.remove('activo','abierto');
+  });
+  document.getElementById('btn-limpiar')?.addEventListener('click',()=>{
+    if(typeof window.limpiarSeleccion==='function') return window.limpiarSeleccion();
+    const modal=document.getElementById('modal-detalle')||document.querySelector('.modal-contenedor,.modal');
+    if(modal) modal.classList.remove('activo','abierto');
+  });
+})();
+</script>
 
 </body>
 </html>
