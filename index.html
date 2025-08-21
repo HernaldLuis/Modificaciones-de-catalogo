@@ -6,6 +6,37 @@
   <title>Catálogo de Habitaciones</title>
   <style>
 
+/* --- Botón Inventario con icono --- */
+.boton-inventario{
+  display:inline-flex; align-items:center; gap:.55rem;
+  padding:.55rem 1rem; border-radius:999px;
+  font:600 14px/1.1 system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans";
+  color:#fff;
+  background: radial-gradient(120% 180% at 20% -20%, rgba(255,255,255,.22), transparent 35%),
+              linear-gradient(135deg,#6a11cb,#a043f3 45%, #2575fc);
+  border:1px solid rgba(255,255,255,.25);
+  box-shadow: 0 10px 22px rgba(106,17,203,.35), inset 0 1px 0 rgba(255,255,255,.35);
+  backdrop-filter: saturate(180%) blur(4px);
+  cursor:pointer;
+  transition: transform .16s ease, box-shadow .22s ease, filter .22s ease, background .22s ease;
+}
+.boton-inventario:hover{
+  transform: translateY(-1px);
+  filter: brightness(1.05);
+  box-shadow: 0 16px 32px rgba(106,17,203,.45);
+}
+.boton-inventario:active{
+  transform: translateY(0);
+  box-shadow: 0 6px 16px rgba(106,17,203,.35);
+}
+.boton-inventario .hk-ic{
+  width:18px; height:18px; display:inline-block; object-fit:contain;
+  filter: drop-shadow(0 1px 1px rgba(0,0,0,.25));
+}
+.boton-inventario span{ display:inline-block; transform: translateY(.5px); }
+
+
+
 /* === Inventario: Botón premium & Modal PIN elegante === */
 .boton-inventario{
   display:inline-flex; align-items:center; gap:.55rem;
@@ -1623,7 +1654,7 @@ panel.innerHTML = `
   <div class="contenido-inferior">\n<aside id="video-habitacion" class="video-habitacion" hidden>\n  <div class="video-ratio">\n    <iframe id="video-embed" src="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen hidden></iframe>\n    <video id="video-mp4" controls playsinline hidden></video>\n  </div>\n</aside>\n
     <h3>${habitacion.titulo}</h3>
     <div class="modal-toolbar">
-      <button class="btn hk" id="btn-inventario" onclick="handleInventarioClick('${num}')" class="boton-inventario">Inventario · ${num}</button>
+      <button class="btn hk" id="btn-inventario" onclick="handleInventarioClick('${num}')" class="boton-inventario" class="boton-inventario"><img class="hk-ic" src="https://res.cloudinary.com/dor6za85u/image/upload/v1755811018/1c729738384b3b439156b2de65158513-housekeeping-broom-icon_p0drof.webp" alt="" loading="lazy" decoding="async"/><span>Inventario · ${num}</span></button>
     </div>
     <p><strong>Categoría:</strong> ${habitacion.categoria} · ${habitacion.vista}</p>
     <p><strong>Habitación conectada:</strong> ${habitacion.habitacion_conectada ? habitacion.habitacion_conectada : 'No aplica'}</p>
