@@ -6,6 +6,46 @@
   <title>Catálogo de Habitaciones</title>
   <style>
 
+/* Oculta botones de acción en el modal de Bienvenida/Novedades */
+.modal-bienvenida .btn,
+.modal-bienvenida .modal-toolbar,
+.modal-bienvenida .acciones,
+.modal-bienvenida .botonera { display: none !important; }
+
+
+
+/* === Botón Inventario (estilo pro) === */
+.boton-inventario{
+  display:inline-flex; align-items:center; gap:.5rem;
+  padding:10px 18px; font-size:14px; font-weight:700; letter-spacing:.15px;
+  color:#fff; background:linear-gradient(135deg,#5a2d82,#9b59b6);
+  border:none; border-radius:10px; cursor:pointer;
+  box-shadow:0 4px 12px rgba(0,0,0,.18);
+  transition:transform .18s ease, box-shadow .18s ease, background .25s ease;
+}
+.boton-inventario:hover{ transform:translateY(-1px); box-shadow:0 8px 18px rgba(0,0,0,.22); background:linear-gradient(135deg,#4e2570,#884ea0); }
+.boton-inventario:active{ transform:translateY(0); box-shadow:0 2px 6px rgba(0,0,0,.2); }
+.boton-inventario::before{ content:"<style>F4DD"; } /* 📝 */
+
+/* === Modal PIN HK === */
+.hkpin-overlay{ display:none; position:fixed; inset:0; z-index:99999;
+  background:rgba(0,0,0,.6); backdrop-filter:blur(2px);
+  justify-content:center; align-items:center; }
+.hkpin-modal{ background:#fff; width:min(90vw,360px); border-radius:14px; padding:18px 16px 16px;
+  box-shadow:0 16px 38px rgba(0,0,0,.32); }
+.hkpin-modal h3{ margin:0 0 6px; font-size:18px; }
+.hkpin-desc{ margin:0 0 10px; font-size:13px; color:#555; }
+.hkpin-field{ display:flex; gap:8px; align-items:center; margin:10px 0 14px; }
+.hkpin-input{ flex:1; padding:10px 12px; border:1px solid #ddd; border-radius:10px; outline:none; font-size:15px; }
+.hkpin-toggle{ background:#eee; border:none; border-radius:8px; padding:9px 10px; cursor:pointer; }
+.hkpin-actions{ display:flex; justify-content:flex-end; gap:8px; }
+.hkbtn{ padding:9px 14px; border-radius:10px; border:1px solid rgba(0,0,0,.12); background:#fff; cursor:pointer; }
+.hkbtn.primary{ background:#5a2d82; color:#fff; border:none; }
+.hkbtn.primary:hover{ filter:brightness(.95); }
+.hkbtn:disabled{ opacity:.6; cursor:not-allowed; }
+
+
+
 /* Toolbar dentro del panel de detalle */
 .modal-toolbar{display:flex;gap:.5rem;align-items:center;margin:.5rem 0 1rem;flex-wrap:wrap}
 .btn{padding:.45rem .8rem;border-radius:.6rem;border:1px solid rgba(0,0,0,.12);background:#fff;cursor:pointer;box-shadow:0 1px 2px rgba(0,0,0,.08);}
@@ -1574,8 +1614,8 @@ async function mostrarInfo(num) {
 panel.innerHTML = `
   <div class="contenido-inferior">\n<aside id="video-habitacion" class="video-habitacion" hidden>\n  <div class="video-ratio">\n    <iframe id="video-embed" src="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen hidden></iframe>\n    <video id="video-mp4" controls playsinline hidden></video>\n  </div>\n</aside>\n
     <h3>${habitacion.titulo}</h3>
-    <div class="modal-toolbar">
-      <button class="btn hk" id="btn-inventario" onclick="handleInventarioClick('${num}')">Inventario · ${num}</button>
+    <div class="modal-bienvenida modal-toolbar">
+      <button class="btn hk" id="btn-inventario" onclick="handleInventarioClick('${num}')" class="boton-inventario">Inventario · ${num}</button>
     </div>
     <p><strong>Categoría:</strong> ${habitacion.categoria} · ${habitacion.vista}</p>
     <p><strong>Habitación conectada:</strong> ${habitacion.habitacion_conectada ? habitacion.habitacion_conectada : 'No aplica'}</p>
@@ -2388,6 +2428,89 @@ async function handleInventarioClick(num){
     alert('Inventario para Habitación ' + num + ' (stub). Integra abrirInventarioHK(num).');
   }
 }
+</script>
+
+
+<!-- Modal de PIN para Inventario HK -->
+<div id="hkpin" class="hkpin-overlay" aria-modal="true" role="dialog" aria-labelledby="hkpin-title">
+  <div class="hkpin-modal">
+    <h3 id="hkpin-title">🔒 Acceso Housekeeping</h3>
+    <p class="hkpin-desc">Ingresa tu PIN para abrir el inventario de la habitación seleccionada.</p>
+    <div class="hkpin-field">
+      <input id="hkpin-input" class="hkpin-input" type="password" placeholder="PIN" autocomplete="one-time-code" inputmode="numeric" />
+      <button id="hkpin-toggle" class="hkpin-toggle" aria-label="Mostrar/ocultar">👁️</button>
+    </div>
+    <div class="hkpin-actions">
+      <button id="hkpin-cancel" class="hkbtn">Cancelar</button>
+      <button id="hkpin-ok" class="hkbtn primary">Ingresar</button>
+    </div>
+  </div>
+</div>
+
+
+<script>
+// --- Modal PIN HK (Promise-based) ---
+window.HK_CTX = window.HK_CTX || { habitacionActual: null };
+(function(){
+  const OVER = document.getElementById('hkpin');
+  const INP  = document.getElementById('hkpin-input');
+  const BTNOK= document.getElementById('hkpin-ok');
+  const BTNC = document.getElementById('hkpin-cancel');
+  const BTNT = document.getElementById('hkpin-toggle');
+  const KEY  = 'HK_PIN_OK';
+  const PIN  = '246810'; // TODO: reemplazar por tu validador real/servidor
+
+  function show(){ OVER.style.display='flex'; setTimeout(()=>INP?.focus(), 30); }
+  function hide(){ OVER.style.display='none'; }
+
+  function pedirPINModal(){
+    return new Promise((resolve)=>{
+      function cleanup(){
+        BTNOK.removeEventListener('click', onok);
+        BTNC.removeEventListener('click', oncancel);
+        BTNT.removeEventListener('click', ontoggle);
+        INP.removeEventListener('keydown', onenter);
+      }
+      function onok(){
+        const val = INP.value.trim();
+        if(val === PIN){
+          try { sessionStorage.setItem(KEY,'1'); }catch(e){}
+          cleanup(); hide(); resolve(true);
+        } else {
+          INP.select(); INP.focus();
+        }
+      }
+      function oncancel(){ cleanup(); hide(); resolve(false); }
+      function onenter(e){ if(e.key === 'Enter') onok(); if(e.key === 'Escape') oncancel(); }
+      function ontoggle(){ INP.type = (INP.type === 'password' ? 'text' : 'password'); INP.focus(); }
+
+      BTNOK.addEventListener('click', onok);
+      BTNC.addEventListener('click', oncancel);
+      BTNT.addEventListener('click', ontoggle);
+      INP.addEventListener('keydown', onenter);
+      INP.value = '';
+      show();
+    });
+  }
+
+  // Reemplazar uso previo de prompt por modal dentro del flujo de inventario
+  window.handleInventarioClick = async function(num){
+    try { window.HK_CTX.habitacionActual = String(num); } catch(e){}
+    // Si ya hay sesión, omite pedir de nuevo
+    try { if (sessionStorage.getItem(KEY) === '1') return abrirInventarioHK(num); } catch(e){}
+    const ok = await pedirPINModal();
+    if(!ok) return;
+    if (typeof window.abrirInventarioHK === 'function') return window.abrirInventarioHK(num);
+    const panel = document.getElementById('panel-inventario') || document.querySelector('.hk-inventario-panel');
+    if (panel){
+      panel.classList.add('abierto','activo');
+      const lbl = panel.querySelector('#inv-room-label'); if (lbl) lbl.textContent = 'Habitación ' + num;
+      const hidden = panel.querySelector('input[name="habitacion_num"]'); if (hidden) hidden.value = num;
+    } else {
+      alert('Inventario para Habitación ' + num + ' (stub). Integra abrirInventarioHK(num).');
+    }
+  };
+})();
 </script>
 
 </body>
