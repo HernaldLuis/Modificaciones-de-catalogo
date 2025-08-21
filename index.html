@@ -6,6 +6,29 @@
   <title>Catálogo de Habitaciones</title>
   <style>
 
+/* --- Botón Inventario dorado->rojo con cursiva --- */
+.boton-inventario{
+  display:inline-flex; align-items:center; gap:.6rem;
+  padding:.6rem 1.1rem; border-radius:999px;
+  font-family:'Playfair Display', serif; font-weight:700; font-style: italic; font-size:15px;
+  color:#fff;
+  background: radial-gradient(120% 180% at 20% -20%, rgba(255,255,255,.22), transparent 36%),
+              linear-gradient(135deg,#D4AF37 0%, #E67E22 45%, #C21807 100%);
+  border:1px solid rgba(255,255,255,.28);
+  box-shadow: 0 10px 24px rgba(194,24,7,.35), inset 0 1px 0 rgba(255,255,255,.35);
+  backdrop-filter: saturate(180%) blur(4px);
+  cursor:pointer;
+  transition: transform .16s ease, box-shadow .22s ease, filter .22s ease;
+}
+.boton-inventario:hover{ transform:translateY(-1px); filter:brightness(1.05); box-shadow:0 16px 32px rgba(194,24,7,.42); }
+.boton-inventario:active{ transform:translateY(0); box-shadow:0 6px 16px rgba(194,24,7,.35); }
+.boton-inventario .hk-ic{
+  width:18px; height:18px; object-fit:contain; display:inline-block; vertical-align:middle;
+  filter: drop-shadow(0 1px 1px rgba(0,0,0,.25));
+}
+
+
+
 /* --- Botón Inventario con icono --- */
 .boton-inventario{
   display:inline-flex; align-items:center; gap:.55rem;
@@ -1654,7 +1677,7 @@ panel.innerHTML = `
   <div class="contenido-inferior">\n<aside id="video-habitacion" class="video-habitacion" hidden>\n  <div class="video-ratio">\n    <iframe id="video-embed" src="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen hidden></iframe>\n    <video id="video-mp4" controls playsinline hidden></video>\n  </div>\n</aside>\n
     <h3>${habitacion.titulo}</h3>
     <div class="modal-toolbar">
-      <button class="btn hk" id="btn-inventario" onclick="handleInventarioClick('${num}')" class="boton-inventario" class="boton-inventario"><img class="hk-ic" src="https://res.cloudinary.com/dor6za85u/image/upload/v1755811018/1c729738384b3b439156b2de65158513-housekeeping-broom-icon_p0drof.webp" alt="" loading="lazy" decoding="async"/><span>Inventario · ${num}</span></button>
+      <button class="btn hk" id="btn-inventario" onclick="handleInventarioClick('${num}')" class="boton-inventario" class="boton-inventario" class="boton-inventario"><span>Inventario · ${num}</span><img class="hk-ic" src="https://res.cloudinary.com/dor6za85u/image/upload/v1755811018/1c729738384b3b439156b2de65158513-housekeeping-broom-icon_p0drof.webp" alt="" loading="lazy" decoding="async"/></button>
     </div>
     <p><strong>Categoría:</strong> ${habitacion.categoria} · ${habitacion.vista}</p>
     <p><strong>Habitación conectada:</strong> ${habitacion.habitacion_conectada ? habitacion.habitacion_conectada : 'No aplica'}</p>
