@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Catálogo de Habitaciones</title>
@@ -365,7 +366,7 @@ border-bottom: none;
   display: flex;
   justify-content: center;
   align-items: center;
-  min-width: 380px;
+  Z0px;
   width: max-content;
   box-sizing: border-box;
 
@@ -657,7 +658,7 @@ border-bottom: none;
 
 /* --- Video en detalle de habitación (handicap) --- */
 .video-habitacion{ position:absolute; top:16px; right:16px; width:520px; max-width:44%; background:#fff; border-radius:12px; box-shadow:0 12px 30px rgba(0,0,0,.18); overflow:hidden; }
-07.77%); background:#000; } /* 16:9 */
+56.25%); background:#000; } /* 16:9 */
 .video-ratio iframe, .video-ratio video{ position:absolute; inset:0; width:100%; height:100%; border:0; object-fit:contain; }
 .video-ratio video{ object-fit: contain; background:#000; }
 .contenido-inferior{ position:relative; }
@@ -878,7 +879,7 @@ border-bottom: none;
   <label class="chk"><input type="checkbox" id="filtro-handicap"> Handicap ♿</label>
   <label class="chk"><input type="checkbox" id="filtro-cocineta"> Cocineta</label>
 
-  <span id="totales-resumen" class="contador-categoria">
+  <span id="totales-resumen" class="contador-categoria" aria-live="polite">
     K: 0 · D: 0 · Total: 0 — Reserve: 0 · ♿: 0 · Cocineta: 0
   </span>
   <a id="btn-descargar-pdf" href="introduccion_paradisus_2025.pdf" download class="btn-reporte" title="Descargar reporte PDF" target="_blank">📄 Descargar PDF</a>
@@ -1758,7 +1759,7 @@ if (nuevaData.tipo_cama === "K") {
     console.warn("No se pudo actualizar habitaciones en segundo plano:", error);
   }
 }
-setInterval(actualizarHabitacionesSilenciosamente, 5000); // Se actualiza cada 5 segundos
+setInterval(actualizarHabitacionesSilenciosamente, 30000); // Se actualiza cada 5 segundos
 
 document.addEventListener('DOMContentLoaded', async () => {
   const sel = document.getElementById('filtro-categoria');
