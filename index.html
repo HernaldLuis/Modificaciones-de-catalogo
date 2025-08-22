@@ -3657,7 +3657,7 @@ if (window.__HK_afterLogin){ try{ window.__HK_afterLogin(); }catch(e){} window._
 </script>
 
 
-<button id="hk-admin-btn" class="hk-admin-btn" type="button">Historial (admin)</button>
+<button id="hk-admin-btn" class="hk-admin-btn" type="button">Historial</button>
 
 <div id="hk-admin-overlay" role="dialog" aria-modal="true" aria-labelledby="hk-admin-title">
   <div class="hk-admin-modal">
@@ -3874,7 +3874,50 @@ if (window.__HK_afterLogin){ try{ window.__HK_afterLogin(); }catch(e){} window._
     th{position:sticky;top:0;background:#fff;border-bottom:2px solid #ddd}</style></head><body>
     <h2>Historial de habitaciones (1211–4529)</h2>
     <table><thead><tr><th>Habitación</th><th>Zona</th><th>Ítem</th><th>Cantidad</th><th>Objetivo</th><th>Notas</th><th>Usuario</th><th>Fecha</th></tr></thead>
-    <tbody>${htmlRows || `<tr><td colspan="8">Sin datos</td></tr>`}</tbody></table></body></html>`);
+    <tbody>${htmlRows || `<tr><td colspan="8">Sin datos</td></tr>`}</tbody></table>
+<script>
+(function(){
+  function showComenzarHeartbeat(){
+    var btn = document.getElementById("hk-comenzar");
+    if(!btn) return;
+    var sess = (typeof getSession==="function") ? getSession() : null;
+    var active = (typeof isActive==="function" ? isActive(sess) : !!sess);
+    var room = window.HK_CURRENT_ROOM || (function(){ try{ return localStorage.getItem("HK_LAST_ROOM"); }catch(e){ return null; }}()) || null;
+    btn.style.display = (active && room) ? "inline-flex" : "none";
+  }
+  setInterval(showComenzarHeartbeat, 1000);
+  showComenzarHeartbeat();
+})();
+</script>
+
+
+<script>
+(function(){
+  // Function to capture and store selected room data into session and localStorage
+  document.addEventListener("click", function(e){
+    const btn = e.target.closest(".habitacion-btn");
+    if (btn && btn.dataset && btn.dataset.num) {
+      window.HK_CURRENT_ROOM = String(btn.dataset.num);
+      try {
+        localStorage.setItem("HK_LAST_ROOM", window.HK_CURRENT_ROOM);
+      } catch (e) {}
+    }
+  });
+
+  // Ensure that `openZones` will fallback to HK_LAST_ROOM if the room is missing
+  function openZones(){
+    const room = window.HK_CURRENT_ROOM || (function(){ try{ return localStorage.getItem("HK_LAST_ROOM"); }catch(e){ return null; }}());
+    if(!room){
+      alert("Selecciona una habitación primero.");
+      return;
+    }
+    // Continue with the rest of the open zones logic
+    // Add your code for displaying modal here
+  }
+})();
+</script>
+
+</body></html>`);
     win.document.close();
   }
 
