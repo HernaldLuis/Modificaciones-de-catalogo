@@ -1000,6 +1000,51 @@ border-bottom: none;
   hyphens: auto;
 }
 
+
+/* === Anti-desborde en modales (texto y controles) === */
+.hk-modal, .hk-logout-modal{
+  box-sizing: border-box;
+  max-width: 100%;
+  overflow: hidden;              /* evita que algo se salga de la tarjeta */
+}
+.hk-modal *, .hk-logout-modal *{
+  max-width: 100%;
+  white-space: normal;           /* fuerza corte en textos largos */
+  overflow-wrap: anywhere;       /* permite corte en cualquier punto si es necesario */
+}
+
+/* Filas del formulario: que envuelvan en pantallas pequeñas */
+.hk-form-row{
+  display: flex;
+  flex-wrap: wrap;               /* permite salto de línea si no cabe */
+  align-items: center;
+  gap: 10px;
+}
+.hk-form-row label{
+  flex: 1 1 160px;               /* etiqueta flexible, mínimo 160px */
+}
+.hk-form-row .hk-stepper,
+.hk-form-row input[type="number"],
+.hk-form-row textarea{
+  flex: 1 1 240px;               /* campo flexible */
+  min-width: 0;                  /* permite encogerse dentro del contenedor */
+}
+
+/* Ajuste fino del título para que no empuje el layout */
+.hk-modal h3{
+  margin-top: 0;
+  word-break: break-word;
+}
+
+/* En móviles, reduce padding para evitar overflow visual */
+@media (max-width: 520px){
+  .hk-modal, .hk-logout-modal{ padding: 14px; }
+  .hk-form-row label{ flex: 1 1 120px; }
+  .hk-form-row .hk-stepper,
+  .hk-form-row input[type="number"],
+  .hk-form-row textarea{ flex: 1 1 180px; }
+}
+
 </style>
 
 <style>
