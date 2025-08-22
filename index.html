@@ -3902,3 +3902,30 @@ if (window.__HK_afterLogin){ try{ window.__HK_afterLogin(); }catch(e){} window._
 
 </body>
 </html>
+
+<!-- Agregar el script necesario para que el botón funcione y recoja la información de las habitaciones -->
+<script>
+    // Mostrar el botón "Comenzar"
+    document.querySelector(".hk-comenzar").style.display = "flex";
+
+    // Evento para marcar habitaciones seleccionadas
+    document.querySelectorAll(".habitacion-btn").forEach(function(btn) {
+        btn.addEventListener("click", function() {
+            btn.classList.toggle("seleccionada");
+        });
+    });
+
+    // Evento para el botón "Comenzar"
+    document.querySelector(".hk-comenzar").addEventListener("click", function() {
+        let habitacionesSeleccionadas = [];
+        document.querySelectorAll(".habitacion-btn").forEach(function(btn) {
+            if (btn.classList.contains("seleccionada")) {
+                habitacionesSeleccionadas.push(btn.dataset.num);
+            }
+        });
+
+        console.log("Habitaciones seleccionadas:", habitacionesSeleccionadas);
+
+        // Aquí puedes procesar o enviar la información como necesites (por ejemplo, enviarla al servidor)
+    });
+</script>
