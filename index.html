@@ -2725,7 +2725,7 @@ async function handleInventarioClick(num){
     try{ window.HK_CTX = window.HK_CTX || {}; window.HK_CTX.habitacionActual = String(num); }catch(e){}
     // Reflejar selección en nuestro módulo
     try {
-      window.HK_CURRENT_ROOM = String(num);
+      window.HK_CURRENT_ROOM = String(num); try{ localStorage.setItem("HK_LAST_ROOM", String(window.HK_CURRENT_ROOM)); }catch(e){}
       const btnC = _get("hk-comenzar");
       if (btnC) btnC.style.display = "inline-flex";
     }catch(e){}
@@ -3061,6 +3061,7 @@ if (window.__HK_afterLogin){ try{ window.__HK_afterLogin(); }catch(e){} window._
     const btn = e.target.closest && e.target.closest(".habitacion-btn");
     if(btn && btn.dataset.num){
       HK_CURRENT_ROOM = btn.dataset.num;
+      try{ localStorage.setItem("HK_LAST_ROOM", String(HK_CURRENT_ROOM)); }catch(e){}
       // Mostrar botón comenzar si hay sesión activa
       const sess = getSession();
       btnComenzar.style.display = isActive(sess) ? "inline-flex" : "none";
@@ -3617,6 +3618,8 @@ if (window.__HK_afterLogin){ try{ window.__HK_afterLogin(); }catch(e){} window._
 
   function openZones(){
     const room = window.HK_CURRENT_ROOM;
+    if(!window.HK_CURRENT_ROOM){ alert("Selecciona una habitación primero."); return; }
+    if(!room){ try{ window.HK_CURRENT_ROOM = localStorage.getItem("HK_LAST_ROOM") || null; }catch(e){} }
     const sess = getSess();
     if(!room){ alert("Selecciona una habitación primero."); return; }
     if(!sessActive(sess)){ alert("Inicia sesión con tu matrícula para registrar."); return; }
@@ -3888,6 +3891,24 @@ if (window.__HK_afterLogin){ try{ window.__HK_afterLogin(); }catch(e){} window._
   }
   setInterval(showComenzarHeartbeat, 1000);
   showComenzarHeartbeat();
+})();
+</script>
+
+
+<script>
+(function(){
+  const ADMINS = ["3067888","3072167"];
+  function refreshHistorialBtn(){
+    try{
+      var el = document.getElementById("hk-admin-btn");
+      if(!el) return;
+      var sess = (typeof getHKSession==="function") ? getHKSession() : null;
+      var can = !!(sess && ADMINS.includes(String(sess.matricula)));
+      el.style.display = can ? "inline-flex" : "none";
+    }catch(e){}
+  }
+  setInterval(refreshHistorialBtn, 1000);
+  refreshHistorialBtn();
 })();
 </script>
 
