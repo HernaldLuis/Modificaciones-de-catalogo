@@ -3729,5 +3729,186 @@ if (window.__HK_afterLogin){ try{ window.__HK_afterLogin(); }catch(e){} window._
 })();
 </script>
 
+
+<!-- === HK · HISTORIAL (Listado + Exportaciones) === -->
+<style>
+  .hk-historial-wrap{margin:16px 0; padding:12px; border:1px solid rgba(0,0,0,.1); border-radius:12px; background:rgba(0,0,0,.02);}
+  .hk-hist-toolbar{display:flex; gap:.5rem; flex-wrap:wrap; align-items:center; margin-bottom:.75rem;}
+  .hk-hist-toolbar .hk-btn{padding:.5rem .75rem; border-radius:10px; border:1px solid rgba(0,0,0,.2); cursor:pointer; background:#fff;}
+  .hk-hist-toolbar .hk-btn.primary{background:#222; color:#fff;}
+  .hk-hist-table{width:100%; border-collapse:collapse; font-size:.93rem; background:#fff;}
+  .hk-hist-table th, .hk-hist-table td{border:1px solid rgba(0,0,0,.12); padding:.4rem .5rem; text-align:left; vertical-align:top;}
+  .hk-hist-table th{background:rgba(0,0,0,.05);}
+  .hk-hist-badge{font-weight:600; opacity:.8; margin-bottom:.5rem;}
+  .hk-hidden{display:none;}
+  @media print {
+    .no-print{display:none !important;}
+    .hk-historial-wrap{border:none; background:#fff;}
+  }
+</style>
+
+<section id="hkHistorialSection" class="hk-historial-wrap hk-hidden">
+  <div class="hk-hist-badge" id="hkHistUserBadge">—</div>
+  <div class="hk-hist-toolbar no-print">
+    <button class="hk-btn primary" id="hkHistRefresh">Refrescar</button>
+    <button class="hk-btn" id="hkExportCSV">Exportar Excel (CSV)</button>
+    <button class="hk-btn" id="hkExportPDF">Exportar PDF</button>
+    <span style="margin-left:auto"></span>
+    <label>Filtrar por habitación:</label>
+    <input type="text" id="hkFilterRoom" placeholder="ej. 1507" style="padding:.35rem .5rem; border-radius:8px; border:1px solid rgba(0,0,0,.2);">
+  </div>
+  <div style="overflow:auto;">
+    <table class="hk-hist-table" id="hkHistTable">
+      <thead>
+        <tr>
+          <th>Fecha</th>
+          <th>Usuario</th>
+          <th>Habitación</th>
+          <th>Resumen</th>
+          <th>Detalles</th>
+        </tr>
+      </thead>
+      <tbody id="hkHistTBody">
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<script>
+(function(){
+  const SKEY = 'hk_session';
+  const ALLOWED = new Set([
+    "3068694","3071925","3075393","3077512","3072167","3062148","3067888"
+  ]);
+
+  // Detect existing helpers (from previous scripts)
+  const q = sel => document.querySelector(sel);
+  const qa = sel => Array.from(document.querySelectorAll(sel));
+
+  // Read session (with TTL if defined)
+  function safeGetSession(){
+    try{
+      if(typeof getSession === 'function'){ return getSession(); }
+      const raw = localStorage.getItem(SKEY);
+      return raw ? JSON.parse(raw) : null;
+    }catch(e){ return null; }
+  }
+
+  function canSeeHistorial(){
+    const ses = safeGetSession();
+    return !!(ses && ALLOWED.has(String(ses.matricula)));
+  }
+
+  // Mount/Toggle UI based on access
+  function renderHistorialAccess(){
+    const sec = q('#hkHistorialSection');
+    const badge = q('#hkHistUserBadge');
+    const ses = safeGetSession();
+    if(!sec) return;
+    if(canSeeHistorial()){
+      sec.classList.remove('hk-hidden');
+      if(ses){
+        const dt = new Date();
+        const fecha = dt.toLocaleDateString(undefined, {weekday:'long', year:'numeric', month:'long', day:'numeric'});
+        badge.textContent = `Hola ${ses.nombre}, aquí está tu historial. (${fecha})`;
+      }
+      loadAndRenderHistorial();
+    }else{
+      sec.classList.add('hk-hidden');
+    }
+  }
+
+  // Load all localStorage entries inv_* and render into table
+  function loadAndRenderHistorial(){
+    const tbody = q('#hkHistTBody');
+    if(!tbody) return;
+    tbody.innerHTML = '';
+    const filt = (q('#hkFilterRoom')?.value || '').trim();
+    const rows = [];
+
+    for(let i=0;i<localStorage.length;i++){
+      const k = localStorage.key(i);
+      if(!/^inv_/.test(k)) continue;
+      const room = k.replace(/^inv_/, '');
+      if(filt && !room.includes(filt)) continue;
+      try{
+        const list = JSON.parse(localStorage.getItem(k) || '[]');
+        list.forEach(item=>{
+          rows.push({
+            fecha: item.fecha || '',
+            usuario: item.usuario || '',
+            room: item.room || room,
+            resumen: item.resumen || '',
+            detalles: JSON.stringify(item)
+          });
+        });
+      }catch(e){}
+    }
+
+    rows.sort((a,b)=> new Date(a.fecha) - new Date(b.fecha)); // cronológico asc
+    rows.forEach(r=>{
+      const tr = document.createElement('tr');
+      const tdF = document.createElement('td'); tdF.textContent = r.fecha;
+      const tdU = document.createElement('td'); tdU.textContent = r.usuario;
+      const tdR = document.createElement('td'); tdR.textContent = r.room;
+      const tdS = document.createElement('td'); tdS.textContent = r.resumen;
+      const tdD = document.createElement('td'); tdD.textContent = r.detalles;
+      tr.appendChild(tdF); tr.appendChild(tdU); tr.appendChild(tdR); tr.appendChild(tdS); tr.appendChild(tdD);
+      tbody.appendChild(tr);
+    });
+  }
+
+  // Export CSV (Excel abre CSV sin problema)
+  function exportCSV(){
+    const tbl = q('#hkHistTable');
+    let csv = '';
+    const rows = tbl.querySelectorAll('tr');
+    rows.forEach(row=>{
+      const cols = row.querySelectorAll('th,td');
+      const line = Array.from(cols).map(c => {
+        const t = (c.textContent || '').replace(/"/g,'""');
+        return `"${t}"`;
+      }).join(',');
+      csv += line + '\n';
+    });
+    const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'historial_inventario.csv';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  // Export PDF -> usamos window.print() con estilos de impresión
+  function exportPDF(){
+    window.print();
+  }
+
+  // Events
+  document.addEventListener('click', (e)=>{
+    if(e.target && e.target.id === 'hkHistRefresh'){ renderHistorialAccess(); }
+    if(e.target && e.target.id === 'hkExportCSV'){ exportCSV(); }
+    if(e.target && e.target.id === 'hkExportPDF'){ exportPDF(); }
+  });
+  document.addEventListener('input', (e)=>{
+    if(e.target && e.target.id === 'hkFilterRoom'){ loadAndRenderHistorial(); }
+  });
+
+  // Init on DOM ready and when session changes (best effort)
+  document.addEventListener('DOMContentLoaded', ()=>{
+    renderHistorialAccess();
+  });
+  // If your renderSessionState exists, hook it
+  if(typeof renderSessionState === 'function'){
+    const _orig = renderSessionState;
+    window.renderSessionState = function(){
+      _orig();
+      renderHistorialAccess();
+    };
+  }
+})();
+</script>
+
 </body>
 </html>
