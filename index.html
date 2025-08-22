@@ -3235,5 +3235,114 @@ if (window.__HK_afterLogin){ try{ window.__HK_afterLogin(); }catch(e){} window._
 })();
 </script>
 
+
+<div id="hkz-overlay" role="dialog" aria-modal="true" aria-labelledby="hkz-title">
+  <div class="hkz-modal">
+    <div class="hkz-head">
+      <div class="hkz-title" id="hkz-title">Inventario por zonas · <span id="hkz-room"></span></div>
+      <div class="hkz-meta" id="hkz-greet"></div>
+    </div>
+    <div class="hkz-tabs">
+      <button class="hkz-tab activa" data-zone="cama">Cama</button>
+      <button class="hkz-tab" data-zone="bano">Baño</button>
+      <button class="hkz-tab" data-zone="closet">Clóset</button>
+      <button class="hkz-tab" data-zone="terraza">Terraza</button>
+    </div>
+    <div class="hkz-body">
+      <!-- Cama -->
+      <section class="hkz-zone activa" id="hkz-zone-cama">
+        <!-- Dynamic content will be injected here -->
+      </section>
+      <!-- Baño -->
+      <section class="hkz-zone" id="hkz-zone-bano">
+        <!-- Dynamic content will be injected here -->
+      </section>
+      <!-- Clóset -->
+      <section class="hkz-zone" id="hkz-zone-closet">
+        <!-- Dynamic content will be injected here -->
+      </section>
+      <!-- Terraza -->
+      <section class="hkz-zone" id="hkz-zone-terraza">
+        <!-- Dynamic content will be injected here -->
+      </section>
+    </div>
+    <div class="hkz-actions">
+      <button type="button" class="hkz-btn" id="hkz-cancelar">Cerrar</button>
+      <button type="button" class="hkz-btn primary" id="hkz-guardar-zona">Guardar zona</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const roomCategories = {
+    "normal": {
+      "cama": [{"item": "Protector colchón", "cantidad": 1}, {"item": "Sábanas (set)", "cantidad": 1}, {"item": "Almohadas", "cantidad": 4}, {"item": "Insert (dúvet)", "cantidad": 1}, {"item": "Cubre Dúvet", "cantidad": 1}],
+      "bano": [{"item": "Toalla de baño", "cantidad": 4}, {"item": "Toalla de mano", "cantidad": 4}, {"item": "Toalla facial", "cantidad": 2}, {"item": "Tapete", "cantidad": 1}],
+      "closet": [{"item": "Ganchos", "cantidad": 6}, {"item": "Bolsa de lavandería", "cantidad": 1}],
+      "terraza": [{"item": "Sillas de habitación", "cantidad": 2}]
+    },
+    "swing": {
+      "cama": [{"item": "Protector colchón", "cantidad": 1}, {"item": "Sábanas (set)", "cantidad": 1}, {"item": "Almohadas", "cantidad": 4}, {"item": "Insert (dúvet)", "cantidad": 1}, {"item": "Cubre Dúvet", "cantidad": 1}],
+      "bano": [{"item": "Toalla de baño", "cantidad": 6}, {"item": "Toalla de mano", "cantidad": 5}, {"item": "Toalla facial", "cantidad": 2}, {"item": "Tapete", "cantidad": 2}],
+      "closet": [{"item": "Ganchos", "cantidad": 6}, {"item": "Bolsa de lavandería", "cantidad": 1}],
+      "terraza": [{"item": "Sillas de habitación", "cantidad": 2}]
+    },
+    "master": {
+      "cama": [{"item": "Protector colchón", "cantidad": 1}, {"item": "Sábanas (set)", "cantidad": 1}, {"item": "Almohadas", "cantidad": 4}, {"item": "Insert (dúvet)", "cantidad": 1}, {"item": "Cubre Dúvet", "cantidad": 1}],
+      "bano": [{"item": "Toalla de baño", "cantidad": 6}, {"item": "Toalla de mano", "cantidad": 7}, {"item": "Toalla facial", "cantidad": 2}, {"item": "Tapete", "cantidad": 4}],
+      "closet": [{"item": "Ganchos", "cantidad": 6}, {"item": "Bolsa de lavandería", "cantidad": 1}],
+      "terraza": [{"item": "Sillas de habitación", "cantidad": 2}]
+    }
+  };
+
+  // Dynamically load the articles into the respective zones
+  function loadCategoryArticles(category){
+    const categoryData = roomCategories[category] || {};
+    Object.keys(categoryData).forEach(zone=>{
+      const zoneSection = document.getElementById("hkz-zone-" + zone);
+      if (zoneSection){
+        categoryData[zone].forEach(item=>{
+          const row = document.createElement("div");
+          row.classList.add("hkz-row");
+          row.innerHTML = `
+            <label>${item.item}</label>
+            <div class="hk-stepper">
+              <button type="button" class="dec">−</button>
+              <input type="number" min="0" step="1" value="${item.cantidad}">
+              <button type="button" class="inc">+</button>
+            </div>`;
+          zoneSection.appendChild(row);
+        });
+      }
+    });
+  }
+
+  function openZones(){
+    const room = window.HK_CURRENT_ROOM;
+    if(!room){ alert("Selecciona una habitación primero."); return; }
+    const categoria = document.getElementById("hkz-categoria").value;
+    loadCategoryArticles(categoria);
+    // Toggle sections based on category selection
+    document.querySelectorAll(".hkz-zone").forEach(zone=>zone.classList.remove("activa"));
+    document.getElementById("hkz-zone-" + categoria).classList.add("activa");
+    document.getElementById("hkz-room").textContent = room;
+    document.getElementById("hkz-greet").textContent = `¿Qué vamos a registrar hoy?`;
+    document.getElementById("hkz-overlay").classList.add("activo");
+  }
+
+  function closeZones(){
+    document.getElementById("hkz-overlay").classList.remove("activo");
+  }
+
+  // Wire events for closing modal and saving
+  document.getElementById("hkz-cancelar").addEventListener("click", closeZones);
+  document.getElementById("hkz-guardar-zona").addEventListener("click", function(){
+    alert("Zona guardada (falta implementar).");
+    closeZones();
+  });
+})();
+</script>
+
 </body>
 </html>
