@@ -3657,7 +3657,7 @@ if (window.__HK_afterLogin){ try{ window.__HK_afterLogin(); }catch(e){} window._
 </script>
 
 
-<button id="hk-admin-btn" class="hk-admin-btn" type="button">Historial</button>
+<button id="hk-admin-btn" class="hk-admin-btn" type="button">Historial (admin)</button>
 
 <div id="hk-admin-overlay" role="dialog" aria-modal="true" aria-labelledby="hk-admin-title">
   <div class="hk-admin-modal">
@@ -3874,24 +3874,7 @@ if (window.__HK_afterLogin){ try{ window.__HK_afterLogin(); }catch(e){} window._
     th{position:sticky;top:0;background:#fff;border-bottom:2px solid #ddd}</style></head><body>
     <h2>Historial de habitaciones (1211–4529)</h2>
     <table><thead><tr><th>Habitación</th><th>Zona</th><th>Ítem</th><th>Cantidad</th><th>Objetivo</th><th>Notas</th><th>Usuario</th><th>Fecha</th></tr></thead>
-    <tbody>${htmlRows || `<tr><td colspan="8">Sin datos</td></tr>`}</tbody></table>
-<script>
-(function(){
-  function showComenzarHeartbeat(){
-    try{
-      var btn = document.getElementById("hk-comenzar");
-      if(!btn) return;
-      var sess = (typeof getSession==="function") ? getSession() : null;
-      var active = (typeof isActive==="function") ? isActive(sess) : !!sess;
-      btn.style.display = (active && window.HK_CURRENT_ROOM) ? "inline-flex" : "none";
-    }catch(e){}
-  }
-  setInterval(showComenzarHeartbeat, 1000);
-  showComenzarHeartbeat();
-})();
-</script>
-
-</body></html>`);
+    <tbody>${htmlRows || `<tr><td colspan="8">Sin datos</td></tr>`}</tbody></table></body></html>`);
     win.document.close();
   }
 
@@ -3903,7 +3886,7 @@ if (window.__HK_afterLogin){ try{ window.__HK_afterLogin(); }catch(e){} window._
   function closeAdmin(){ ov.classList.remove("activo"); }
 
   // Wiring
-  if(btn){ btn.title="Historial"; btn.addEventListener("click", openAdmin); }
+  btn && btn.addEventListener("click", openAdmin);
   btnClose && btnClose.addEventListener("click", closeAdmin);
   ov && ov.addEventListener("click", (e)=>{ if(e.target===ov) closeAdmin(); });
   search && search.addEventListener("input", renderTable);
