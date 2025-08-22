@@ -3878,42 +3878,16 @@ if (window.__HK_afterLogin){ try{ window.__HK_afterLogin(); }catch(e){} window._
 <script>
 (function(){
   function showComenzarHeartbeat(){
-    var btn = document.getElementById("hk-comenzar");
-    if(!btn) return;
-    var sess = (typeof getSession==="function") ? getSession() : null;
-    var active = (typeof isActive==="function" ? isActive(sess) : !!sess);
-    var room = window.HK_CURRENT_ROOM || (function(){ try{ return localStorage.getItem("HK_LAST_ROOM"); }catch(e){ return null; }}()) || null;
-    btn.style.display = (active && room) ? "inline-flex" : "none";
+    try{
+      var btn = document.getElementById("hk-comenzar");
+      if(!btn) return;
+      var sess = (typeof getSession==="function") ? getSession() : null;
+      var active = (typeof isActive==="function") ? isActive(sess) : !!sess;
+      btn.style.display = (active && window.HK_CURRENT_ROOM) ? "inline-flex" : "none";
+    }catch(e){}
   }
   setInterval(showComenzarHeartbeat, 1000);
   showComenzarHeartbeat();
-})();
-</script>
-
-
-<script>
-(function(){
-  // Function to capture and store selected room data into session and localStorage
-  document.addEventListener("click", function(e){
-    const btn = e.target.closest(".habitacion-btn");
-    if (btn && btn.dataset && btn.dataset.num) {
-      window.HK_CURRENT_ROOM = String(btn.dataset.num);
-      try {
-        localStorage.setItem("HK_LAST_ROOM", window.HK_CURRENT_ROOM);
-      } catch (e) {}
-    }
-  });
-
-  // Ensure that `openZones` will fallback to HK_LAST_ROOM if the room is missing
-  function openZones(){
-    const room = window.HK_CURRENT_ROOM || (function(){ try{ return localStorage.getItem("HK_LAST_ROOM"); }catch(e){ return null; }}());
-    if(!room){
-      alert("Selecciona una habitación primero.");
-      return;
-    }
-    // Continue with the rest of the open zones logic
-    // Add your code for displaying modal here
-  }
 })();
 </script>
 
@@ -3929,7 +3903,7 @@ if (window.__HK_afterLogin){ try{ window.__HK_afterLogin(); }catch(e){} window._
   function closeAdmin(){ ov.classList.remove("activo"); }
 
   // Wiring
-  btn && btn.addEventListener("click", openAdmin);
+  if(btn){ btn.title="Historial"; btn.addEventListener("click", openAdmin); }
   btnClose && btnClose.addEventListener("click", closeAdmin);
   ov && ov.addEventListener("click", (e)=>{ if(e.target===ov) closeAdmin(); });
   search && search.addEventListener("input", renderTable);
