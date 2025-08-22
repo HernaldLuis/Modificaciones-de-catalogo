@@ -10,15 +10,15 @@
 .boton-inventario{
   display:inline-flex; align-items:center; gap:.55rem;
   padding:.6rem 1rem; border-radius:999px;
-  font: 600 14px/1 system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial, 'Noto Sans';
-  color:#fff; background:linear-gradient(135deg,#6a11cb,#2575fc);
+  font: 600 14px/1 'Playfair Display', Georgia, 'Times New Roman', serif;
+  color:#fff; background:linear-gradient(135deg,#c9a14a,#8a5a2b);
   border:1px solid rgba(255,255,255,.22);
-  box-shadow:0 10px 25px rgba(37,117,252,.35), inset 0 1px 0 rgba(255,255,255,.25);
+  box-shadow:0 10px 25px rgba(138,90,43,.35), inset 0 1px 0 rgba(255,255,255,.25);
   backdrop-filter:saturate(180%) blur(4px);
   cursor:pointer; transition:transform .15s ease, box-shadow .2s ease, filter .2s ease;
 }
-.boton-inventario:hover{ transform:translateY(-1px); filter:brightness(1.05); box-shadow:0 16px 30px rgba(37,117,252,.45); }
-.boton-inventario:active{ transform:translateY(0); box-shadow:0 6px 16px rgba(37,117,252,.35); }
+.boton-inventario:hover{ transform:translateY(-1px); filter:brightness(1.05); box-shadow: 0 16px 30px rgba(138,90,43,.45); }
+.boton-inventario:active{ transform:translateY(0); box-shadow: 0 6px 16px rgba(138,90,43,.35); }
 .boton-inventario::before{
   content:"🧾"; font-size:16px; line-height:1; margin-right:.1rem;
 }
@@ -385,16 +385,9 @@ border-bottom: none;
       background-color: #388e3c ; /*🔥 Estas seccion cambiar el color de las habitaciones cuando pones el cursor*/
     }
 
-    .habitacion-btn.disponible {  
-  background-color:#e07b17;      /*🔥 Estas seccion cambiar el color de las habotaciones disponiblesx */
-  color: white;
-  border: 2px solid #0056b3;
-  font-weight: bold;
-}
+    .habitacion-btn.disponible {  background-color:#c79b3b; color:#fff; border: 2px solid rgba(255,255,255,.6); font-weight: bold; }
 
-.habitacion-btn.disponible:hover {
-  background-color: #0056b3;
-}
+.habitacion-btn.disponible:hover { background-color: #a87f2d; }
 
     /* Tipo K - King */
 .habitacion-btn.tipo-k {
@@ -845,6 +838,21 @@ border-bottom: none;
   }
 }
 */
+
+
+@media (max-width: 720px){
+  .galeria-habitacion{ 
+    display: grid !important;
+    grid-auto-flow: column;
+    grid-auto-columns: 80vw;
+    overflow-x: auto;
+    grid-template-columns: none;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+  }
+  .bloque-imagen{ scroll-snap-align: center; }
+}
+
 
 </style>
 
