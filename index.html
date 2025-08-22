@@ -907,6 +907,16 @@ border-bottom: none;
 .hk-stepper button{ width:34px; height:34px; border-radius:8px; border:1px solid #ddd; background:#fafafa; font-weight:900; cursor:pointer; }
 .hk-stepper input{ width:90px; text-align:center; }
 
+
+/* === Historial de sillas (por habitación) === */
+.hk-ultima-act { font-size:.9rem; opacity:.8; margin:6px 0 8px; }
+.hk-hist-toggle { margin:6px 0 10px; display:inline-flex; gap:6px; align-items:center; cursor:pointer; font-weight:700; }
+.hk-hist { display:none; border:1px dashed #ddd; border-radius:12px; padding:10px; background:#fafafa; max-height:220px; overflow:auto; }
+.hk-hist-item { font-size:.9rem; border-bottom:1px solid #eee; padding:6px 0; display:flex; justify-content:space-between; gap:10px; }
+.hk-hist-item:last-child { border-bottom:none; }
+.hk-hist-meta { opacity:.75; }
+.hk-hist-actions button { border:1px solid #ddd; border-radius:8px; background:#fff; padding:.25rem .5rem; cursor:pointer; font-weight:700; }
+
 </style>
 
 <style>
@@ -2577,6 +2587,12 @@ window.HK_CTX = window.HK_CTX || { habitacionActual: null };
   <div class="hk-modal">
     <h3 id="hk-sillas-title">Sillas de habitación <span id="hk-room-label"></span></h3>
     <div class="hk-badge-usuario" id="hk-usuario-label"></div>
+    <div id="hk-ultima-actualizacion" class="hk-ultima-act">Sin registros previos.</div>
+    <div id="hk-hist-toggle" class="hk-hist-toggle">🕘 Ver historial</div>
+    <div id="hk-hist" class="hk-hist">
+      <div id="hk-hist-list"></div>
+    </div>
+
 
     <div class="hk-form-row"><label for="hk-sillas-cantidad">Cantidad de sillas</label><div class="hk-stepper"><button type="button" class="hk-stepper-dec" aria-label="Disminuir">−</button><input id="hk-sillas-cantidad" type="number" min="0" max="6" step="1" value="0"><button type="button" class="hk-stepper-inc" aria-label="Aumentar">+</button></div></div>
     <div class="hk-form-row">
@@ -2623,6 +2639,79 @@ window.HK_CTX = window.HK_CTX || { habitacionActual: null };
   const inputCant = document.getElementById("hk-sillas-cantidad");
   const inputNotas = document.getElementById("hk-sillas-notas");
   const btnGuardar = document.getElementById("hk-sillas-guardar");
+  const MAX_HISTORY = 50;
+  const elUltima = document.getElementById("hk-ultima-actualizacion");
+  const elHistToggle = document.getElementById("hk-hist-toggle");
+  const elHist = document.getElementById("hk-hist");
+  const elHistList = document.getElementById("hk-hist-list");
+
+  function formatFecha(ts){
+    try { return new Date(ts).toLocaleString("es-MX", { dateStyle:"medium", timeStyle:"short" }); }
+    catch(e){ return new Date(ts).toLocaleString(); }
+  }
+
+  function getRoomData(num){
+    const data = loadRoomsData();
+    return data[num] || {};
+  }
+  function setRoomData(num, payload){
+    const data = loadRoomsData();
+    data[num] = Object.assign({}, data[num]||{}, payload);
+    saveRoomsData(data);
+  }
+
+  function renderUltima(num){
+    const d = getRoomData(num);
+    const last = (d.sillas_historial && d.sillas_historial.length) ? d.sillas_historial[d.sillas_historial.length-1] : d.sillas;
+    if (last && typeof last.ts === "number"){
+      elUltima.textContent = `Última actualización: ${formatFecha(last.ts)} · ${last.nombre}`;
+    } else {
+      elUltima.textContent = "Sin registros previos.";
+    }
+  }
+
+  function renderHistorial(num){
+    const d = getRoomData(num);
+    const hist = (d.sillas_historial||[]).slice().reverse(); // mostrar recientes primero
+    elHistList.innerHTML = "";
+    if (!hist.length){
+      elHistList.innerHTML = "<div class='hk-hist-item'><div class='hk-hist-meta'>No hay historial aún.</div></div>";
+      return;
+    }
+    hist.forEach((entry, i)=>{
+      const wrap = document.createElement("div");
+      wrap.className = "hk-hist-item";
+      const meta = document.createElement("div");
+      meta.className = "hk-hist-meta";
+      meta.textContent = `${formatFecha(entry.ts)} · ${entry.nombre} · Cant: ${entry.cantidad}` + (entry.notas ? ` · "${entry.notas}"` : "");
+      const actions = document.createElement("div");
+      actions.className = "hk-hist-actions";
+      const restore = document.createElement("button");
+      restore.textContent = "Restaurar";
+      restore.addEventListener("click", ()=>{
+        // Solo carga los valores al formulario; el guardado crea una nueva versión
+        inputCant.value = entry.cantidad;
+        inputNotas.value = entry.notas || "";
+      });
+      actions.appendChild(restore);
+      wrap.appendChild(meta);
+      wrap.appendChild(actions);
+      elHistList.appendChild(wrap);
+    });
+  }
+
+  // Toggle del historial
+  if (elHistToggle){
+    elHistToggle.addEventListener("click", ()=>{
+      const isOpen = elHist.style.display === "block";
+      elHist.style.display = isOpen ? "none" : "block";
+      elHistToggle.textContent = isOpen ? "🕘 Ver historial" : "🗂️ Ocultar historial";
+      if (!isOpen && HK_CURRENT_ROOM){
+        renderHistorial(HK_CURRENT_ROOM);
+      }
+    });
+  }
+
   const btnCancelar = document.getElementById("hk-sillas-cancelar");
 
   // Exponer helpers a window si no existen
@@ -2703,7 +2792,11 @@ window.HK_CTX = window.HK_CTX || { habitacionActual: null };
     const prev = (data[HK_CURRENT_ROOM] && data[HK_CURRENT_ROOM].sillas) ? data[HK_CURRENT_ROOM].sillas : null;
     inputCant.value = prev ? prev.cantidad : 0;
     inputNotas.value = prev ? (prev.notas||"") : "";
+    // actualizar UI de última actualización e historial (cerrado por defecto)
+    if (elHist){ elHist.style.display = "none"; }
+    renderUltima(HK_CURRENT_ROOM);
     sillasOverlay.classList.add("activo");
+  
   }
   function closeSillas(){
     sillasOverlay.classList.remove("activo");
@@ -2726,13 +2819,24 @@ window.HK_CTX = window.HK_CTX || { habitacionActual: null };
 
     const data = loadRoomsData();
     data[HK_CURRENT_ROOM] = data[HK_CURRENT_ROOM] || {};
-    data[HK_CURRENT_ROOM].sillas = {
+
+    const entry = {
       cantidad,
       notas,
       by: sess.matricula,
       nombre: sess.nombre,
       ts: now()
     };
+
+    // historial
+    const hist = (data[HK_CURRENT_ROOM].sillas_historial || []);
+    hist.push(entry);
+    if (hist.length > MAX_HISTORY){ data[HK_CURRENT_ROOM].sillas_historial = hist.slice(hist.length - MAX_HISTORY); }
+    else { data[HK_CURRENT_ROOM].sillas_historial = hist; }
+
+    // último
+    data[HK_CURRENT_ROOM].sillas = entry;
+
     saveRoomsData(data);
     audit("save_sillas", { habitacion: HK_CURRENT_ROOM, cantidad });
 
@@ -2747,9 +2851,7 @@ window.HK_CTX = window.HK_CTX || { habitacionActual: null };
     m.textContent = `Sillas registradas para ${HK_CURRENT_ROOM} · ${cantidad}`;
     document.body.appendChild(m);
     setTimeout(()=>{ m.remove(); }, 2000);
-  });
-
-  // Mostrar/ocultar botón "Comenzar" en base a la sesión
+  });// Mostrar/ocultar botón "Comenzar" en base a la sesión
   function refreshComenzar(){
     const sess = getSession();
     btnComenzar.style.display = isActive(sess) && HK_CURRENT_ROOM ? "inline-flex" : "none";
