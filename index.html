@@ -2639,6 +2639,73 @@ window.HK_CTX = window.HK_CTX || { habitacionActual: null };
   const inputCant = document.getElementById("hk-sillas-cantidad");
   const inputNotas = document.getElementById("hk-sillas-notas");
   const btnGuardar = document.getElementById("hk-sillas-guardar");
+  /* --- Login helpers & wiring (overlay PIN usado como matrícula) --- */
+  function validateMatricula(m){
+    return !!USERS[(m||"").trim()];
+  }
+  window.HK_validate = validateMatricula;
+
+  // Abre/cierra el modal de matrícula (overlay existente)
+  function openPIN(){
+    if(!overlayPIN) return;
+    overlayPIN.style.display = "flex";
+    setTimeout(()=>overlayPIN.classList.add("activo"), 0);
+    if (inputPIN){ inputPIN.type="text"; inputPIN.placeholder="Matrícula"; inputPIN.value=""; inputPIN.focus(); }
+  }
+  function closePIN(){
+    if(!overlayPIN) return;
+    overlayPIN.classList.remove("activo");
+    setTimeout(()=>overlayPIN.style.display = "none", 200);
+  }
+
+  // Click en Inventario: si sesión activa, abre panel si aplica; si no, pide matrícula
+  if (btnInventario){
+    btnInventario.addEventListener("click", ()=>{
+      const sess = getSession();
+      if (isActive(sess)){
+        // acceso directo (si usas panel lateral)
+        // const side = document.querySelector(".hk-inv-side"); if(side) side.classList.add("hk-open");
+      } else {
+        openPIN();
+      }
+    });
+  }
+
+  // Enter en input de matrícula
+  if (inputPIN){
+    inputPIN.addEventListener("keydown", function(ev){
+      if (ev.key === "Enter"){
+        const m = (inputPIN.value||"").trim();
+        if (validateMatricula(m)){
+          setSession(m);
+          closePIN();
+        } else {
+          inputPIN.setCustomValidity("Matrícula no reconocida");
+          inputPIN.reportValidity();
+          setTimeout(()=>inputPIN.setCustomValidity(""), 1800);
+        }
+      }
+    });
+  }
+
+  // Click en botón Aceptar del modal de matrícula
+  (function(){
+    const btnOK = document.getElementById("hkpin2-ok");
+    if (btnOK && inputPIN){
+      btnOK.addEventListener("click", function(){
+        const m = (inputPIN.value||"").trim();
+        if (validateMatricula(m)){
+          setSession(m);
+          closePIN();
+        } else {
+          inputPIN.setCustomValidity("Matrícula no reconocida");
+          inputPIN.reportValidity();
+          setTimeout(()=>inputPIN.setCustomValidity(""), 1800);
+        }
+      });
+    }
+  })();
+
   const MAX_HISTORY = 50;
   const elUltima = document.getElementById("hk-ultima-actualizacion");
   const elHistToggle = document.getElementById("hk-hist-toggle");
