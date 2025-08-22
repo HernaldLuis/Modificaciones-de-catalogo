@@ -956,6 +956,50 @@ border-bottom: none;
 .hk-logout-btn{ padding:.55rem .9rem; border-radius:10px; border:1px solid rgba(0,0,0,.1); cursor:pointer; font-weight:700; }
 .hk-logout-btn.primary{ background: linear-gradient(135deg,#c9a14a,#8a5a2b); color:#fff; border:none; }
 
+
+/* === Ajustes de texto responsivo (modales y mensajes) === */
+.hk-modal h3,
+.hk-logout-modal h3{
+  font-size: clamp(1.05rem, 2.2vw, 1.25rem);
+  line-height: 1.25;
+}
+.hk-badge-usuario,
+.hk-ultima-act,
+#hk-room-label{
+  font-size: clamp(.92rem, 1.8vw, 1.05rem);
+  line-height: 1.35;
+  word-break: break-word;
+  hyphens: auto;
+}
+.hk-modal p,
+.hk-logout-modal p,
+.hk-logout-modal .hk-logout-actions .hk-logout-btn{
+  font-size: clamp(.92rem, 1.65vw, 1rem);
+  line-height: 1.4;
+}
+
+.mensaje-flotante{
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 18px;
+  background: rgba(0,0,0,.78);
+  color: #fff;
+  padding: .5rem .8rem;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: clamp(.9rem, 1.8vw, 1rem);
+  max-width: 92vw;
+  text-align: center;
+  z-index: 10090;
+}
+
+/* Asegurar que cualquier texto dentro del modal no se recorte */
+.hk-modal, .hk-logout-modal{
+  word-break: break-word;
+  hyphens: auto;
+}
+
 </style>
 
 <style>
