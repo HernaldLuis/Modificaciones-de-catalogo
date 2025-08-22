@@ -2725,7 +2725,7 @@ async function handleInventarioClick(num){
     try{ window.HK_CTX = window.HK_CTX || {}; window.HK_CTX.habitacionActual = String(num); }catch(e){}
     // Reflejar selección en nuestro módulo
     try {
-      window.HK_CURRENT_ROOM = String(num); try{ localStorage.setItem("HK_LAST_ROOM", String(window.HK_CURRENT_ROOM)); }catch(e){}
+      window.HK_CURRENT_ROOM = String(num); try{ localStorage.setItem("HK_LAST_ROOM", String(window.HK_CURRENT_ROOM)); }catch(_){ } try{ localStorage.setItem("HK_LAST_ROOM", String(window.HK_CURRENT_ROOM)); }catch(e){}
       const btnC = _get("hk-comenzar");
       if (btnC) btnC.style.display = "inline-flex";
     }catch(e){}
@@ -3618,7 +3618,11 @@ if (window.__HK_afterLogin){ try{ window.__HK_afterLogin(); }catch(e){} window._
 
   function openZones(){
     const room = window.HK_CURRENT_ROOM;
-    if(!window.HK_CURRENT_ROOM){ alert("Selecciona una habitación primero."); return; }
+    if(!window.HK_CURRENT_ROOM){ alert("Selecciona una habitación primero."); return; 
+    var r = window.HK_CURRENT_ROOM;
+    if(!r){ try{ r = localStorage.getItem("HK_LAST_ROOM"); if(r) window.HK_CURRENT_ROOM = r; }catch(_){}
+    if(!r){ alert("Selecciona una habitación primero."); return; } }
+  }
     if(!room){ try{ window.HK_CURRENT_ROOM = localStorage.getItem("HK_LAST_ROOM") || null; }catch(e){} }
     const sess = getSess();
     if(!room){ alert("Selecciona una habitación primero."); return; }
