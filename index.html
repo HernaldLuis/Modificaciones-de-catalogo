@@ -3235,5 +3235,181 @@ if (window.__HK_afterLogin){ try{ window.__HK_afterLogin(); }catch(e){} window._
 })();
 </script>
 
+
+<!-- INICIO: BLOQUES DE INVENTARIO (Cama / Clóset / Baño) - Inserción no intrusiva -->
+<div id="bloques-inventario-extendidos" style="margin-top:1rem;">
+  <!-- HABITACIÓN (Sillas ya existente; aquí solo dejamos el placeholder) -->
+  <details open>
+    <summary style="font-weight:600; font-size:1.05rem;">🏠 Habitación</summary>
+    <div class="inventario-zona" data-zona="habitacion">
+      <!--
+        Nota: La sección de Sillas ya existe en tu index.
+        Si deseas, podemos clonar su bloque aquí o mantenerla donde está.
+        Este contenedor queda listo para futuras extensiones (más artículos de habitación).
+      -->
+    </div>
+  </details>
+
+  <!-- CAMA -->
+  <details>
+    <summary style="font-weight:600; font-size:1.05rem;">🛏️ Cama</summary>
+    <div class="inventario-zona" data-zona="cama">
+      <div class="fila">
+        <label for="tipo-cama">Tipo de cama</label>
+        <select id="tipo-cama">
+          <option value="K">K — 1 cama king</option>
+          <option value="D">D — 2 camas matrimoniales</option>
+        </select>
+        <small>(Si es D, todo lo de cama se multiplica x2)</small>
+      </div>
+      <div class="grid-inventario">
+        <label>Protector</label><input type="number" min="0" step="1" value="1" data-item="protector">
+        <label>Sábanas</label><input type="number" min="0" step="1" value="1" data-item="sabanas">
+        <label>Almohadas</label><input type="number" min="0" step="1" value="2" data-item="almohadas">
+        <label>Fundas</label><input type="number" min="0" step="1" value="2" data-item="fundas">
+        <label>Protector de almohadas</label><input type="number" min="0" step="1" value="2" data-item="protector_almohadas">
+        <label>Inserto (dúvet)</label><input type="number" min="0" step="1" value="1" data-item="duvet">
+        <label>Cubre dúvet</label><input type="number" min="0" step="1" value="1" data-item="cubre_duvet">
+        <label>Color (cubre dúvet)</label>
+        <select data-item="color_cubre_duvet">
+          <option value="blanco">Blanco</option>
+          <option value="cafe">Café</option>
+        </select>
+      </div>
+    </div>
+  </details>
+
+  <!-- CLÓSET -->
+  <details>
+    <summary style="font-weight:600; font-size:1.05rem;">🧳 Clóset</summary>
+    <div class="inventario-zona" data-zona="closet">
+      <div class="grid-inventario">
+        <label>Cobertor</label><input type="number" min="0" step="1" value="1" data-item="cobertor">
+        <label>Almohada matrimonial</label><input type="number" min="0" step="1" value="1" data-item="almohada_mat">
+        <label>Funda matrimonial</label><input type="number" min="0" step="1" value="1" data-item="funda_mat">
+        <label>Protector matrimonial</label><input type="number" min="0" step="1" value="1" data-item="protector_mat">
+        <label>Bolsa de tela</label><input type="number" min="0" step="1" value="1" data-item="bolsa_tela">
+      </div>
+    </div>
+  </details>
+
+  <!-- BAÑO -->
+  <details>
+    <summary style="font-weight:600; font-size:1.05rem;">🚿 Baño</summary>
+    <div class="inventario-zona" data-zona="bano">
+      <div class="fila">
+        <label for="categoria-habitacion">Categoría</label>
+        <select id="categoria-habitacion">
+          <option value="Normal">Normal</option>
+          <option value="Swing Up">Swing Up</option>
+          <option value="Master Suite">Master Suite</option>
+        </select>
+        <small>Nota: Swing Up y Master Suite usan toallas/tapetes color café.</small>
+      </div>
+      <div class="grid-inventario">
+        <label>Toallas de baño</label><input type="number" min="0" step="1" value="4" data-item="toalla_bano">
+        <label>Toallas de mano</label><input type="number" min="0" step="1" value="4" data-item="toalla_mano">
+        <label>Toallas faciales</label><input type="number" min="0" step="1" value="2" data-item="toalla_facial">
+        <label>Tapetes</label><input type="number" min="0" step="1" value="1" data-item="tapete">
+        <label>Toallas verdes de alberca</label><input type="number" min="0" step="1" value="0" data-item="toalla_verde">
+        <label>Color (toallas/tapetes)</label>
+        <select id="color-toallas">
+          <option value="blanco">Blanco</option>
+          <option value="cafe">Café</option>
+        </select>
+      </div>
+      <small id="nota-ubicacion-swing" style="display:none;">
+        Distribución Swing/Master: baño + tina/escalera; verdes dentro de la bolsa de playa.
+      </small>
+    </div>
+  </details>
+</div>
+
+<style>
+/* estilos mínimos reutilizables y no intrusivos */
+#bloques-inventario-extendidos .grid-inventario {
+  display:grid; grid-template-columns: 1fr 120px; gap:.5rem 1rem; align-items:center;
+}
+#bloques-inventario-extendidos .fila { display:flex; gap:.75rem; align-items:center; margin:.25rem 0 .75rem; flex-wrap:wrap;}
+#bloques-inventario-extendidos details { background: rgba(0,0,0,.03); border-radius:12px; padding:.75rem 1rem; margin:.5rem 0;}
+#bloques-inventario-extendidos summary { cursor:pointer; outline:none; }
+#bloques-inventario-extendidos input[type="number"], 
+#bloques-inventario-extendidos select { padding:.35rem .5rem; border-radius:8px; border:1px solid rgba(0,0,0,.2); }
+@media (prefers-reduced-motion: reduce){
+  #bloques-inventario-extendidos *{ animation:none !important; transition:none !important; }
+}
+</style>
+
+<script>
+// JS aislado para no interferir con tu lógica existente
+(function(){
+  function setCamaMultiplicador(){
+    const tipo = document.getElementById('tipo-cama');
+    if(!tipo) return;
+    const mult = (tipo.value === 'D') ? 2 : 1;
+    const zona = document.querySelector('[data-zona="cama"]');
+    if(!zona) return;
+    zona.querySelectorAll('input[type="number"][data-item]').forEach(inp => {
+      const base = Number(inp.getAttribute('data-base') || inp.value);
+      if(!inp.hasAttribute('data-base')) inp.setAttribute('data-base', String(base));
+      inp.value = String(base * mult);
+    });
+  }
+
+  function setBanoPorCategoria(){
+    const catSel = document.getElementById('categoria-habitacion');
+    const colorSel = document.getElementById('color-toallas');
+    const zona = document.querySelector('[data-zona="bano"]');
+    const nota = document.getElementById('nota-ubicacion-swing');
+    if(!catSel || !zona) return;
+
+    const toalla_bano = zona.querySelector('input[data-item="toalla_bano"]');
+    const toalla_mano = zona.querySelector('input[data-item="toalla_mano"]');
+    const toalla_facial = zona.querySelector('input[data-item="toalla_facial"]');
+    const tapete = zona.querySelector('input[data-item="tapete"]');
+    const verde = zona.querySelector('input[data-item="toalla_verde"]');
+
+    const cat = catSel.value;
+    if(cat === 'Normal'){
+      toalla_bano.value = 4;
+      toalla_mano.value = 4;
+      toalla_facial.value = 2;
+      tapete.value = 1;
+      verde.value = 0;
+      if(colorSel){ colorSel.disabled = false; colorSel.value = 'blanco'; }
+      if(nota) nota.style.display = 'none';
+    } else if(cat === 'Swing Up'){
+      toalla_bano.value = 6;  // 4 baño + 2 junto a tina
+      toalla_mano.value = 5;  // 4 baño + 1 junto a tina
+      toalla_facial.value = 2;
+      tapete.value = 2;       // 1 baño + 1 tina
+      verde.value = 2;
+      if(colorSel){ colorSel.disabled = true; colorSel.value = 'cafe'; }
+      if(nota) nota.style.display = 'inline';
+    } else { // Master Suite
+      toalla_bano.value = 6;
+      toalla_mano.value = 7;  // 4 baño, 2 canasta, 1 tina
+      toalla_facial.value = 2;
+      tapete.value = 4;       // 2 lavabos, 1 escalera, 1 regadera
+      verde.value = 2;
+      if(colorSel){ colorSel.disabled = true; colorSel.value = 'cafe'; }
+      if(nota) nota.style.display = 'inline';
+    }
+  }
+
+  document.addEventListener('change', (e)=>{
+    if(e.target && e.target.id === 'tipo-cama'){ setCamaMultiplicador(); }
+    if(e.target && e.target.id === 'categoria-habitacion'){ setBanoPorCategoria(); }
+  });
+
+  // inicializar con valores por defecto
+  document.addEventListener('DOMContentLoaded', ()=>{
+    setCamaMultiplicador();
+    setBanoPorCategoria();
+  });
+})();
+</script>
+<!-- FIN: BLOQUES DE INVENTARIO -->
+
 </body>
 </html>
