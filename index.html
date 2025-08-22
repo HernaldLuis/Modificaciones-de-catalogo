@@ -1045,6 +1045,75 @@ border-bottom: none;
   .hk-form-row textarea{ flex: 1 1 180px; }
 }
 
+
+/* === Modal de Inventario por Zonas === */
+#hkz-overlay{ display:none; position:fixed; inset:0; z-index:10120; background:rgba(0,0,0,.55); align-items:center; justify-content:center; backdrop-filter: blur(2px); }
+#hkz-overlay.activo{ display:flex; }
+.hkz-modal{ width:min(96vw, 900px); background:#fff; border-radius:16px; padding:16px; box-shadow:0 24px 60px rgba(0,0,0,.35); display:flex; flex-direction:column; gap:10px; }
+.hkz-head{ display:flex; flex-wrap:wrap; gap:10px; align-items:center; justify-content:space-between; }
+.hkz-title{ font-weight:900; font-size: clamp(1.05rem, 2.2vw, 1.25rem); }
+.hkz-meta{ font-size: clamp(.9rem, 1.6vw, 1rem); opacity:.85; }
+.hkz-controls{ display:flex; gap:10px; flex-wrap:wrap; }
+.hkz-controls select{ padding:.45rem .6rem; border:1px solid #ddd; border-radius:10px; }
+.hkz-tabs{ display:flex; gap:6px; border-bottom:1px solid #eee; margin-top:4px; }
+.hkz-tab{ padding:.5rem .8rem; border-radius:10px 10px 0 0; cursor:pointer; background:#f5f5f5; border:1px solid #eee; border-bottom:none; font-weight:700; }
+.hkz-tab.activa{ background:#fff; color:#000; }
+.hkz-body{ padding-top:8px; max-height:60vh; overflow:auto; }
+.hkz-zone{ display:none; }
+.hkz-zone.activa{ display:block; }
+.hkz-row{ display:flex; flex-wrap:wrap; align-items:center; gap:10px; padding:6px 0; border-bottom:1px dashed #eee; }
+.hkz-row label{ flex:1 1 220px; font-weight:700; }
+.hkz-row .hk-stepper{ display:inline-flex; align-items:center; gap:8px; }
+.hkz-row .hk-stepper button{ width:34px; height:34px; border-radius:8px; border:1px solid #ddd; background:#fafafa; font-weight:900; cursor:pointer; }
+.hkz-row .hk-stepper input{ width:90px; text-align:center; }
+.hkz-row .na-toggle{ margin-left:auto; display:flex; align-items:center; gap:6px; }
+.hkz-notas{ width:100%; padding:.5rem .7rem; border:1px solid #ddd; border-radius:10px; resize:vertical; min-height:64px; }
+.hkz-actions{ display:flex; justify-content:flex-end; gap:8px; padding-top:8px; border-top:1px solid #eee; }
+.hkz-btn{ padding:.55rem .9rem; border-radius:10px; border:1px solid rgba(0,0,0,.1); cursor:pointer; font-weight:700; }
+.hkz-btn.primary{ background: linear-gradient(135deg,#c9a14a,#8a5a2b); color:#fff; border:none; }
+.hkz-summary{ font-weight:800; margin-left:auto; }
+@media (max-width:640px){
+  .hkz-head{ gap:6px; }
+  .hkz-row label{ flex:1 1 160px; }
+}
+
+
+/* === Consola de Historial (ADMIN) === */
+.hk-admin-btn{
+  position: fixed; top: 12px; right: 122px; z-index: 10085;
+  padding: .45rem .7rem; border-radius: 999px;
+  background: rgba(255,255,255,.6);
+  border: 1px solid rgba(0,0,0,.08);
+  backdrop-filter: blur(6px) saturate(160%);
+  font-weight: 700; font-size: .9rem; cursor: pointer; display:none;
+}
+.hk-admin-btn:hover{ background: rgba(255,255,255,.9); }
+
+#hk-admin-overlay{ display:none; position:fixed; inset:0; z-index:10150;
+  background: rgba(0,0,0,.55); align-items:center; justify-content:center; backdrop-filter: blur(2px); }
+#hk-admin-overlay.activo{ display:flex; }
+.hk-admin-modal{
+  width:min(96vw, 1080px); max-height: 86vh; overflow: hidden;
+  background:#fff; border-radius:16px; box-shadow: 0 24px 60px rgba(0,0,0,.35);
+  display:flex; flex-direction:column;
+}
+.hk-admin-head{ padding:14px 16px; border-bottom:1px solid #eee; display:flex; gap:10px; align-items:center; justify-content:space-between; }
+.hk-admin-title{ font-weight:900; font-size: clamp(1.05rem, 2.2vw, 1.25rem); }
+.hk-admin-controls{ display:flex; gap:10px; flex-wrap:wrap; }
+.hk-admin-controls input, .hk-admin-controls select{ padding:.45rem .6rem; border:1px solid #ddd; border-radius:10px; }
+.hk-admin-body{ padding:10px 0 0; overflow:auto; }
+.hk-admin-table{ width:100%; border-collapse: collapse; font-size: clamp(.9rem, 1.5vw, .98rem); }
+.hk-admin-table th, .hk-admin-table td{ padding:8px 10px; border-bottom:1px solid #eee; text-align:left; vertical-align: top; }
+.hk-admin-table th{ position: sticky; top: 0; background:#fff; z-index: 1; border-bottom:2px solid #ddd; }
+.hk-admin-empty{ padding:18px; text-align:center; opacity:.7; }
+.hk-admin-actions{ padding:10px 16px; display:flex; gap:10px; justify-content:flex-end; border-top:1px solid #eee; }
+.hk-admin-btn2{ padding:.55rem .9rem; border-radius:10px; border:1px solid rgba(0,0,0,.1); cursor:pointer; font-weight:700; }
+.hk-admin-btn2.primary{ background: linear-gradient(135deg,#c9a14a,#8a5a2b); color:#fff; border:none; }
+@media (max-width:720px){
+  .hk-admin-head{ align-items:flex-start; }
+  .hk-admin-controls{ width:100%; }
+}
+
 </style>
 
 <style>
@@ -2665,7 +2734,7 @@ async function handleInventarioClick(num){
     try {
       if (typeof getSession === "function" && typeof isActive === "function"){
         const s = getSession();
-        if (isActive(s)){ tryOpenSillas(); return; }
+        if (isActive(s)){ if (typeof openInventarioZonas==='function'){ openInventarioZonas(); } else { tryOpenSillas(); } return; }
       }
     } catch(e){}
 
@@ -2673,7 +2742,7 @@ async function handleInventarioClick(num){
     try {
       if (typeof openPIN === "function"){ openPIN(); }
       window.__HK_afterLogin = function(){
-        tryOpenSillas();
+        if (typeof openInventarioZonas==='function'){ openInventarioZonas(); } else { tryOpenSillas(); }
       };
     } catch(e){}
   };
@@ -3044,7 +3113,7 @@ if (window.__HK_afterLogin){ try{ window.__HK_afterLogin(); }catch(e){} window._
     sillasOverlay.classList.remove("activo");
   }
 
-  btnComenzar && btnComenzar.addEventListener("click", openSillas);
+  btnComenzar && btnComenzar.addEventListener("click", openInventarioZonas);
   btnCancelar && btnCancelar.addEventListener("click", closeSillas);
   sillasOverlay && sillasOverlay.addEventListener("click", (e)=>{
     if(e.target === sillasOverlay) closeSillas();
@@ -3232,6 +3301,602 @@ if (window.__HK_afterLogin){ try{ window.__HK_afterLogin(); }catch(e){} window._
 
   // Also show immediately if already active on load
   showLogout(sessActive());
+})();
+</script>
+
+
+<div id="hkz-overlay" role="dialog" aria-modal="true" aria-labelledby="hkz-title">
+  <div class="hkz-modal">
+    <div class="hkz-head">
+      <div class="hkz-title" id="hkz-title">Inventario por zonas · <span id="hkz-room"></span></div>
+      <div class="hkz-meta" id="hkz-greet"></div>
+      <div class="hkz-controls">
+        <label>Categoria 
+          <select id="hkz-categoria">
+            <option value="normal">Normal</option>
+            <option value="swing">Swing Up</option>
+            <option value="master">Master Suite</option>
+          </select>
+        </label>
+        <label>Tipo cama 
+          <select id="hkz-cama">
+            <option value="K">King (K)</option>
+            <option value="D">Doble (D)</option>
+          </select>
+        </label>
+      </div>
+    </div>
+    <div class="hkz-tabs">
+      <button class="hkz-tab activa" data-zone="cama">Cama</button>
+      <button class="hkz-tab" data-zone="bano">Baño</button>
+      <button class="hkz-tab" data-zone="closet">Clóset</button>
+      <button class="hkz-tab" data-zone="terraza">Terraza</button>
+      <div class="hkz-summary" id="hkz-summary"></div>
+    </div>
+    <div class="hkz-body">
+      <!-- CAMA -->
+      <section class="hkz-zone activa" id="hkz-zone-cama">
+        <div class="hkz-row" data-item="protector_colchon">
+          <label>Protector de colchón</label>
+          <div class="hk-stepper"><button type="button" class="dec">−</button><input type="number" min="0" step="1" value="0"><button type="button" class="inc">+</button></div>
+        </div>
+        <div class="hkz-row" data-item="sabanas_set">
+          <label>Set de sábanas</label>
+          <div class="hk-stepper"><button type="button" class="dec">−</button><input type="number" min="0" step="1" value="0"><button type="button" class="inc">+</button></div>
+        </div>
+        <div class="hkz-row" data-item="duvet_insert">
+          <label>Insert (dúvet)</label>
+          <div class="hk-stepper"><button type="button" class="dec">−</button><input type="number" min="0" step="1" value="0"><button type="button" class="inc">+</button></div>
+        </div>
+        <div class="hkz-row" data-item="cubre_duvet">
+          <label>Cubre dúvet</label>
+          <div class="hk-stepper"><button type="button" class="dec">−</button><input type="number" min="0" step="1" value="0"><button type="button" class="inc">+</button></div>
+        </div>
+        <div class="hkz-row" data-item="almohadas">
+          <label>Almohadas</label>
+          <div class="hk-stepper"><button type="button" class="dec">−</button><input type="number" min="0" step="1" value="0"><button type="button" class="inc">+</button></div>
+        </div>
+      </section>
+      <!-- BANO -->
+      <section class="hkz-zone" id="hkz-zone-bano">
+        <div class="hkz-row" data-item="toalla_bano">
+          <label>Toalla baño</label>
+          <div class="hk-stepper"><button type="button" class="dec">−</button><input type="number" min="0" step="1" value="0"><button type="button" class="inc">+</button></div>
+        </div>
+        <div class="hkz-row" data-item="toalla_mano">
+          <label>Toalla mano</label>
+          <div class="hk-stepper"><button type="button" class="dec">−</button><input type="number" min="0" step="1" value="0"><button type="button" class="inc">+</button></div>
+        </div>
+        <div class="hkz-row" data-item="toalla_facial">
+          <label>Toalla facial</label>
+          <div class="hk-stepper"><button type="button" class="dec">−</button><input type="number" min="0" step="1" value="0"><button type="button" class="inc">+</button></div>
+        </div>
+        <div class="hkz-row" data-item="tapete">
+          <label>Tapete</label>
+          <div class="hk-stepper"><button type="button" class="dec">−</button><input type="number" min="0" step="1" value="0"><button type="button" class="inc">+</button></div>
+          <div class="na-toggle"><label><input type="checkbox" class="na"> No aplica</label></div>
+          <textarea class="hkz-notas" placeholder="Notas (opcional)"></textarea>
+        </div>
+      </section>
+      <!-- CLOSET -->
+      <section class="hkz-zone" id="hkz-zone-closet">
+        <div class="hkz-row" data-item="bolsa_lavanderia">
+          <label>Bolsa de lavandería</label>
+          <div class="hk-stepper"><button type="button" class="dec">−</button><input type="number" min="0" step="1" value="0"><button type="button" class="inc">+</button></div>
+        </div>
+        <div class="hkz-row" data-item="ganchos">
+          <label>Ganchos</label>
+          <div class="hk-stepper"><button type="button" class="dec">−</button><input type="number" min="0" step="1" value="0"><button type="button" class="inc">+</button></div>
+        </div>
+      </section>
+      <!-- TERRAZA -->
+      <section class="hkz-zone" id="hkz-zone-terraza">
+        <div class="hkz-row" data-item="sillas_habitacion">
+          <label>Sillas de habitación</label>
+          <div class="hk-stepper"><button type="button" class="dec">−</button><input id="hkz-sillas" type="number" min="0" step="1" value="0"><button type="button" class="inc">+</button></div>
+          <textarea class="hkz-notas" placeholder="Observaciones (opcional)"></textarea>
+        </div>
+      </section>
+    </div>
+    <div class="hkz-actions">
+      <button type="button" class="hkz-btn" id="hkz-cancelar">Cerrar</button>
+      <button type="button" class="hkz-btn primary" id="hkz-guardar-zona">Guardar zona</button>
+    </div>
+  </div>
+</div>
+
+
+<script>
+(function(){
+  const ROOMS_KEY = "HK_ROOM_ITEMS"; // mismo storage
+  const STORAGE_KEY = "HK_INV_SESSION_V2";
+  const DURATION_MS = 8*60*60*1000;
+
+  // Templates por categoría
+  const TEMPLATES = {
+    normal: {
+      bano: { toalla_bano:4, toalla_mano:4, toalla_facial:2, tapete:1 },
+      cama: { protector_colchon:1, sabanas_set:1, duvet_insert:1, cubre_duvet:1, almohadas:4 },
+      closet:{ bolsa_lavanderia:1, ganchos:6 },
+      terraza:{ sillas_habitacion:2 }
+    },
+    swing: {
+      bano: { toalla_bano:6, toalla_mano:5, toalla_facial:2, tapete:2 },
+      cama: { protector_colchon:1, sabanas_set:1, duvet_insert:1, cubre_duvet:1, almohadas:4 },
+      closet:{ bolsa_lavanderia:1, ganchos:6 },
+      terraza:{ sillas_habitacion:2 }
+    },
+    master: {
+      bano: { toalla_bano:6, toalla_mano:7, toalla_facial:2, tapete:4 },
+      cama: { protector_colchon:1, sabanas_set:1, duvet_insert:1, cubre_duvet:1, almohadas:4 },
+      closet:{ bolsa_lavanderia:1, ganchos:6 },
+      terraza:{ sillas_habitacion:2 }
+    }
+  };
+
+  // Elementos UI
+  const ov = document.getElementById("hkz-overlay");
+  const roomEl = document.getElementById("hkz-room");
+  const greetEl = document.getElementById("hkz-greet");
+  const selCat = document.getElementById("hkz-categoria");
+  const selCama = document.getElementById("hkz-cama");
+  const tabs = document.querySelectorAll(".hkz-tab");
+  const zones = {
+    cama: document.getElementById("hkz-zone-cama"),
+    bano: document.getElementById("hkz-zone-bano"),
+    closet: document.getElementById("hkz-zone-closet"),
+    terraza: document.getElementById("hkz-zone-terraza")
+  };
+  const btnGuardarZona = document.getElementById("hkz-guardar-zona");
+  const btnCancelar = document.getElementById("hkz-cancelar");
+  const summaryEl = document.getElementById("hkz-summary");
+
+  function now(){ return Date.now(); }
+  function getSess(){
+    try{ const raw = localStorage.getItem(STORAGE_KEY); return raw?JSON.parse(raw):null; }catch(e){ return null; }
+  }
+  function sessActive(s){ return s && s.expiresAt>now(); }
+  function loadRooms(){ try{ return JSON.parse(localStorage.getItem(ROOMS_KEY)||"{}"); }catch(e){ return {}; } }
+  function saveRooms(d){ localStorage.setItem(ROOMS_KEY, JSON.stringify(d)); }
+
+  function clamp(v){ v = parseInt(v||"0",10); if(isNaN(v)) v=0; return Math.max(0, v); }
+
+  // Stepper wiring in a container
+  function wireSteppers(container){
+    container.querySelectorAll(".hk-stepper").forEach(st=>{
+      const inp = st.querySelector("input[type='number']");
+      const dec = st.querySelector(".dec");
+      const inc = st.querySelector(".inc");
+      function set(v){ inp.value = clamp(v); }
+      dec && dec.addEventListener("click", ()=> set(clamp(inp.value)-1));
+      inc && inc.addEventListener("click", ()=> set(clamp(inp.value)+1));
+    });
+  }
+  Object.values(zones).forEach(wireSteppers);
+
+  // Tabs behavior
+  tabs.forEach(t=>{
+    t.addEventListener("click", ()=>{
+      tabs.forEach(x=>x.classList.remove("activa"));
+      t.classList.add("activa");
+      const z = t.dataset.zone;
+      Object.entries(zones).forEach(([k,el])=> el.classList.toggle("activa", k===z));
+      updateSummary();
+    });
+  });
+
+  function prefillFor(room){
+    const data = loadRooms();
+    data[room] = data[room] || { inventario: {} };
+    const cat = selCat.value; const cama = selCama.value;
+    const base = JSON.parse(JSON.stringify(TEMPLATES[cat]));
+
+    // Multiplicar cama para tipo D
+    if (cama === "D"){
+      Object.keys(base.cama).forEach(k=> base.cama[k] = base.cama[k]*2);
+    }
+
+    // Si no existe inventario, lo inicializamos con "objetivo" y "cantidad" previos
+    ["cama","bano","closet","terraza"].forEach(zone=>{
+      const zoneObj = data[room].inventario[zone] || { items:{} };
+      const tpl = base[zone];
+      Object.keys(tpl).forEach(itemKey=>{
+        const prev = zoneObj.items[itemKey];
+        zoneObj.items[itemKey] = prev || { objetivo: tpl[itemKey], cantidad: tpl[itemKey], notas:"", historial: [] };
+        // si ya había objetivo 0, respétalo; si no, asegura objetivo
+        if (zoneObj.items[itemKey].objetivo == null) zoneObj.items[itemKey].objetivo = tpl[itemKey];
+      });
+      data[room].inventario[zone] = zoneObj;
+    });
+
+    // Bridge con legacy sillas
+    const legacy = data[room].sillas;
+    if (legacy && typeof legacy.cantidad==="number"){
+      const tz = data[room].inventario.terraza.items;
+      if (!tz.sillas_habitacion){
+        tz.sillas_habitacion = { objetivo: base.terraza.sillas_habitacion, cantidad: legacy.cantidad, notas: legacy.notas||"", historial: [] };
+      } else {
+        tz.sillas_habitacion.cantidad = legacy.cantidad;
+        if (legacy.notas) tz.sillas_habitacion.notas = legacy.notas;
+      }
+    }
+
+    saveRooms(data);
+    return data[room];
+  }
+
+  function renderZone(room, zoneName){
+    const data = loadRooms();
+    const zone = data[room]?.inventario?.[zoneName];
+    if (!zone) return;
+    const zoneEl = zones[zoneName];
+    if (!zoneEl) return;
+
+    // For each row with data-item, set value/notes
+    zoneEl.querySelectorAll(".hkz-row").forEach(row=>{
+      const key = row.dataset.item;
+      const entry = zone.items[key] || { cantidad:0, notas:"", objetivo:0 };
+      const inp = row.querySelector("input[type='number']");
+      const notes = row.querySelector("textarea.hkz-notas");
+      const na = row.querySelector("input.na");
+
+      if (inp){ inp.value = clamp(entry.cantidad); }
+      if (notes){ notes.value = entry.notas||""; }
+      if (na){ na.checked = entry.no_aplica === true; }
+    });
+  }
+
+  function saveCurrentZone(room){
+    const activeTab = document.querySelector(".hkz-tab.activa")?.dataset.zone || "terraza";
+    const zEl = zones[activeTab];
+    const data = loadRooms();
+    const sess = getSess();
+
+    data[room] = data[room] || { inventario:{} };
+    data[room].inventario[activeTab] = data[room].inventario[activeTab] || { items:{} };
+    const z = data[room].inventario[activeTab];
+
+    zEl.querySelectorAll(".hkz-row").forEach(row=>{
+      const key = row.dataset.item;
+      const inp = row.querySelector("input[type='number']");
+      const notes = row.querySelector("textarea.hkz-notas");
+      const na = row.querySelector("input.na");
+      const cantidad = clamp(inp ? inp.value : 0);
+      const notas = notes ? (notes.value||"") : "";
+      const no_aplica = na ? !!na.checked : false;
+
+      const prev = z.items[key] || { objetivo: 0, historial: [] };
+      const entry = {
+        objetivo: prev.objetivo || 0,
+        cantidad, notas, no_aplica,
+        by: sess?.matricula, nombre: sess?.nombre, ts: Date.now()
+      };
+      // historial
+      const hist = prev.historial || [];
+      hist.push(entry);
+      entry.historial = hist.slice(-50);
+      z.items[key] = entry;
+
+      // Bridge con legacy sillas (si estamos en terraza y item es sillas_habitacion)
+      if (activeTab==="terraza" && key==="sillas_habitacion"){
+        data[room].sillas = {
+          cantidad, notas, by: sess?.matricula, nombre: sess?.nombre, ts: Date.now()
+        };
+      }
+    });
+
+    saveRooms(data);
+    // Feedback
+    try {
+      const m = document.createElement("div");
+      m.className = "mensaje-flotante";
+      m.textContent = `Zona ${activeTab} guardada`;
+      document.body.appendChild(m);
+      setTimeout(()=>{ m.remove(); }, 1800);
+    } catch(e){}
+    updateSummary();
+  }
+
+  function updateSummary(){
+    const room = window.HK_CURRENT_ROOM;
+    if(!room){ summaryEl.textContent = ""; return; }
+    const d = loadRooms()[room];
+    if(!d || !d.inventario){ summaryEl.textContent = ""; return; }
+    const zones = d.inventario;
+    // Compute completado: cantidad == objetivo for items with no_aplica false
+    let total=0, ok=0;
+    Object.values(zones).forEach(z=>{
+      Object.values(z.items).forEach(it=>{
+        if (it.no_aplica) return;
+        total++;
+        if (clamp(it.cantidad) === clamp(it.objetivo)) ok++;
+      });
+    });
+    summaryEl.textContent = total ? `Avance: ${ok}/${total}` : "";
+  }
+
+  function openZones(){
+    const room = window.HK_CURRENT_ROOM;
+    const sess = getSess();
+    if(!room){ alert("Selecciona una habitación primero."); return; }
+    if(!sessActive(sess)){ alert("Inicia sesión con tu matrícula para registrar."); return; }
+
+    roomEl.textContent = room;
+    greetEl.textContent = `Hola ${sess.nombre.split(" ")[0]}, gusto en verte. ¿Qué vamos a registrar hoy? (${new Date().toLocaleDateString("es-MX", { weekday:'long', year:'numeric', month:'long', day:'numeric' })})`;
+
+    // Prefill y render
+    prefillFor(room);
+    ["cama","bano","closet","terraza"].forEach(z=> renderZone(room, z));
+    updateSummary();
+
+    ov.classList.add("activo");
+  }
+
+  function closeZones(){ ov.classList.remove("activo"); }
+
+  // Wiring botones
+  btnGuardarZona.addEventListener("click", ()=>{ if(window.HK_CURRENT_ROOM) saveCurrentZone(window.HK_CURRENT_ROOM); });
+  btnCancelar.addEventListener("click", closeZones);
+  ov.addEventListener("click", (e)=>{ if(e.target===ov) closeZones(); });
+
+  // Selects de categoría/cama actualizan objetivos (y re-render sin perder capturas previas)
+  function onTplChange(){
+    const room = window.HK_CURRENT_ROOM;
+    if(!room) return;
+    // Re-prefill con nueva plantilla SOLO agrega objetivos faltantes; no borra capturas
+    prefillFor(room);
+    ["cama","bano","closet","terraza"].forEach(z=> renderZone(room, z));
+    updateSummary();
+  }
+  selCat.addEventListener("change", onTplChange);
+  selCama.addEventListener("change", onTplChange);
+
+  // Exponer apertura pública
+  window.openInventarioZonas = openZones;
+})();
+</script>
+
+
+<button id="hk-admin-btn" class="hk-admin-btn" type="button">Historial (admin)</button>
+
+<div id="hk-admin-overlay" role="dialog" aria-modal="true" aria-labelledby="hk-admin-title">
+  <div class="hk-admin-modal">
+    <div class="hk-admin-head">
+      <div class="hk-admin-title" id="hk-admin-title">Historial de habitaciones (1211–4529)</div>
+      <div class="hk-admin-controls">
+        <input id="hk-admin-search" type="text" placeholder="Buscar habitación (ej. 1515)" />
+        <select id="hk-admin-zone">
+          <option value="">Zona (todas)</option>
+          <option value="cama">Cama</option>
+          <option value="bano">Baño</option>
+          <option value="closet">Clóset</option>
+          <option value="terraza">Terraza</option>
+        </select>
+        <button id="hk-admin-openwin" class="hk-admin-btn2">Abrir en nueva ventana</button>
+        <button id="hk-admin-export" class="hk-admin-btn2">Exportar CSV</button>
+      </div>
+    </div>
+    <div class="hk-admin-body">
+      <table class="hk-admin-table" id="hk-admin-table">
+        <thead>
+          <tr>
+            <th>Habitación</th>
+            <th>Zona</th>
+            <th>Ítem</th>
+            <th>Cantidad</th>
+            <th>Objetivo</th>
+            <th>Notas</th>
+            <th>Usuario</th>
+            <th>Fecha</th>
+          </tr>
+        </thead>
+        <tbody id="hk-admin-tbody">
+          <tr><td colspan="8" class="hk-admin-empty">Sin datos aún.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="hk-admin-actions">
+      <button id="hk-admin-close" class="hk-admin-btn2">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+
+<script>
+(function(){
+  const ADMINS = ["3067888","3072167"]; // Manuel Migoni y Luis Hernaldo
+  const ROOMS_MIN = 1211, ROOMS_MAX = 4529;
+  const STORAGE_KEY = "HK_INV_SESSION_V2";
+  const ROOMS_KEY = "HK_ROOM_ITEMS";
+
+  const btn = document.getElementById("hk-admin-btn");
+  const ov  = document.getElementById("hk-admin-overlay");
+  const tbody = document.getElementById("hk-admin-tbody");
+  const search = document.getElementById("hk-admin-search");
+  const zoneSel = document.getElementById("hk-admin-zone");
+  const btnClose = document.getElementById("hk-admin-close");
+  const btnExport = document.getElementById("hk-admin-export");
+  const btnOpenWin = document.getElementById("hk-admin-openwin");
+
+  function getSess(){
+    try{ const raw = localStorage.getItem(STORAGE_KEY); return raw ? JSON.parse(raw) : null; }catch(e){ return null; }
+  }
+  function isAdmin(){
+    const s = getSess();
+    return !!(s && ADMINS.includes(String(s.matricula)));
+  }
+  function showAdminBtn(){
+    if (btn) btn.style.display = isAdmin() ? "inline-flex" : "none";
+  }
+
+  function loadRooms(){ try{ return JSON.parse(localStorage.getItem(ROOMS_KEY)||"{}"); }catch(e){ return {}; } }
+
+  function inRange(n){
+    const num = parseInt(n,10);
+    return !isNaN(num) && num >= ROOMS_MIN && num <= ROOMS_MAX;
+  }
+
+  // Flatten historial: one row per history entry
+  function buildDataset(){
+    const d = loadRooms();
+    const rows = [];
+    Object.keys(d).forEach(room=>{
+      if(!inRange(room)) return;
+      const inv = d[room]?.inventario || {};
+      Object.entries(inv).forEach(([zone, zobj])=>{
+        const items = zobj?.items || {};
+        Object.entries(items).forEach(([key, entry])=>{
+          const hist = entry?.historial || [];
+          if (!hist.length){
+            // include last as single if exists
+            if (entry && typeof entry.cantidad !== "undefined"){
+              rows.push({
+                habitacion: room, zona: zone, item: key,
+                cantidad: entry.cantidad, objetivo: entry.objetivo ?? null,
+                notas: entry.notas || "", user: entry.nombre || "", ts: entry.ts || null
+              });
+            }
+            return;
+          }
+          hist.forEach(h=>{
+            rows.push({
+              habitacion: room, zona: zone, item: key,
+              cantidad: h.cantidad, objetivo: (entry.objetivo ?? null),
+              notas: h.notas || "", user: h.nombre || "", ts: h.ts || null
+            });
+          });
+        });
+      });
+      // Legacy sillas_historial (si existiera)
+      const legacy = d[room]?.sillas_historial || [];
+      legacy.forEach(h=>{
+        rows.push({
+          habitacion: room, zona: "terraza", item: "sillas_habitacion",
+          cantidad: h.cantidad, objetivo: null,
+          notas: h.notas || "", user: h.nombre || "", ts: h.ts || null
+        });
+      });
+    });
+    // sort: room asc, ts desc
+    rows.sort((a,b)=>{
+      const ra = parseInt(a.habitacion,10), rb = parseInt(b.habitacion,10);
+      if (ra!==rb) return ra-rb;
+      const ta = a.ts||0, tb = b.ts||0;
+      return tb - ta;
+    });
+    return rows;
+  }
+
+  function fmtDate(ts){
+    if (!ts) return "";
+    try { return new Date(ts).toLocaleString("es-MX", { dateStyle:"medium", timeStyle:"short" }); }
+    catch(e){ return new Date(ts).toLocaleString(); }
+  }
+
+  function applyFilters(rows){
+    const q = (search.value||"").trim();
+    const zone = zoneSel.value;
+    return rows.filter(r=>{
+      if (q && String(r.habitacion)!==q) return false;
+      if (zone && r.zona!==zone) return false;
+      return true;
+    });
+  }
+
+  function renderTable(){
+    const all = buildDataset();
+    const rows = applyFilters(all);
+    if (!rows.length){
+      tbody.innerHTML = `<tr><td colspan="8" class="hk-admin-empty">Sin datos para los filtros aplicados.</td></tr>`;
+      return;
+    }
+    const cells = rows.map(r=>`<tr>
+      <td>${r.habitacion}</td>
+      <td>${r.zona}</td>
+      <td>${r.item}</td>
+      <td>${r.cantidad ?? ""}</td>
+      <td>${r.objetivo ?? ""}</td>
+      <td>${(r.notas||"").replace(/</g,"&lt;")}</td>
+      <td>${(r.user||"")}</td>
+      <td>${fmtDate(r.ts)}</td>
+    </tr>`).join("");
+    tbody.innerHTML = cells;
+  }
+
+  function toCSV(rows){
+    const head = ["habitacion","zona","item","cantidad","objetivo","notas","usuario","fecha"];
+    const lines = [head.join(",")];
+    rows.forEach(r=>{
+      const vals = [
+        r.habitacion,
+        r.zona,
+        r.item,
+        r.cantidad ?? "",
+        r.objetivo ?? "",
+        (r.notas||"").replace(/"/g,'""'),
+        r.user||"",
+        fmtDate(r.ts)
+      ];
+      lines.push(vals.map(v=>`"${String(v)}"`).join(","));
+    });
+    return lines.join("\n");
+  }
+
+  function exportCSV(){
+    const rows = applyFilters(buildDataset());
+    const csv = toCSV(rows);
+    const blob = new Blob([csv], {type: "text/csv;charset=utf-8;"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "historial_habitaciones.csv";
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(()=>{
+      URL.revokeObjectURL(url);
+      a.remove();
+    }, 1000);
+  }
+
+  function openNewWindow(){
+    const rows = applyFilters(buildDataset());
+    const htmlRows = rows.map(r=>`<tr>
+      <td>${r.habitacion}</td><td>${r.zona}</td><td>${r.item}</td>
+      <td>${r.cantidad ?? ""}</td><td>${r.objetivo ?? ""}</td>
+      <td>${(r.notas||"").replace(/</g,"&lt;")}</td>
+      <td>${r.user||""}</td><td>${fmtDate(r.ts)}</td>
+    </tr>`).join("");
+    const win = window.open("", "_blank");
+    if (!win) return;
+    win.document.write(`<!DOCTYPE html><html lang="es"><head><meta charset="utf-8"><title>Historial habitaciones</title>
+    <style>body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif;padding:16px}
+    table{width:100%;border-collapse:collapse} th,td{padding:8px 10px;border-bottom:1px solid #eee;text-align:left}
+    th{position:sticky;top:0;background:#fff;border-bottom:2px solid #ddd}</style></head><body>
+    <h2>Historial de habitaciones (1211–4529)</h2>
+    <table><thead><tr><th>Habitación</th><th>Zona</th><th>Ítem</th><th>Cantidad</th><th>Objetivo</th><th>Notas</th><th>Usuario</th><th>Fecha</th></tr></thead>
+    <tbody>${htmlRows || `<tr><td colspan="8">Sin datos</td></tr>`}</tbody></table></body></html>`);
+    win.document.close();
+  }
+
+  function openAdmin(){
+    if (!isAdmin()){ alert("Acceso restringido a administradores."); return; }
+    renderTable();
+    ov.classList.add("activo");
+  }
+  function closeAdmin(){ ov.classList.remove("activo"); }
+
+  // Wiring
+  btn && btn.addEventListener("click", openAdmin);
+  btnClose && btnClose.addEventListener("click", closeAdmin);
+  ov && ov.addEventListener("click", (e)=>{ if(e.target===ov) closeAdmin(); });
+  search && search.addEventListener("input", renderTable);
+  zoneSel && zoneSel.addEventListener("change", renderTable);
+  btnExport && btnExport.addEventListener("click", exportCSV);
+  btnOpenWin && btnOpenWin.addEventListener("click", openNewWindow);
+
+  // Show admin button only for allowed users (poll + immediate)
+  setInterval(showAdminBtn, 1000);
+  showAdminBtn();
 })();
 </script>
 
