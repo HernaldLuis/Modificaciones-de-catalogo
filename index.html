@@ -3411,5 +3411,323 @@ if (window.__HK_afterLogin){ try{ window.__HK_afterLogin(); }catch(e){} window._
 </script>
 <!-- FIN: BLOQUES DE INVENTARIO -->
 
+
+<!-- === HK INVENTARIO · MODAL INTEGRADO (Sillas + Cama + Clóset + Baño) === -->
+<div class="hk-modal-overlay" id="hkInvOverlay" aria-hidden="true">
+  <div class="hk-modal" role="dialog" aria-modal="true" aria-labelledby="hkInvTitle">
+    <h3 id="hkInvTitle">Inventario · <span id="hkInvRoom">—</span></h3>
+    <div class="hk-badge-usuario" id="hkInvSub">Hola, ¿qué registramos hoy?</div>
+
+    <!-- Toggle historial -->
+    <label class="hk-hist-toggle">
+      <input type="checkbox" id="hkHistToggle"> Ocultar historial
+    </label>
+    <div class="hk-ultima-act" id="hkInvUltima">Sin registros previos.</div>
+    <div class="hk-hist" id="hkInvHist">No hay historial aún.</div>
+
+    <hr style="margin:10px 0; opacity:.3;">
+
+    <!-- HABITACIÓN: Sillas -->
+    <div class="hk-form-row">
+      <label for="hkSillas">Cantidad de sillas</label>
+      <div class="hk-stepper">
+        <button type="button" id="hkMinus">-</button>
+        <input type="number" id="hkSillas" min="0" value="0">
+        <button type="button" id="hkPlus">+</button>
+      </div>
+    </div>
+
+    <!-- CAMA -->
+    <details style="margin:6px 0;" id="hkCamaBlock">
+      <summary style="font-weight:800;">🛏️ Cama</summary>
+      <div class="hk-form-row">
+        <label for="hkTipoCama">Tipo de cama</label>
+        <select id="hkTipoCama">
+          <option value="K">K — 1 cama king</option>
+          <option value="D">D — 2 camas matrimoniales</option>
+        </select>
+      </div>
+      <div class="hk-form-row"><label>Protector</label><input type="number" id="hkCamaProtector" min="0" value="1"></div>
+      <div class="hk-form-row"><label>Sábanas</label><input type="number" id="hkCamaSabanas" min="0" value="1"></div>
+      <div class="hk-form-row"><label>Almohadas</label><input type="number" id="hkCamaAlmohadas" min="0" value="2"></div>
+      <div class="hk-form-row"><label>Fundas</label><input type="number" id="hkCamaFundas" min="0" value="2"></div>
+      <div class="hk-form-row"><label>Protector de almohadas</label><input type="number" id="hkCamaProtAlm" min="0" value="2"></div>
+      <div class="hk-form-row"><label>Inserto (dúvet)</label><input type="number" id="hkCamaDuvet" min="0" value="1"></div>
+      <div class="hk-form-row">
+        <label>Cubre dúvet</label>
+        <input type="number" id="hkCamaCubre" min="0" value="1">
+      </div>
+      <div class="hk-form-row">
+        <label>Color (cubre dúvet)</label>
+        <select id="hkCamaColor">
+          <option value="blanco">Blanco</option>
+          <option value="cafe">Café</option>
+        </select>
+      </div>
+    </details>
+
+    <!-- CLÓSET -->
+    <details style="margin:6px 0;" id="hkClosetBlock">
+      <summary style="font-weight:800;">🧳 Clóset</summary>
+      <div class="hk-form-row"><label>Cobertor</label><input type="number" id="hkClosetCobertor" min="0" value="1"></div>
+      <div class="hk-form-row"><label>Almohada matrimonial</label><input type="number" id="hkClosetAlm" min="0" value="1"></div>
+      <div class="hk-form-row"><label>Funda matrimonial</label><input type="number" id="hkClosetFunda" min="0" value="1"></div>
+      <div class="hk-form-row"><label>Protector matrimonial</label><input type="number" id="hkClosetProt" min="0" value="1"></div>
+      <div class="hk-form-row"><label>Bolsa de tela</label><input type="number" id="hkClosetBolsa" min="0" value="1"></div>
+    </details>
+
+    <!-- BAÑO -->
+    <details style="margin:6px 0;" id="hkBanoBlock">
+      <summary style="font-weight:800;">🚿 Baño</summary>
+      <div class="hk-form-row">
+        <label for="hkCategoria">Categoría</label>
+        <select id="hkCategoria">
+          <option value="Normal">Normal</option>
+          <option value="Swing Up">Swing Up</option>
+          <option value="Master Suite">Master Suite</option>
+        </select>
+      </div>
+      <div class="hk-form-row"><label>Toallas de baño</label><input type="number" id="hkBanioBano" min="0" value="4"></div>
+      <div class="hk-form-row"><label>Toallas de mano</label><input type="number" id="hkBanioMano" min="0" value="4"></div>
+      <div class="hk-form-row"><label>Toallas faciales</label><input type="number" id="hkBanioFacial" min="0" value="2"></div>
+      <div class="hk-form-row"><label>Tapetes</label><input type="number" id="hkBanioTapete" min="0" value="1"></div>
+      <div class="hk-form-row"><label>Toallas verdes de alberca</label><input type="number" id="hkBanioVerde" min="0" value="0"></div>
+      <div class="hk-form-row">
+        <label>Color (toallas/tapetes)</label>
+        <select id="hkBanioColor">
+          <option value="blanco">Blanco</option>
+          <option value="cafe">Café</option>
+        </select>
+      </div>
+      <div class="hk-inv-muted" id="hkNotaUbic">Normal: sin verdes. Swing/Master: cafés y 2 verdes en bolsa de playa.</div>
+    </details>
+
+    <div class="hk-form-row">
+      <label for="hkNotas">Notas</label>
+      <textarea id="hkNotas" placeholder="Observaciones (opcional)"></textarea>
+    </div>
+
+    <div class="hk-actions">
+      <button class="hk-btn" id="hkCancelar">Cancelar</button>
+      <button class="hk-btn primary" id="hkGuardar">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const q = sel => document.querySelector(sel);
+  const qa = sel => Array.from(document.querySelectorAll(sel));
+  let currentRoom = null;
+
+  // Attach to room buttons
+  function attachHandlers(){
+    qa('.habitacion-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const num = btn.getAttribute('data-num') || btn.textContent.trim();
+        openModal(num);
+      });
+    });
+  }
+
+  // Open modal
+  function openModal(room){
+    currentRoom = room;
+    q('#hkInvRoom').textContent = room;
+    // Reset form
+    q('#hkSillas').value = 0;
+    q('#hkTipoCama').value = 'K';
+    setCamaMultiplicador(); // sets cama baseline
+
+    q('#hkCategoria').value = 'Normal';
+    applyCategoriaDefaults();
+
+    q('#hkNotas').value = '';
+    q('#hkHistToggle').checked = false;
+    q('#hkInvHist').style.display = 'block';
+
+    renderHistorial(room);
+    q('#hkInvOverlay').classList.add('activo');
+    q('#hkInvOverlay').setAttribute('aria-hidden','false');
+  }
+
+  // Close modal
+  function closeModal(){
+    q('#hkInvOverlay').classList.remove('activo');
+    q('#hkInvOverlay').setAttribute('aria-hidden','true');
+  }
+
+  // Historial
+  function key(room){ return 'inv_' + room; }
+  function load(room){
+    try { return JSON.parse(localStorage.getItem(key(room)) || '[]'); }
+    catch(e){ return []; }
+  }
+  function save(room, list){
+    localStorage.setItem(key(room), JSON.stringify(list));
+  }
+  function renderHistorial(room){
+    const list = load(room);
+    const hist = q('#hkInvHist');
+    const ultima = q('#hkInvUltima');
+    hist.innerHTML = '';
+    if(list.length === 0){
+      hist.textContent = 'No hay historial aún.';
+      ultima.textContent = 'Sin registros previos.';
+    }else{
+      list.slice().reverse().forEach(item => {
+        const row = document.createElement('div');
+        row.className = 'hk-hist-item';
+        const left = document.createElement('div');
+        left.innerHTML = '<strong>' + (item.fecha || '') + '</strong><br>' +
+          (item.resumen || '');
+        const right = document.createElement('div');
+        right.className = 'hk-hist-meta';
+        right.textContent = item.usuario || '';
+        row.appendChild(left); row.appendChild(right);
+        hist.appendChild(row);
+      });
+      const last = list[list.length-1];
+      ultima.textContent = 'Último: ' + (last.fecha || '');
+    }
+
+    // marcar botón de habitación si tiene registros
+    qa('.habitacion-btn').forEach(b=>{
+      const num = b.getAttribute('data-num') || b.textContent.trim();
+      const has = load(num).length > 0;
+      b.classList.toggle('inventario-ok', has);
+    });
+  }
+
+  // Cama multiplicador
+  function setCamaMultiplicador(){
+    const mult = (q('#hkTipoCama').value === 'D') ? 2 : 1;
+    const mapa = [
+      ['#hkCamaProtector', 1],
+      ['#hkCamaSabanas', 1],
+      ['#hkCamaAlmohadas', 2],
+      ['#hkCamaFundas', 2],
+      ['#hkCamaProtAlm', 2],
+      ['#hkCamaDuvet', 1],
+      ['#hkCamaCubre', 1],
+    ];
+    mapa.forEach(([sel, base]) => { q(sel).value = base * mult; });
+  }
+
+  // Baño por categoría
+  function applyCategoriaDefaults(){
+    const cat = q('#hkCategoria').value;
+    if(cat === 'Normal'){
+      q('#hkBanioBano').value = 4;
+      q('#hkBanioMano').value = 4;
+      q('#hkBanioFacial').value = 2;
+      q('#hkBanioTapete').value = 1;
+      q('#hkBanioVerde').value = 0;
+      q('#hkBanioColor').disabled = false;
+      q('#hkBanioColor').value = 'blanco';
+      q('#hkNotaUbic').textContent = 'Normal: sin verdes. Swing/Master: cafés y 2 verdes en bolsa de playa.';
+    } else if(cat === 'Swing Up'){
+      q('#hkBanioBano').value = 6;   // 4 baño + 2 junto a tina
+      q('#hkBanioMano').value = 5;   // 4 baño + 1 junto a tina
+      q('#hkBanioFacial').value = 2;
+      q('#hkBanioTapete').value = 2; // 1 baño + 1 tina
+      q('#hkBanioVerde').value = 2;
+      q('#hkBanioColor').disabled = true;
+      q('#hkBanioColor').value = 'cafe';
+      q('#hkNotaUbic').textContent = 'Swing Up: cafés, 2 verdes en bolsa de playa (baño + tina).';
+    } else { // Master Suite
+      q('#hkBanioBano').value = 6;
+      q('#hkBanioMano').value = 7;   // 4 baño, 2 canasta, 1 tina
+      q('#hkBanioFacial').value = 2;
+      q('#hkBanioTapete').value = 4; // 2 lavabos, 1 escalera, 1 regadera
+      q('#hkBanioVerde').value = 2;
+      q('#hkBanioColor').disabled = true;
+      q('#hkBanioColor').value = 'cafe';
+      q('#hkNotaUbic').textContent = 'Master Suite: cafés, 2 verdes en bolsa de playa (tina + escalera).';
+    }
+  }
+
+  // Save
+  function guardar(){
+    if(!currentRoom) return;
+    const now = new Date();
+    const stamp = now.toLocaleString();
+
+    const data = {
+      room: currentRoom,
+      fecha: stamp,
+      usuario: '',
+      sillas: Number(q('#hkSillas').value || 0),
+      cama: {
+        tipo: q('#hkTipoCama').value,
+        protector: Number(q('#hkCamaProtector').value || 0),
+        sabanas: Number(q('#hkCamaSabanas').value || 0),
+        almohadas: Number(q('#hkCamaAlmohadas').value || 0),
+        fundas: Number(q('#hkCamaFundas').value || 0),
+        protector_almohadas: Number(q('#hkCamaProtAlm').value || 0),
+        duvet: Number(q('#hkCamaDuvet').value || 0),
+        cubre_duvet: Number(q('#hkCamaCubre').value || 0),
+        color_cubre_duvet: q('#hkCamaColor').value
+      },
+      closet: {
+        cobertor: Number(q('#hkClosetCobertor').value || 0),
+        almohada_matrimonial: Number(q('#hkClosetAlm').value || 0),
+        funda_matrimonial: Number(q('#hkClosetFunda').value || 0),
+        protector_matrimonial: Number(q('#hkClosetProt').value || 0),
+        bolsa_tela: Number(q('#hkClosetBolsa').value || 0)
+      },
+      bano: {
+        categoria: q('#hkCategoria').value,
+        toalla_bano: Number(q('#hkBanioBano').value || 0),
+        toalla_mano: Number(q('#hkBanioMano').value || 0),
+        toalla_facial: Number(q('#hkBanioFacial').value || 0),
+        tapete: Number(q('#hkBanioTapete').value || 0),
+        toalla_verde: Number(q('#hkBanioVerde').value || 0),
+        color: q('#hkBanioColor').value
+      },
+      notas: q('#hkNotas').value.trim()
+    };
+
+    // Resumen corto para historial
+    data.resumen = `Sillas: ${data.sillas} · Cama(${data.cama.tipo}) almoh:${data.cama.almohadas} · Baño(${data.bano.categoria}) baño:${data.bano.toalla_bano}, mano:${data.bano.toalla_mano}, tapete:${data.bano.tapete}, verdes:${data.bano.toalla_verde}`;
+
+    const list = load(currentRoom);
+    list.push(data);
+    save(currentRoom, list);
+
+    renderHistorial(currentRoom);
+    closeModal();
+  }
+
+  // Events
+  document.addEventListener('click', (e)=>{
+    if(e.target.id === 'hkCancelar'){ closeModal(); }
+    if(e.target.id === 'hkGuardar'){ guardar(); }
+    if(e.target.id === 'hkMinus'){ const v = q('#hkSillas'); v.value = Math.max(0, (Number(v.value)||0) - 1); }
+    if(e.target.id === 'hkPlus'){ const v = q('#hkSillas'); v.value = (Number(v.value)||0) + 1; }
+    if(e.target.id === 'hkHistToggle'){
+      const on = q('#hkHistToggle').checked;
+      q('#hkInvHist').style.display = on ? 'none' : 'block';
+    }
+    // Close when clicking outside
+    if(e.target.id === 'hkInvOverlay'){ closeModal(); }
+  });
+
+  document.addEventListener('change', (e)=>{
+    if(e.target && e.target.id === 'hkTipoCama'){ setCamaMultiplicador(); }
+    if(e.target && e.target.id === 'hkCategoria'){ applyCategoriaDefaults(); }
+  });
+
+  document.addEventListener('DOMContentLoaded', ()=>{
+    attachHandlers();
+    // Marcar habitaciones con registros ya existentes
+    qa('.habitacion-btn').forEach(b=>{
+      const num = b.getAttribute('data-num') || b.textContent.trim();
+      if((load(num) || []).length > 0) b.classList.add('inventario-ok');
+    });
+  });
+})();
+</script>
+
 </body>
 </html>
