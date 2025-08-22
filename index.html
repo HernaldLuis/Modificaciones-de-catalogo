@@ -917,6 +917,45 @@ border-bottom: none;
 .hk-hist-meta { opacity:.75; }
 .hk-hist-actions button { border:1px solid #ddd; border-radius:8px; background:#fff; padding:.25rem .5rem; cursor:pointer; font-weight:700; }
 
+
+/* Fuerza estilo premium del botón Inventario sobre .btn */
+.btn.hk.boton-inventario, .boton-inventario.btn.hk {
+  background: linear-gradient(135deg,#c9a14a,#8a5a2b) !important;
+  color:#fff !important;
+  border-color: rgba(255,255,255,.22) !important;
+}
+
+
+/* === Logout control (discreto, arriba-derecha) === */
+.hk-logout {
+  position: fixed; top: 12px; right: 14px; z-index: 10080;
+  padding: .45rem .7rem; border-radius: 999px;
+  background: rgba(255,255,255,.6);
+  border: 1px solid rgba(0,0,0,.08);
+  backdrop-filter: blur(6px) saturate(160%);
+  font-weight: 700; font-size: .9rem; cursor: pointer;
+  display: none;
+}
+.hk-logout:hover { background: rgba(255,255,255,.9); }
+
+/* Confirmación de cierre de sesión */
+.hk-logout-overlay{
+  display:none; position:fixed; inset:0; z-index:10100;
+  background:rgba(0,0,0,.55); align-items:center; justify-content:center;
+  backdrop-filter: blur(2px);
+}
+.hk-logout-overlay.activo{ display:flex; }
+.hk-logout-modal{
+  width:min(92vw, 420px);
+  background:#fff; border-radius:16px; padding:18px;
+  box-shadow: 0 24px 60px rgba(0,0,0,.35);
+}
+.hk-logout-modal h3{ margin:0 0 8px; font-size:1.15rem; font-weight:800; }
+.hk-logout-modal p{ margin:.2rem 0 .8rem; opacity:.85; }
+.hk-logout-actions{ display:flex; justify-content:flex-end; gap:10px; }
+.hk-logout-btn{ padding:.55rem .9rem; border-radius:10px; border:1px solid rgba(0,0,0,.1); cursor:pointer; font-weight:700; }
+.hk-logout-btn.primary{ background: linear-gradient(135deg,#c9a14a,#8a5a2b); color:#fff; border:none; }
+
 </style>
 
 <style>
@@ -2509,6 +2548,49 @@ async function handleInventarioClick(num){
 }
 </script>
 
+<script>
+// Override para integrar flujo multiusuario + Sillas
+(function(){
+  window.__HK_afterLogin = null;
+  const _get = (id)=>document.getElementById(id);
+
+  function tryOpenSillas(){
+    // Usa la función ya definida en el módulo de sillas
+    if (typeof openSillas === "function") {
+      openSillas();
+      return true;
+    }
+    return false;
+  }
+
+  window.handleInventarioClick = function(num){
+    try{ window.HK_CTX = window.HK_CTX || {}; window.HK_CTX.habitacionActual = String(num); }catch(e){}
+    // Reflejar selección en nuestro módulo
+    try {
+      window.HK_CURRENT_ROOM = String(num);
+      const btnC = _get("hk-comenzar");
+      if (btnC) btnC.style.display = "inline-flex";
+    }catch(e){}
+
+    // Si hay sesión activa -> abre sillas directo
+    try {
+      if (typeof getSession === "function" && typeof isActive === "function"){
+        const s = getSession();
+        if (isActive(s)){ tryOpenSillas(); return; }
+      }
+    } catch(e){}
+
+    // Si no hay sesión: abrir modal y esperar login para abrir sillas
+    try {
+      if (typeof openPIN === "function"){ openPIN(); }
+      window.__HK_afterLogin = function(){
+        tryOpenSillas();
+      };
+    } catch(e){}
+  };
+})();
+</script>
+
 
 <!-- Modal PIN elegante -->
 <div id="hkpin2-overlay" class="hkpin2-overlay" role="dialog" aria-modal="true" aria-labelledby="hkpin2-title">
@@ -2678,8 +2760,10 @@ window.HK_CTX = window.HK_CTX || { habitacionActual: null };
         const m = (inputPIN.value||"").trim();
         if (validateMatricula(m)){
           setSession(m);
-          closePIN();
-        } else {
+        closePIN();
+        if (window.__HK_afterLogin){ try{ window.__HK_afterLogin(); }catch(e){} window.__HK_afterLogin=null; }
+if (window.__HK_afterLogin){ try{ window.__HK_afterLogin(); }catch(e){} window.__HK_afterLogin=null; }
+} else {
           inputPIN.setCustomValidity("Matrícula no reconocida");
           inputPIN.reportValidity();
           setTimeout(()=>inputPIN.setCustomValidity(""), 1800);
@@ -2696,8 +2780,10 @@ window.HK_CTX = window.HK_CTX || { habitacionActual: null };
         const m = (inputPIN.value||"").trim();
         if (validateMatricula(m)){
           setSession(m);
-          closePIN();
-        } else {
+        closePIN();
+        if (window.__HK_afterLogin){ try{ window.__HK_afterLogin(); }catch(e){} window.__HK_afterLogin=null; }
+if (window.__HK_afterLogin){ try{ window.__HK_afterLogin(); }catch(e){} window.__HK_afterLogin=null; }
+} else {
           inputPIN.setCustomValidity("Matrícula no reconocida");
           inputPIN.reportValidity();
           setTimeout(()=>inputPIN.setCustomValidity(""), 1800);
@@ -2977,6 +3063,86 @@ window.HK_CTX = window.HK_CTX || { habitacionActual: null };
     const v = clamp(parseInt(inp.value||"0",10) + 1);
     inp.value = v;
   });
+})();
+</script>
+
+
+<button id="hk-logout" class="hk-logout" type="button" aria-label="Cerrar sesión">Cerrar sesión</button>
+
+<div id="hk-logout-overlay" class="hk-logout-overlay" role="dialog" aria-modal="true" aria-labelledby="hk-logout-title">
+  <div class="hk-logout-modal">
+    <h3 id="hk-logout-title">Cerrar sesión</h3>
+    <p>¿Seguro que deseas cerrar la sesión actual? Se requerirá matrícula para volver a ingresar.</p>
+    <div class="hk-logout-actions">
+      <button type="button" class="hk-logout-btn" id="hk-logout-cancel">Cancelar</button>
+      <button type="button" class="hk-logout-btn primary" id="hk-logout-accept">Cerrar sesión</button>
+    </div>
+  </div>
+</div>
+
+
+<script>
+(function(){
+  const STORAGE_KEY = "HK_INV_SESSION_V2";
+  const btnLogout = document.getElementById("hk-logout");
+  const overlay = document.getElementById("hk-logout-overlay");
+  const btnCancel = document.getElementById("hk-logout-cancel");
+  const btnAccept = document.getElementById("hk-logout-accept");
+
+  function sessActive(){
+    try{
+      if (typeof window.getHKSession === "function"){
+        return !!window.getHKSession();
+      }
+      // Fallback: read key directly
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return false;
+      const s = JSON.parse(raw);
+      return s && typeof s.expiresAt === "number" && s.expiresAt > Date.now();
+    }catch(e){ return false; }
+  }
+
+  function showLogout(v){
+    if (!btnLogout) return;
+    btnLogout.style.display = v ? "inline-flex" : "none";
+  }
+
+  function doLogout(){
+    try{ localStorage.removeItem(STORAGE_KEY); }catch(e){}
+    try{ sessionStorage.removeItem('HK_PIN_OK'); }catch(e){}
+    // Oculta controles dependientes de sesión
+    try{
+      const btnC = document.getElementById("hk-comenzar");
+      if (btnC) btnC.style.display = "none";
+    }catch(e){}
+    showLogout(false);
+    // Mini feedback
+    try {
+      const m = document.createElement("div");
+      m.className = "mensaje-flotante";
+      m.textContent = "Sesión cerrada";
+      document.body.appendChild(m);
+      setTimeout(()=>{ m.remove(); }, 1800);
+    } catch(e){}
+  }
+
+  function openConfirm(){ overlay && (overlay.classList.add("activo")); }
+  function closeConfirm(){ overlay && (overlay.classList.remove("activo")); }
+
+  // Wire events
+  btnLogout && btnLogout.addEventListener("click", openConfirm);
+  btnCancel && btnCancel.addEventListener("click", closeConfirm);
+  overlay && overlay.addEventListener("click", (e)=>{ if(e.target===overlay) closeConfirm(); });
+  btnAccept && btnAccept.addEventListener("click", function(){
+    doLogout();
+    closeConfirm();
+  });
+
+  // Poll to keep visibility in sync (lightweight)
+  setInterval(()=>{ showLogout(sessActive()); }, 1000);
+
+  // Also show immediately if already active on load
+  showLogout(sessActive());
 })();
 </script>
 
