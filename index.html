@@ -854,6 +854,54 @@ border-bottom: none;
 }
 
 
+
+/* === HK Inventario: marca visual cuando una habitación ya tiene registro de sillas === */
+.habitacion-btn.inventario-ok{
+  outline: 3px solid #c79b3b; /* dorado */
+  box-shadow: 0 0 0 3px rgba(199,155,59,0.25);
+}
+
+/* Botón flotante "Comenzar" dentro del panel inferior */
+.hk-comenzar {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 10050;
+  display: none;
+  align-items: center;
+  gap: .5rem;
+  padding: .7rem 1rem;
+  border-radius: 999px;
+  background: linear-gradient(135deg,#c9a14a,#8a5a2b);
+  color: #fff;
+  font-weight: 700;
+  border: 0;
+  box-shadow: 0 10px 24px rgba(138,90,43,.35);
+  cursor: pointer;
+}
+
+/* Modal de Sillas */
+.hk-modal-overlay{
+  display:none; position:fixed; inset:0; z-index:10060;
+  background:rgba(0,0,0,.55); align-items:center; justify-content:center;
+  backdrop-filter: blur(2px);
+}
+.hk-modal-overlay.activo{ display:flex; }
+.hk-modal{
+  width:min(92vw, 520px);
+  background:#fff; border-radius:16px; padding:18px; 
+  box-shadow: 0 24px 60px rgba(0,0,0,.35);
+}
+.hk-modal h3{ margin:0 0 8px; font-size:1.2rem; font-weight:800; }
+.hk-form-row{ display:flex; gap:10px; align-items:center; margin:10px 0; }
+.hk-form-row label{ min-width:160px; font-weight:600; }
+.hk-form-row input[type="number"]{ width:120px; padding:.4rem .6rem; border:1px solid #ddd; border-radius:10px; }
+.hk-form-row textarea{ width:100%; min-height:80px; padding:.6rem; border:1px solid #ddd; border-radius:10px; resize:vertical; }
+.hk-actions{ display:flex; justify-content:flex-end; gap:10px; margin-top:12px; }
+.hk-btn{ padding:.55rem .9rem; border-radius:10px; border:1px solid rgba(0,0,0,.1); cursor:pointer; font-weight:700; }
+.hk-btn.primary{ background: linear-gradient(135deg,#c9a14a,#8a5a2b); color:#fff; border:none; }
+.hk-badge-usuario{ font-size:.92rem; opacity:.85; margin-top:6px; }
+
 </style>
 
 <style>
@@ -2514,6 +2562,199 @@ window.HK_CTX = window.HK_CTX || { habitacionActual: null };
     // Fallback simple
     alert('Inventario para Habitación ' + num + ' (stub). Integra abrirInventarioHK(num).');
   };
+})();
+</script>
+
+
+<button id="hk-comenzar" class="hk-comenzar" type="button">▶️ Comenzar</button>
+
+<div id="hk-sillas-overlay" class="hk-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="hk-sillas-title">
+  <div class="hk-modal">
+    <h3 id="hk-sillas-title">Sillas de habitación <span id="hk-room-label"></span></h3>
+    <div class="hk-badge-usuario" id="hk-usuario-label"></div>
+
+    <div class="hk-form-row">
+      <label for="hk-sillas-cantidad">Cantidad de sillas</label>
+      <input id="hk-sillas-cantidad" type="number" min="0" max="6" step="1" value="0">
+    </div>
+    <div class="hk-form-row">
+      <label for="hk-sillas-notas">Notas</label>
+      <textarea id="hk-sillas-notas" placeholder="Observaciones (opcional)"></textarea>
+    </div>
+
+    <div class="hk-actions">
+      <button type="button" class="hk-btn" id="hk-sillas-cancelar">Cancelar</button>
+      <button type="button" class="hk-btn primary" id="hk-sillas-guardar">Guardar</button>
+    </div>
+  </div>
+</div>
+
+
+<script>
+/* ===== HK Multiusuario + Registro de Sillas ===== */
+(function(){
+  // --- Usuarios proporcionados ---
+  const USERS = {
+    "3068694": { nombre: "Cifuentes María Dolores", rol: "SUP HSK" },
+    "3071925": { nombre: "Amezquita Valencia Zinia Itzel", rol: "SUP HSK" },
+    "3075393": { nombre: "Jiménez López Juana Marisela", rol: "SUP HSK" },
+    "3077512": { nombre: "Florencio García Cynthia Ximena", rol: "SUP HSK" },
+    "3072167": { nombre: "Juárez Pineda Luis Hernaldo", rol: "ASIST. ADMVO" },
+    "3062148": { nombre: "Pérez Otero Silvia", rol: "ASIST. OPERATIVA" },
+    "3067888": { nombre: "Migoni García Manuel", rol: "AMA DE LLAVES EJEC" }
+  };
+
+  const STORAGE_KEY = "HK_INV_SESSION_V2";
+  const LOG_KEY = "HK_INV_LOGS";
+  const ROOMS_KEY = "HK_ROOM_ITEMS"; // Persistencia por habitación
+  const DURATION_MS = 8 * 60 * 60 * 1000;
+
+  const btnInventario = document.getElementById("btn-inventario");
+  const overlayPIN = document.getElementById("hkpin2-overlay");
+  const inputPIN = document.getElementById("hkpin2-input");
+
+  // UI para sillas
+  const btnComenzar = document.getElementById("hk-comenzar");
+  const sillasOverlay = document.getElementById("hk-sillas-overlay");
+  const roomLabel = document.getElementById("hk-room-label");
+  const userLabel = document.getElementById("hk-usuario-label");
+  const inputCant = document.getElementById("hk-sillas-cantidad");
+  const inputNotas = document.getElementById("hk-sillas-notas");
+  const btnGuardar = document.getElementById("hk-sillas-guardar");
+  const btnCancelar = document.getElementById("hk-sillas-cancelar");
+
+  // Exponer helpers a window si no existen
+  function now(){ return Date.now(); }
+  function fmt(t){ return new Date(t).toLocaleString("es-MX"); }
+  function getSession(){
+    try{ const raw = localStorage.getItem(STORAGE_KEY); return raw ? JSON.parse(raw) : null; }catch(e){ return null; }
+  }
+  function isActive(sess){
+    return sess && USERS[sess.matricula] && sess.expiresAt > now();
+  }
+  function setSession(matricula){
+    const startedAt = now();
+    const expiresAt = startedAt + DURATION_MS;
+    const perfil = USERS[matricula];
+    const sess = { matricula, nombre: perfil.nombre, rol: perfil.rol, startedAt, expiresAt };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(sess));
+    return sess;
+  }
+  function audit(action, payload){
+    try {
+      const raw = localStorage.getItem(LOG_KEY);
+      const arr = raw ? JSON.parse(raw) : [];
+      const sess = getSession();
+      const base = isActive(sess) ? { matricula: sess.matricula, nombre: sess.nombre, rol: sess.rol } : {};
+      arr.push(Object.assign({ ts: now(), action }, base, (payload||{})));
+      localStorage.setItem(LOG_KEY, JSON.stringify(arr));
+    } catch(e){}
+  }
+  window.getHKSession = window.getHKSession || function(){ const s=getSession(); return isActive(s)?s:null; };
+  window.auditHK = window.auditHK || audit;
+
+  // Detectar habitación seleccionada (delegación de eventos)
+  let HK_CURRENT_ROOM = null;
+  document.addEventListener("click", (e)=>{
+    const btn = e.target.closest && e.target.closest(".habitacion-btn");
+    if(btn && btn.dataset.num){
+      HK_CURRENT_ROOM = btn.dataset.num;
+      // Mostrar botón comenzar si hay sesión activa
+      const sess = getSession();
+      btnComenzar.style.display = isActive(sess) ? "inline-flex" : "none";
+    }
+  });
+
+  // Al cargar, marcar habitaciones ya registradas (sillas)
+  function loadRoomsData(){
+    try{ return JSON.parse(localStorage.getItem(ROOMS_KEY)||"{}"); }catch(e){ return {}; }
+  }
+  function saveRoomsData(data){
+    localStorage.setItem(ROOMS_KEY, JSON.stringify(data));
+  }
+  function markRegisteredRooms(){
+    const data = loadRoomsData();
+    document.querySelectorAll(".habitacion-btn[data-num]").forEach(b=>{
+      const num = b.dataset.num;
+      if (data[num] && data[num].sillas && typeof data[num].sillas.cantidad === "number"){
+        b.classList.add("inventario-ok");
+      }
+    });
+  }
+  markRegisteredRooms();
+
+  // Mostrar modal de sillas
+  function openSillas(){
+    if(!HK_CURRENT_ROOM){
+      alert("Selecciona una habitación primero.");
+      return;
+    }
+    const sess = getSession();
+    if(!isActive(sess)){
+      alert("Inicia sesión con tu matrícula para registrar.");
+      return;
+    }
+    roomLabel.textContent = "· " + HK_CURRENT_ROOM;
+    userLabel.textContent = `Hola ${sess.nombre.split(" ")[0]}, gusto en verte. ¿Qué vamos a registrar hoy? (${new Date().toLocaleDateString("es-MX", { weekday:'long', year:'numeric', month:'long', day:'numeric' })})`;
+    // cargar valores previos si existen
+    const data = loadRoomsData();
+    const prev = (data[HK_CURRENT_ROOM] && data[HK_CURRENT_ROOM].sillas) ? data[HK_CURRENT_ROOM].sillas : null;
+    inputCant.value = prev ? prev.cantidad : 0;
+    inputNotas.value = prev ? (prev.notas||"") : "";
+    sillasOverlay.classList.add("activo");
+  }
+  function closeSillas(){
+    sillasOverlay.classList.remove("activo");
+  }
+
+  btnComenzar && btnComenzar.addEventListener("click", openSillas);
+  btnCancelar && btnCancelar.addEventListener("click", closeSillas);
+  sillasOverlay && sillasOverlay.addEventListener("click", (e)=>{
+    if(e.target === sillasOverlay) closeSillas();
+  });
+
+  // Guardar registro
+  btnGuardar && btnGuardar.addEventListener("click", ()=>{
+    const sess = getSession();
+    if(!isActive(sess)){ alert("Sesión caducada. Inicia sesión de nuevo."); return; }
+    const cantidad = parseInt(inputCant.value || "0", 10);
+    const notas = (inputNotas.value || "").trim();
+
+    if(isNaN(cantidad) || cantidad < 0){ alert("Cantidad inválida."); return; }
+
+    const data = loadRoomsData();
+    data[HK_CURRENT_ROOM] = data[HK_CURRENT_ROOM] || {};
+    data[HK_CURRENT_ROOM].sillas = {
+      cantidad,
+      notas,
+      by: sess.matricula,
+      nombre: sess.nombre,
+      ts: now()
+    };
+    saveRoomsData(data);
+    audit("save_sillas", { habitacion: HK_CURRENT_ROOM, cantidad });
+
+    // Marca visual
+    const btn = document.querySelector(`.habitacion-btn[data-num="${HK_CURRENT_ROOM}"]`);
+    if(btn) btn.classList.add("inventario-ok");
+
+    closeSillas();
+    // Feedback rápido
+    const m = document.createElement("div");
+    m.className = "mensaje-flotante";
+    m.textContent = `Sillas registradas para ${HK_CURRENT_ROOM} · ${cantidad}`;
+    document.body.appendChild(m);
+    setTimeout(()=>{ m.remove(); }, 2000);
+  });
+
+  // Mostrar/ocultar botón "Comenzar" en base a la sesión
+  function refreshComenzar(){
+    const sess = getSession();
+    btnComenzar.style.display = isActive(sess) && HK_CURRENT_ROOM ? "inline-flex" : "none";
+  }
+  setInterval(refreshComenzar, 1000);
+
+  // Tip: si ya tienes otro módulo de sesión, este respeta STORAGE_KEY/USERS y reutiliza helpers.
 })();
 </script>
 
