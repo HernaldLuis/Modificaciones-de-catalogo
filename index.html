@@ -1631,7 +1631,7 @@ panel.innerHTML = `
   <div class="contenido-inferior">\n<aside id="video-habitacion" class="video-habitacion" hidden>\n  <div class="video-ratio">\n    <iframe id="video-embed" src="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen hidden></iframe>\n    <video id="video-mp4" controls playsinline hidden></video>\n  </div>\n</aside>\n
     <h3>${habitacion.titulo}</h3>
     <div class="modal-toolbar">
-      <button class="btn hk" id="btn-inventario" onclick="handleInventarioClick('${num}')" class="boton-inventario">Inventario · ${num}</button>
+      <button class="boton-inventario btn hk" id="btn-inventario" onclick="handleInventarioClick('${num}')" >Inventario · ${num}</button>
     </div>
     <p><strong>Categoría:</strong> ${habitacion.categoria} · ${habitacion.vista}</p>
     <p><strong>Habitación conectada:</strong> ${habitacion.habitacion_conectada ? habitacion.habitacion_conectada : 'No aplica'}</p>
