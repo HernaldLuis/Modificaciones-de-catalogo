@@ -902,6 +902,11 @@ border-bottom: none;
 .hk-btn.primary{ background: linear-gradient(135deg,#c9a14a,#8a5a2b); color:#fff; border:none; }
 .hk-badge-usuario{ font-size:.92rem; opacity:.85; margin-top:6px; }
 
+
+.hk-stepper{ display:inline-flex; align-items:center; gap:8px; }
+.hk-stepper button{ width:34px; height:34px; border-radius:8px; border:1px solid #ddd; background:#fafafa; font-weight:900; cursor:pointer; }
+.hk-stepper input{ width:90px; text-align:center; }
+
 </style>
 
 <style>
@@ -1679,7 +1684,7 @@ panel.innerHTML = `
   <div class="contenido-inferior">\n<aside id="video-habitacion" class="video-habitacion" hidden>\n  <div class="video-ratio">\n    <iframe id="video-embed" src="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen hidden></iframe>\n    <video id="video-mp4" controls playsinline hidden></video>\n  </div>\n</aside>\n
     <h3>${habitacion.titulo}</h3>
     <div class="modal-toolbar">
-      <button class="boton-inventario btn hk" id="btn-inventario" onclick="handleInventarioClick('${num}')" >Inventario · ${num}</button>
+      <button class="boton-inventario btn hk" id="btn-inventario" onclick="handleInventarioClick('${num}')" >Inventario</button>
     </div>
     <p><strong>Categoría:</strong> ${habitacion.categoria} · ${habitacion.vista}</p>
     <p><strong>Habitación conectada:</strong> ${habitacion.habitacion_conectada ? habitacion.habitacion_conectada : 'No aplica'}</p>
@@ -2573,10 +2578,7 @@ window.HK_CTX = window.HK_CTX || { habitacionActual: null };
     <h3 id="hk-sillas-title">Sillas de habitación <span id="hk-room-label"></span></h3>
     <div class="hk-badge-usuario" id="hk-usuario-label"></div>
 
-    <div class="hk-form-row">
-      <label for="hk-sillas-cantidad">Cantidad de sillas</label>
-      <input id="hk-sillas-cantidad" type="number" min="0" max="6" step="1" value="0">
-    </div>
+    <div class="hk-form-row"><label for="hk-sillas-cantidad">Cantidad de sillas</label><div class="hk-stepper"><button type="button" class="hk-stepper-dec" aria-label="Disminuir">−</button><input id="hk-sillas-cantidad" type="number" min="0" max="6" step="1" value="0"><button type="button" class="hk-stepper-inc" aria-label="Aumentar">+</button></div></div>
     <div class="hk-form-row">
       <label for="hk-sillas-notas">Notas</label>
       <textarea id="hk-sillas-notas" placeholder="Observaciones (opcional)"></textarea>
@@ -2755,6 +2757,57 @@ window.HK_CTX = window.HK_CTX || { habitacionActual: null };
   setInterval(refreshComenzar, 1000);
 
   // Tip: si ya tienes otro módulo de sesión, este respeta STORAGE_KEY/USERS y reutiliza helpers.
+})();
+</script>
+
+
+<script>
+(function(){
+  // Botón "Aceptar" del modal de matrícula (si existe)
+  const overlayPIN = document.getElementById("hkpin2-overlay");
+  const inputPIN = document.getElementById("hkpin2-input");
+  const btnOK = document.getElementById("hkpin2-ok");
+  if (overlayPIN && inputPIN && btnOK) {
+    btnOK.addEventListener("click", function(){
+      // Reutiliza la validación del módulo principal si está presente
+      try {
+        // Trigger Enter key behavior programmatically
+        const evt = new KeyboardEvent("keydown", {key:"Enter"});
+        inputPIN.dispatchEvent(evt);
+      } catch(e) {
+        // Fallback: setSession si el index integra validateMatricula en window
+        const m = (inputPIN.value||"").trim();
+        if (window.validateMatricula && window.setSession) {
+          if (window.validateMatricula(m)) {
+            window.setSession(m);
+          }
+        }
+      }
+    });
+  }
+})();
+</script>
+
+
+<script>
+(function(){
+  const inp = document.getElementById("hk-sillas-cantidad");
+  const dec = document.querySelector(".hk-stepper-dec");
+  const inc = document.querySelector(".hk-stepper-inc");
+  function clamp(v){
+    const min = parseInt(inp.getAttribute("min")||"0",10);
+    const max = parseInt(inp.getAttribute("max")||"99",10);
+    if (isNaN(v)) v = 0;
+    return Math.max(min, Math.min(max, v));
+  }
+  if (dec) dec.addEventListener("click", ()=>{
+    const v = clamp(parseInt(inp.value||"0",10) - 1);
+    inp.value = v;
+  });
+  if (inc) inc.addEventListener("click", ()=>{
+    const v = clamp(parseInt(inp.value||"0",10) + 1);
+    inp.value = v;
+  });
 })();
 </script>
 
