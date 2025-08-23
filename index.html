@@ -955,7 +955,7 @@ body.hk-modal-open{ overflow: hidden; }
 
 </head>
 <body>
-<button id="hk-admin-btn" type="button">📊 Consolidado</button>>
+<button id="hk-admin-btn" type="button">🗂️ Reporte</button>>
   <!-- Modal de Éxito Inventario -->
   <div id="hkSuccessModal" class="hk-success-overlay" aria-hidden="true">
     <div class="hk-success-card" role="dialog" aria-modal="true" aria-labelledby="hk-success-title">
@@ -2694,7 +2694,7 @@ document.addEventListener('DOMContentLoaded', () => {
 <div id="hkConsolidado" aria-hidden="true">
   <div class="hk-con-card" role="dialog" aria-modal="true" aria-labelledby="hkConsolidadoTitle">
     <div class="hk-con-head">
-      <h3 id="hkConsolidadoTitle" class="hk-con-title">Consolidado de Inventario</h3>
+      <h3 id="hkConsolidadoTitle" class="hk-con-title">Reporte de Inventario</h3>
       <div class="hk-con-actions">
         <button class="hk-btn csv" id="hkExportCSV">Exportar Excel (CSV)</button>
         <button class="hk-btn print" id="hkPrint">Imprimir / PDF</button>
@@ -2934,7 +2934,44 @@ document.addEventListener('DOMContentLoaded', () => {
       </style>
       </head><body>`);
     win.document.write(document.getElementById('hkConTabla').outerHTML);
-    win.document.write("</body></html>");
+    win.document.write("
+<script>
+// === Placer: ubicar "🗂️ Reporte" junto a "coincidencias: ###" ===
+(function(){
+  function placeAdminBtn(){
+    try{
+      var btn = document.getElementById('hk-admin-btn');
+      if(!btn) return;
+      // scan for an element that visibly contains "coincidencias:"
+      var nodes = Array.prototype.slice.call(document.querySelectorAll('body *'));
+      var host = null;
+      for(var i=0;i<nodes.length;i++){
+        var el = nodes[i];
+        if(!el || !el.textContent) continue;
+        var txt = el.textContent.trim().toLowerCase();
+        if(/coincidencias\s*:\s*\d+/.test(txt) && el.offsetParent){ host = el; break; }
+      }
+      if(host && host !== btn.parentNode){
+        // Try to append the button at the end of that host
+        host.appendChild(btn);
+        btn.style.position = 'static';
+        btn.style.marginLeft = '8px';
+      }else{
+        // fallback: keep absolute position style
+      }
+    }catch(e){}
+  }
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', placeAdminBtn);
+  }else{
+    placeAdminBtn();
+  }
+  // Also re-place after any route/content change (simple heuristic)
+  window.addEventListener('hashchange', placeAdminBtn);
+})();
+</script>
+
+</body></html>");
     win.document.close();
     win.focus();
     win.print();
