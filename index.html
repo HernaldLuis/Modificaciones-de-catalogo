@@ -885,6 +885,16 @@ body.hk-modal-open{ overflow: hidden; }
 @keyframes hkPop{ from{ transform:scale(.98); opacity:0 } to{ transform:scale(1); opacity:1 } }
 /* --- fin éxito --- */
 
+
+/* === HK: video en primera columna de galería === */
+.bloque-imagen video{
+  width: 100% !important;
+  height: auto !important;
+  display: block;
+  border-radius: 10px;
+  cursor: zoom-in; /* se mantiene el hint visual */
+}
+
 </style>
 
 <style>
@@ -1683,6 +1693,62 @@ panel.innerHTML = `
   </div>
 `;
     
+    
+    // === Sustituir imagen izquierda por VIDEO (si hay fuente) ===
+    try{
+      const gal = panel.querySelector('.galeria-habitacion');
+      if(gal){
+        // Resolver URL del video
+        const esHandicap = !!(habitacion && (
+          habitacion.discapacidad === true ||
+          habitacion.handicap === true ||
+          habitacion.discapacidad === 'Adaptada' ||
+          habitacion.discapacidad === 'Sí' ||
+          (habitacion.categoria && /handicap|adaptad/i.test(habitacion.categoria)) ||
+          (Array.isArray(habitacion.tags) && habitacion.tags.some(t=>/handicap/i.test(t)))
+        ));
+
+        let vsrc = '';
+        if(esHandicap && typeof window !== 'undefined' && typeof window.HANDICAP_VIDEO_URL !== 'undefined'){
+          vsrc = window.HANDICAP_VIDEO_URL || '';
+        }else{
+          vsrc = (habitacion && (habitacion.video || habitacion.video_url)) || '';
+          if(!vsrc && typeof window !== 'undefined' && window.VIDEOS_HAB && typeof num !== 'undefined'){
+            vsrc = window.VIDEOS_HAB[num] || '';
+          }
+        }
+
+        if(vsrc){
+          // Crear tile <div class="bloque-imagen"> con <video>
+          const tile = document.createElement('div');
+          tile.className = 'bloque-imagen';
+          const vid = document.createElement('video');
+          vid.setAttribute('muted',''); vid.muted = true;
+          vid.setAttribute('playsinline',''); vid.playsInline = true;
+          vid.setAttribute('autoplay',''); vid.autoplay = true;
+          vid.setAttribute('loop',''); vid.loop = true;
+          const src = document.createElement('source'); src.src = vsrc; src.type='video/mp4';
+          vid.appendChild(src);
+          tile.appendChild(vid);
+
+          // Reemplazar el PRIMER bloque de imagen por el video
+          const first = gal.querySelector('.bloque-imagen');
+          if(first){
+            gal.replaceChild(tile, first);
+          }else{
+            gal.insertBefore(tile, gal.firstChild);
+          }
+
+          // Intentar reproducir
+          try{ vid.load(); }catch(_e){}
+          try{ const p = vid.play(); if(p && p.then) p.catch(()=>{}); }catch(_e){}
+
+          // Click: alternar controles, sin overlay
+          vid.addEventListener('click', ()=>{ vid.controls = !vid.controls; }, {passive:true});
+        }
+      }
+    }catch(_e){ /* silencioso */ }
+    // === fin sustitución de imagen por video ===
     // --- Video handicap (arriba-derecha) ---
     try {
   if (habitacion && (habitacion.discapacidad === true)) {
