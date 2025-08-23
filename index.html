@@ -1666,7 +1666,7 @@ async function mostrarInfo(num) {
       galeriaHTML += '</div>';
 
 panel.innerHTML = `
-  <div class="contenido-inferior">\n<aside id="video-habitacion" class="video-habitacion" hidden>\n  <div class="video-ratio">\n    <iframe id="video-embed" src="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen hidden></iframe>\n    <video id="video-mp4" controls playsinline hidden></video>\n  </div>\n</aside>\n
+  <div class="contenido-inferior">\n<aside id="video-habitacion" class="video-habitacion" hidden>\n  <div class="video-ratio">\n    <iframe id="video-embed" src="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen hidden></iframe>\n    <video id="video-mp4" controls playsinline hidden autoplay loop playsinline muted></video>\n  </div>\n</aside>\n
     <h3>${habitacion.titulo}</h3>
     <button class="btn-inventario" onclick="(hkHasSession()? abrirInventarioPrincipal(${num}) : hkLogin(()=>abrirInventarioPrincipal(${num})))">📋 Inventario</button>
 
@@ -1940,7 +1940,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   await initCategorias();
   aplicarFiltro('');
 });
-    </script>  <!-- ✅ Cierra aquí tu script principal -->
+    
+</script>  <!-- ✅ Cierra aquí tu script principal -->
 
 <div id="modal-mejoras" class="modal-mejoras" role="dialog" aria-modal="true" aria-labelledby="titulo-novedades">
   <div class="modal-contenido">
