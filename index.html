@@ -922,7 +922,7 @@ body.hk-modal-open{ overflow: hidden; }
 #hk-badge.ok{background:#10b981}
 
 
-/* === INV-Scroll minimal (no funcional, solo estética del modal) === */
+/* === INV-Scroll minimal (solo estética modal inventario) === */
 #inventarioOverlay{ align-items:flex-start; overflow:auto; overscroll-behavior:contain; padding:16px 8px; }
 #inventarioOverlay .modal-contenido{ width:clamp(720px,96vw,1200px); max-height:calc(100vh - 32px); overflow:auto; -webkit-overflow-scrolling:touch; touch-action:pan-y; }
 #inventarioOverlay .invp-actions{ position:sticky; bottom:0; background:#fff; padding-top:8px; z-index:1; }
@@ -2796,156 +2796,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const ov=el('#concentradoOverlay'); const wrap=el('.table-wrap', ov); const html=wrap?wrap.innerHTML:'<p>Sin datos</p>';
     const w=window.open('', '_blank'); if(!w) return alert('Permite ventanas emergentes para exportar a PDF.');
     const css='<style>body{font-family:Arial,sans-serif;padding:16px}h1{font-size:18px;margin:0 0 10px}table{width:100%;border-collapse:collapse}th,td{border:1px solid #ddd;padding:6px;font-size:12px;white-space:nowrap}th{background:#f3f4f6;position:sticky;top:0}tr:nth-child(even) td{background:#fcfdff}</style>';
-    w.document.write('<html><head><meta charset="utf-8"><title>Concentrado</title>'+css+'</head><body><h1>Concentrado de Inventarios</h1>'+html+'
-<script>
-(()=>{
-  if (window.__hkSugeridosWired) return;
-  window.__hkSugeridosWired = true;
-
-  // --- Listas oficiales ---
-  const MASTERS = [3014, 3114, 3214, 4111, 4211, 4311, 4411, 4511];
-  const SWING_UP = [3014, 3015, 3016, 3017, 3018, 3019, 3020, 3021, 3022, 3023, 3024, 3025, 3026, 3027, 3028, 3029, 3030, 3101, 3102, 3103, 3104, 3105, 3106, 3107, 3108, 3109, 3110, 3111, 3112];
-
-  const esMaster   = n => MASTERS.includes(Number(n));
-  const esSwingUp  = n => SWING_UP.includes(Number(n)) && !esMaster(n);
-  const categoriaDe = n => esMaster(n) ? 'Master Suite' : (esSwingUp(n) ? 'Swing Up' : 'Normal');
-
-  // --- Obtener datos de la habitación (ya los cargas en tu index) ---
-  async function getHabitacion(num){
-    try{
-      if (typeof window.ensureHabitacionesData === 'function'){
-        const map = await window.ensureHabitacionesData();
-        return map?.[num] || null;
-      }
-      const data = await fetch('habitaciones.json').then(r=>r.json());
-      return data?.[num] || null;
-    }catch(_){ return null; }
-  }
-  function tipoCamaDesdeJson(h){
-    if (!h) return '';
-    if (typeof window.getTipoCama === 'function') return window.getTipoCama(h);
-    const v = (h.tipo_cama||'').toString().toUpperCase();
-    if (v==='K' || v==='D') return v;
-    const txt = [h.titulo||'', h.descripcion||'', ...(h.caracteristicas||[])].join(' ').toUpperCase();
-    if (/\bKING\b|KING SIZE|\bKS\b/.test(txt)) return 'K';
-    if (/\bDOUBLE\b|\bDOBLE\b|\bMATRIMONIAL\b|\bMATRI\b|2\s*DBL/.test(txt)) return 'D';
-    return '';
-  }
-
-  // --- Sugeridos oficiales por categoría ---
-  function sugeridos(categoria, tipoCamaNorm='K'){
-    const camaK = { protector:1, sabanas:2, almohadas:4, fundas:4, protAlm:4, inserto:1, cubre:1 };
-    const camaD = {
-      protector: camaK.protector*2,
-      sabanas:   camaK.sabanas*2,
-      almohadas: camaK.almohadas*2,
-      fundas:    camaK.fundas*2,
-      protAlm:   camaK.protAlm*2,
-      inserto:   camaK.inserto*2,
-      cubre:     camaK.cubre*2
-    };
-
-    if (categoria === 'Swing Up'){
-      return {
-        ban: { bano:6, mano:6, facial:2, tapete:2, verdes:2, color:'Café', lockColor:true },
-        cama: { ...camaK, color:'Café', tipo:'K', lockTipo:true, lockColor:true }
-      };
-    }
-    if (categoria === 'Master Suite'){
-      return {
-        ban: { bano:6, mano:7, facial:2, tapete:4, verdes:2, color:'Café', lockColor:true },
-        cama: { ...camaK, color:'Café', tipo:'K', lockTipo:true, lockColor:true }
-      };
-    }
-    const isD = (tipoCamaNorm==='D');
-    return {
-      ban: { bano:4, mano:4, facial:2, tapete:1, verdes:0, color:'Blanco', lockColor:false },
-      cama: { ...(isD?camaD:camaK), color:'Blanco', tipo:(isD?'D':'K'), lockTipo:true, lockColor:false }
-    };
-  }
-
-  // --- Helpers DOM ---
-  function setVal(id, val){ const el=document.getElementById(id); if(el) el.value=String(val); }
-  function setSel(id, val, lock=false){
-    const el=document.getElementById(id);
-    if(!el) return;
-    const opt=[...el.options].find(o=>o.value==val)?val:(el.options[0]?.value||'');
-    el.value=opt;
-    if(lock) el.setAttribute('disabled','disabled'); else el.removeAttribute('disabled');
-  }
-
-  function pintarChip(cat, cama){
-    try{
-      const head = document.querySelector('#inventarioOverlay .invp-head') || document.querySelector('#inventarioOverlay .modal-contenido h2');
-      if(!head) return;
-      let chip = document.getElementById('hk-sugeridos-chip');
-      if(!chip){
-        chip = document.createElement('div');
-        chip.id='hk-sugeridos-chip';
-        chip.style.cssText='margin:.5rem 0 0;display:flex;gap:8px;align-items:center;flex-wrap:wrap';
-        const badge=document.createElement('span');
-        badge.id='hk-sugeridos-badge';
-        badge.style.cssText='display:inline-block;background:#0ea5e9;color:#fff;font-weight:700;border-radius:999px;padding:4px 10px;font-size:12px';
-        const btn=document.createElement('button');
-        btn.type='button'; btn.id='hk-sugeridos-restore'; btn.textContent='Restaurar sugeridos';
-        btn.style.cssText='border:none;background:#e5e7eb;border-radius:8px;padding:4px 8px;font-size:12px;cursor:pointer';
-        chip.appendChild(badge); chip.appendChild(btn);
-        head.parentNode.insertBefore(chip, head.nextSibling);
-      }
-      const badge=document.getElementById('hk-sugeridos-badge');
-      if(badge) badge.textContent=`Sugeridos: ${cat} • ${cama}`;
-    }catch(_){}
-  }
-
-  async function aplicarSugeridos(num){
-    const h = await getHabitacion(num);
-    const cat = categoriaDe(num);
-    const tipo = (cat==='Normal') ? (tipoCamaDesdeJson(h)||'K') : 'K';
-    const sug = sugeridos(cat, tipo);
-
-    // Baño
-    setVal('ban-bano',   sug.ban.bano);
-    setVal('ban-mano',   sug.ban.mano);
-    setVal('ban-facial', sug.ban.facial);
-    setVal('ban-tapete', sug.ban.tapete);
-    setVal('ban-verdes', sug.ban.verdes);
-    setSel('ban-color',  sug.ban.color,  sug.ban.lockColor);
-    setSel('ban-categoria', cat, true);
-
-    // Cama
-    setSel('tipo-cama',  sug.cama.tipo, sug.cama.lockTipo);
-    setVal('cama-protector',  sug.cama.protector);
-    setVal('cama-sabanas',    sug.cama.sabanas);
-    setVal('cama-almohadas',  sug.cama.almohadas);
-    setVal('cama-fundas',     sug.cama.fundas);
-    setVal('cama-prot-alm',   sug.cama.protAlm);
-    setVal('cama-inserto',    sug.cama.inserto);
-    setVal('cama-cubre',      sug.cama.cubre);
-    setSel('cama-color',      sug.cama.color, sug.cama.lockColor);
-
-    pintarChip(cat, (cat==='Normal'? tipo : 'K'));
-
-    const btn = document.getElementById('hk-sugeridos-restore');
-    if(btn){ btn.onclick = ()=> aplicarSugeridos(num); }
-  }
-
-  // --- Hook no invasivo ---
-  function tryWire(){
-    if(typeof window.abrirInventarioPrincipal!=='function') return;
-    if(window.__hkSugeridosHooked) return;
-    window.__hkSugeridosHooked = true;
-
-    const _open = window.abrirInventarioPrincipal;
-    window.abrirInventarioPrincipal = function(num){
-      _open(num);
-      setTimeout(()=>{ aplicarSugeridos(num); }, 0);
-    };
-  }
-  tryWire();
-  document.addEventListener('DOMContentLoaded', tryWire);
-})();
-</script>
-');
+    w.document.write('<html><head><meta charset="utf-8"><title>Concentrado</title>'+css+'</head><body><h1>Concentrado de Inventarios</h1>'+html+'</body></html>');
     w.document.close(); w.focus(); w.print();
   }
 
@@ -3034,5 +2885,83 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
 })();</script>
+
+
+<script>
+(()=>{
+  if (window.__hkSugeridosWired) return;
+  window.__hkSugeridosWired = true;
+  const MASTERS = [3014, 3114, 3214, 4111, 4211, 4311, 4411, 4511];
+  const SWING_UP = [3014, 3015, 3016, 3017, 3018, 3019, 3020, 3021, 3022, 3023, 3024, 3025, 3026, 3027, 3028, 3029, 3030, 3101, 3102, 3103, 3104, 3105, 3106, 3107, 3108, 3109, 3110, 3111, 3112];
+  const esMaster = n => MASTERS.includes(Number(n));
+  const esSwingUp = n => SWING_UP.includes(Number(n)) && !esMaster(n);
+  const categoriaDe = n => esMaster(n) ? 'Master Suite' : (esSwingUp(n) ? 'Swing Up' : 'Normal');
+  async function getHabitacion(num){
+    try{
+      if (typeof window.ensureHabitacionesData === 'function'){
+        const map = await window.ensureHabitacionesData();
+        return map?.[num] || null;
+      }
+      const data = await fetch('habitaciones.json').then(r=>r.json());
+      return data?.[num] || null;
+    }catch(_){ return null; }
+  }
+  function tipoCamaDesdeJson(h){
+    if (!h) return '';
+    if (typeof window.getTipoCama === 'function') return window.getTipoCama(h);
+    const v = (h.tipo_cama||'').toString().toUpperCase();
+    if (v==='K' || v==='D') return v;
+    const txt = [h.titulo||'', h.descripcion||'', ...(h.caracteristicas||[])].join(' ').toUpperCase();
+    if (/\bKING\b|KING SIZE|\bKS\b/.test(txt)) return 'K';
+    if (/\bDOUBLE\b|\bDOBLE\b|\bMATRIMONIAL\b|\bMATRI\b|2\s*DBL/.test(txt)) return 'D';
+    return '';
+  }
+  function sugeridos(categoria, tipoCamaNorm='K'){
+    const camaK = { protector:1, sabanas:2, almohadas:4, fundas:4, protAlm:4, inserto:1, cubre:1 };
+    const camaD = { protector:camaK.protector*2, sabanas:camaK.sabanas*2, almohadas:camaK.almohadas*2, fundas:camaK.fundas*2, protAlm:camaK.protAlm*2, inserto:camaK.inserto*2, cubre:camaK.cubre*2 };
+    if (categoria==='Swing Up'){
+      return { ban:{bano:6,mano:6,facial:2,tapete:2,verdes:2,color:'Café',lockColor:true}, cama:{...camaK,color:'Café',tipo:'K',lockTipo:true,lockColor:true} };
+    }
+    if (categoria==='Master Suite'){
+      return { ban:{bano:6,mano:7,facial:2,tapete:4,verdes:2,color:'Café',lockColor:true}, cama:{...camaK,color:'Café',tipo:'K',lockTipo:true,lockColor:true} };
+    }
+    const isD = (tipoCamaNorm==='D');
+    return { ban:{bano:4,mano:4,facial:2,tapete:1,verdes:0,color:'Blanco',lockColor:false}, cama:{...(isD?camaD:camaK),color:'Blanco',tipo:(isD?'D':'K'),lockTipo:true,lockColor:false} };
+  }
+  function setVal(id,v){ const el=document.getElementById(id); if(el) el.value=String(v); }
+  function setSel(id,v,lock=false){ const el=document.getElementById(id); if(!el) return; const has=[...el.options].some(o=>o.value==v); el.value=has?v:(el.options[0]?.value||''); lock?el.setAttribute('disabled','disabled'):el.removeAttribute('disabled'); }
+  function pintarChip(cat,cama){
+    try{
+      const head=document.querySelector('#inventarioOverlay .invp-head')||document.querySelector('#inventarioOverlay .modal-contenido h2');
+      if(!head) return;
+      let chip=document.getElementById('hk-sugeridos-chip');
+      if(!chip){
+        chip=document.createElement('div'); chip.id='hk-sugeridos-chip'; chip.style.cssText='margin:.5rem 0 0;display:flex;gap:8px;align-items:center;flex-wrap:wrap';
+        const badge=document.createElement('span'); badge.id='hk-sugeridos-badge'; badge.style.cssText='display:inline-block;background:#0ea5e9;color:#fff;font-weight:700;border-radius:999px;padding:4px 10px;font-size:12px';
+        const btn=document.createElement('button'); btn.type='button'; btn.id='hk-sugeridos-restore'; btn.textContent='Restaurar sugeridos'; btn.style.cssText='border:none;background:#e5e7eb;border-radius:8px;padding:4px 8px;font-size:12px;cursor:pointer';
+        chip.appendChild(badge); chip.appendChild(btn); head.parentNode.insertBefore(chip, head.nextSibling);
+      }
+      const badge=document.getElementById('hk-sugeridos-badge'); if(badge) badge.textContent=`Sugeridos: ${cat} • ${cama}`;
+    }catch(_){}
+  }
+  async function aplicarSugeridos(num){
+    const h=await getHabitacion(num);
+    const cat=categoriaDe(num);
+    const tipo=(cat==='Normal')?(tipoCamaDesdeJson(h)||'K'):'K';
+    const sug=sugeridos(cat,tipo);
+    setVal('ban-bano',sug.ban.bano); setVal('ban-mano',sug.ban.mano); setVal('ban-facial',sug.ban.facial); setVal('ban-tapete',sug.ban.tapete); setVal('ban-verdes',sug.ban.verdes); setSel('ban-color',sug.ban.color,sug.ban.lockColor); setSel('ban-categoria',cat,true);
+    setSel('tipo-cama',sug.cama.tipo,sug.cama.lockTipo); setVal('cama-protector',sug.cama.protector); setVal('cama-sabanas',sug.cama.sabanas); setVal('cama-almohadas',sug.cama.almohadas); setVal('cama-fundas',sug.cama.fundas); setVal('cama-prot-alm',sug.cama.protAlm); setVal('cama-inserto',sug.cama.inserto); setVal('cama-cubre',sug.cama.cubre); setSel('cama-color',sug.cama.color,sug.cama.lockColor);
+    pintarChip(cat,(cat==='Normal'?tipo:'K'));
+    const btn=document.getElementById('hk-sugeridos-restore'); if(btn){ btn.onclick=()=>aplicarSugeridos(num); }
+  }
+  function tryWire(){
+    if(typeof window.abrirInventarioPrincipal!=='function') return;
+    if(window.__hkSugeridosHooked) return; window.__hkSugeridosHooked=true;
+    const _open=window.abrirInventarioPrincipal;
+    window.abrirInventarioPrincipal=function(num){ _open(num); setTimeout(()=>{ aplicarSugeridos(num); },0); };
+  }
+  tryWire(); document.addEventListener('DOMContentLoaded', tryWire);
+})();
+</script>
 </body>
 </html>
