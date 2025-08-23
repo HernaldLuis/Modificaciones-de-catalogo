@@ -895,6 +895,37 @@ body.hk-modal-open{ overflow: hidden; }
   cursor: zoom-in; /* se mantiene el hint visual */
 }
 
+
+/* === HK: Consolidado Inventario (Admin) === */
+#hk-admin-btn{
+  display:none; position:absolute; top:8px; left:12px; z-index:10020;
+  padding:6px 12px; border:none; border-radius:999px; font-weight:800; cursor:pointer;
+  background:#111827; color:#fff; box-shadow:0 8px 18px rgba(0,0,0,.25);
+}
+#hk-admin-btn.show{ display:inline-flex; align-items:center; gap:6px; }
+#hkConsolidado{
+  position:fixed; inset:0; display:none; align-items:center; justify-content:center;
+  background:rgba(0,0,0,.4); backdrop-filter:blur(4px); z-index:10250;
+}
+#hkConsolidado.activo{ display:flex; }
+.hk-con-card{
+  width:min(1060px,96vw); max-height:86vh; overflow:auto;
+  background:#fff; border-radius:16px; padding:18px;
+  box-shadow:0 30px 60px rgba(0,0,0,.28); font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;
+}
+.hk-con-head{ display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:10px; }
+.hk-con-title{ font-size:18px; font-weight:800; margin:0; }
+.hk-con-actions{ display:flex; gap:8px; flex-wrap:wrap; }
+.hk-btn{ border:none; border-radius:10px; padding:8px 12px; font-weight:700; cursor:pointer; }
+.hk-btn.csv{ background:#10b981; color:#fff; }
+.hk-btn.print{ background:#0ea5e9; color:#fff; }
+.hk-btn.close{ background:#eee; color:#111; }
+.hk-table{ width:100%; border-collapse:collapse; font-size:13px; }
+.hk-table thead th{ position:sticky; top:0; background:#f3f4f6; z-index:1; }
+.hk-table th, .hk-table td{ border-bottom:1px solid #eee; padding:6px 8px; text-align:left; }
+.hk-chip{ display:inline-flex; align-items:center; padding:2px 6px; border-radius:999px; background:#f3f4f6; font-size:12px; }
+@media (max-width: 720px){ #hk-admin-btn{ left:auto; right:12px; } }
+
 </style>
 
 <style>
@@ -918,6 +949,7 @@ body.hk-modal-open{ overflow: hidden; }
 
 </head>
 <body>
+<button id="hk-admin-btn" type="button">📊 Consolidado</button>>
   <!-- Modal de Éxito Inventario -->
   <div id="hkSuccessModal" class="hk-success-overlay" aria-hidden="true">
     <div class="hk-success-card" role="dialog" aria-modal="true" aria-labelledby="hk-success-title">
@@ -2637,6 +2669,252 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('keydown', onkey);
   };
 })();
+</script>
+
+
+<!-- Modal Consolidado Inventario -->
+<div id="hkConsolidado" aria-hidden="true">
+  <div class="hk-con-card" role="dialog" aria-modal="true" aria-labelledby="hkConsolidadoTitle">
+    <div class="hk-con-head">
+      <h3 id="hkConsolidadoTitle" class="hk-con-title">Consolidado de Inventario</h3>
+      <div class="hk-con-actions">
+        <button class="hk-btn csv" id="hkExportCSV">Exportar Excel (CSV)</button>
+        <button class="hk-btn print" id="hkPrint">Imprimir / PDF</button>
+        <button class="hk-btn close" id="hkConClose">Cerrar</button>
+      </div>
+    </div>
+    <div id="hkConMeta" style="margin-bottom:6px; color:#374151; font-size:12px;"></div>
+    <div style="overflow:auto;">
+      <table class="hk-table" id="hkConTabla">
+        <thead>
+          <tr>
+            <th>Fecha</th><th>Hora</th><th>Habitación</th><th>Usuario</th>
+            <th>Sillas</th><th>Tipo Cama</th><th>Protector</th><th>Sábanas</th><th>Almohadas</th><th>Fundas</th><th>Prot. Alm.</th><th>Inserto</th><th>Cubre</th><th>Color Cub.</th>
+            <th>Cobertor</th><th>Alm. Mat.</th><th>Funda Mat.</th><th>Prot. Mat.</th><th>Bolsa</th>
+            <th>Cat. Baño</th><th>Toalla Baño</th><th>Toalla Mano</th><th>Facial</th><th>Tapete</th><th>Verdes</th><th>Color Toalla</th>
+            <th>Notas</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+// === HK: Persistencia y consolidado de Inventario ===
+(function(){
+  const STORAGE_KEY = 'HK_INV_EVENTS';
+  const SESSION_KEY = 'hk_inv_session';
+  const ADMINS = new Set(['3072167','3067888']); // Luis, Manuel
+  // util
+  function now(){ return new Date(); }
+  function pad(n){ return String(n).padStart(2,'0'); }
+  function fmtDateTime(ts){
+    const d = new Date(ts);
+    const f = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+    const t = `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    return [f,t];
+  }
+  function readEvents(){
+    try{ return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }catch(e){ return []; }
+  }
+  function writeEvents(arr){
+    try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(arr)); }catch(e){}
+  }
+  function getUser(){
+    try{
+      return {
+        id: sessionStorage.getItem('HK_MAT') || '',
+        name: sessionStorage.getItem('HK_NAME') || ''
+      };
+    }catch(e){ return {id:'', name:''}; }
+  }
+  function hasSession(){
+    try{
+      const TTL = 5*60*60*1000;
+      const t = +sessionStorage.getItem(SESSION_KEY)||0;
+      return (Date.now()-t) < TTL;
+    }catch(e){ return false; }
+  }
+  // Exponer para usar en overlay existente
+  window.hkGuardarInventarioReal = function(habitacionNum){
+    // Leer campos
+    const val = id => { const el=document.getElementById(id); return el ? (el.value||'') : ''; };
+    const num = id => { const v=val(id); const n=parseInt(v,10); return isNaN(n)?0:n; };
+    const data = {
+      room: String(habitacionNum),
+      ts: Date.now(),
+      user: getUser(),
+      sillas: num('sillas-cant'),
+      cama_tipo: val('tipo-cama'),
+      cama_protector: num('cama-protector'),
+      cama_sabanas: num('cama-sabanas'),
+      cama_almohadas: num('cama-almohadas'),
+      cama_fundas: num('cama-fundas'),
+      cama_prot_alm: num('cama-prot-alm'),
+      cama_inserto: num('cama-inserto'),
+      cama_cubre: num('cama-cubre'),
+      cama_color: val('cama-color'),
+      clo_cobertor: num('clo-cobertor'),
+      clo_alm_mat: num('clo-alm-mat'),
+      clo_funda_mat: num('clo-funda-mat'),
+      clo_prot_mat: num('clo-prot-mat'),
+      clo_bolsa: num('clo-bolsa'),
+      ban_categoria: val('ban-categoria'),
+      ban_bano: num('ban-bano'),
+      ban_mano: num('ban-mano'),
+      ban_facial: num('ban-facial'),
+      ban_tapete: num('ban-tapete'),
+      ban_verdes: num('ban-verdes'),
+      ban_color: val('ban-color'),
+      notas: (document.getElementById('invp-notas')?.value||'').trim()
+    };
+    // Guardar
+    const all = readEvents();
+    all.push(data);
+    writeEvents(all);
+    // Guardado por habitación (último)
+    try{ localStorage.setItem('HK_INV_last_'+data.room, JSON.stringify(data)); }catch(e){}
+    // Actualizar historial visible (si existe el cuadro)
+    try{
+      const box = document.getElementById('invp-histbox');
+      if(box){
+        const [f,t] = fmtDateTime(data.ts);
+        const txt = `• ${f} ${t} — ${data.user.name||'usuario'} — Sillas:${data.sillas}, Cama:${data.cama_tipo}, Baño:${data.ban_categoria}`;
+        const p = document.createElement('div'); p.textContent = txt; box.appendChild(p);
+      }
+    }catch(e){}
+    // Modal de éxito existente (si está en este index)
+    if(typeof showSuccessModal === 'function'){
+      showSuccessModal('Inventario de la habitación ' + data.room + ' guardado.', function(){
+        const ov=document.getElementById('inventarioOverlay'); if(ov) ov.classList.remove('activo');
+        try{ document.body.classList.remove('hk-modal-open'); }catch(_){}
+      });
+    }else{
+      alert('Guardado.');
+    }
+  };
+
+  // Reemplazar el botón Guardar demo por el real si existe
+  document.addEventListener('click', function(e){
+    const tgt = e.target;
+    if(tgt && tgt.id === 'invp-guardar' && tgt.getAttribute('data-real')!=='1'){
+      e.preventDefault();
+      tgt.setAttribute('data-real','1');
+      // Reasignar handler al vuelo
+      const htext = document.querySelector('#inv-titulo')?.textContent||'';
+      const num = (htext.match(/\d+/)||[''])[0];
+      window.hkGuardarInventarioReal(num);
+    }
+  }, true);
+
+  // Botón admin (Consolidado) — solo Luis/Manuel con sesión
+  function toggleAdminBtn(){
+    const btn = document.getElementById('hk-admin-btn');
+    if(!btn) return;
+    const u = getUser();
+    const show = hasSession() && ADMINS.has(u.id);
+    btn.classList.toggle('show', !!show);
+  }
+  window.addEventListener('storage', toggleAdminBtn);
+  document.addEventListener('DOMContentLoaded', toggleAdminBtn);
+  // Si tienes un hook de login exitoso, llama toggleAdminBtn() después de setSession()
+
+  // Abrir Consolidado
+  function renderConsolidado(){
+    const data = readEvents();
+    const tbody = document.querySelector('#hkConTabla tbody');
+    const meta  = document.getElementById('hkConMeta');
+    if(!tbody) return;
+    tbody.innerHTML = '';
+    const byUser = {};
+    data.forEach(r => {
+      const [f,t] = fmtDateTime(r.ts);
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${f}</td><td>${t}</td><td>${r.room||''}</td><td>${(r.user?.name||'')}</td>
+        <td>${r.sillas}</td><td>${r.cama_tipo}</td><td>${r.cama_protector}</td><td>${r.cama_sabanas}</td><td>${r.cama_almohadas}</td><td>${r.cama_fundas}</td><td>${r.cama_prot_alm}</td><td>${r.cama_inserto}</td><td>${r.cama_cubre}</td><td>${r.cama_color}</td>
+        <td>${r.clo_cobertor}</td><td>${r.clo_alm_mat}</td><td>${r.clo_funda_mat}</td><td>${r.clo_prot_mat}</td><td>${r.clo_bolsa}</td>
+        <td>${r.ban_categoria}</td><td>${r.ban_bano}</td><td>${r.ban_mano}</td><td>${r.ban_facial}</td><td>${r.ban_tapete}</td><td>${r.ban_verdes}</td><td>${r.ban_color}</td>
+        <td>${(r.notas||'').replace(/</g,'&lt;')}</td>`;
+      tbody.appendChild(tr);
+      const key = r.user?.name || 'desconocido';
+      byUser[key] = (byUser[key]||0)+1;
+    });
+    if(meta){
+      const total = data.length;
+      const partes = Object.entries(byUser).map(([k,v]) => `<span class="hk-chip">${k}: ${v}</span>`);
+      meta.innerHTML = `Registros: <strong>${total}</strong> &nbsp; ${partes.join(' &nbsp; ')}`;
+    }
+  }
+  function openConsolidado(){
+    renderConsolidado();
+    const ov = document.getElementById('hkConsolidado');
+    if(!ov) return;
+    ov.classList.add('activo'); ov.setAttribute('aria-hidden','false');
+  }
+  function closeConsolidado(){
+    const ov = document.getElementById('hkConsolidado');
+    if(!ov) return;
+    ov.classList.remove('activo'); ov.setAttribute('aria-hidden','true');
+  }
+  // CSV Export
+  function exportCSV(){
+    const data = readEvents();
+    const headers = ["fecha","hora","habitacion","usuario","sillas","tipo_cama","protector","sabanas","almohadas","fundas","prot_alm","inserto","cubre","color_cubre","cobertor","alm_matr","funda_matr","prot_matr","bolsa","categoria_bano","toalla_bano","toalla_mano","facial","tapete","verdes","color_toalla","notas"];
+    const lines = [headers.join(",")];
+    data.forEach(r=>{
+      const [f,t] = fmtDateTime(r.ts);
+      const row = [
+        f,t,r.room||"", (r.user?.name||""), r.sillas, r.cama_tipo, r.cama_protector, r.cama_sabanas, r.cama_almohadas, r.cama_fundas, r.cama_prot_alm, r.cama_inserto, r.cama_cubre, r.cama_color,
+        r.clo_cobertor, r.clo_alm_mat, r.clo_funda_mat, r.clo_prot_mat, r.clo_bolsa, r.ban_categoria, r.ban_bano, r.ban_mano, r.ban_facial, r.ban_tapete, r.ban_verdes, r.ban_color,
+        (r.notas||"").replace(/[\r\n,]+/g," ").replace(/"/g,"'")
+      ];
+      lines.push(row.join(","));
+    });
+    const blob = new Blob([lines.join("\n")], {type:"text/csv;charset=utf-8;"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'consolidado_inventario.csv';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(()=>URL.revokeObjectURL(url), 1500);
+  }
+  // Print (PDF)
+  function doPrint(){
+    const win = window.open("", "_blank", "width=1200,height=800");
+    if(!win) return;
+    win.document.write(`<html><head><title>Consolidado Inventario</title>
+      <style>
+        body{font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial; padding:10px;}
+        table{width:100%; border-collapse:collapse; font-size:12px;}
+        th,td{border:1px solid #ddd; padding:4px 6px; text-align:left;}
+        thead th{background:#f3f4f6;}
+      </style>
+      </head><body>`);
+    win.document.write(document.getElementById('hkConTabla').outerHTML);
+    win.document.write("</body></html>");
+    win.document.close();
+    win.focus();
+    win.print();
+  }
+  // Bind UI
+  document.addEventListener('DOMContentLoaded', function(){
+    const btn = document.getElementById('hk-admin-btn');
+    if(btn){
+      btn.addEventListener('click', openConsolidado);
+    }
+    const c1 = document.getElementById('hkConClose');
+    const c2 = document.getElementById('hkConsolidado');
+    if(c1) c1.addEventListener('click', closeConsolidado);
+    if(c2) c2.addEventListener('click', function(e){ if(e.target===c2) closeConsolidado(); });
+    const ex = document.getElementById('hkExportCSV');
+    const pr = document.getElementById('hkPrint');
+    if(ex) ex.addEventListener('click', exportCSV);
+    if(pr) pr.addEventListener('click', doPrint);
+  });
+
+})(); // fin HK persistencia
 </script>
 
 </body>
