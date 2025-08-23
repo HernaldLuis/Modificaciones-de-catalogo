@@ -699,11 +699,13 @@ border-bottom: none;
 }
 
 /* Reservar espacio a la derecha para que el texto no quede debajo del video */
-.contenido-inferior { padding-right: 0 !important; }
+.contenido-inferior {
+  padding-right: 364px; /* ≈ 520px * 0.65 + holgura */
+}
 
 /* Opcional: en pantallas estrechas, reducir el padding para no comer demasiado ancho */
 @media (max-width: 600px){
-  .contenido-inferior { padding-right: 0 !important; }
+  .contenido-inferior { padding-right: 40vw; }
 }
 
 
@@ -736,9 +738,15 @@ border-bottom: none;
 .contenido-inferior { padding-right: 0 !important; }
 
 /* Aplica el espacio a la derecha SOLO al título y a los primeros 8 <p> (hasta "Características") */
-
+.contenido-inferior > h3,
+.contenido-inferior > p:nth-of-type(-n+8){
+  padding-right: 364px; /* ≈ ancho del video escalado */
+}
 @media (max-width: 600px){
-  
+  .contenido-inferior > h3,
+  .contenido-inferior > p:nth-of-type(-n+8){
+    padding-right: 40vw;
+  }
 }
 
 /* Galería responsive: que ninguna imagen se desborde */
@@ -888,12 +896,6 @@ body.hk-modal-open{ overflow: hidden; }
 }
 
 
-/* Padding selectivo: reserva espacio para el video anclado sin afectar todo el bloque */
-.contenido-inferior > h3,
-.contenido-inferior > p:nth-of-type(-n+8){
-  padding-right: clamp(0px, 40vw, 364px);
-}
-
 /* === Concentrado (solo Admin) === */
 #concentradoOverlay .modal-contenido{ max-width: 96vw; max-height: 92vh; }
 .table-wrap{ overflow:auto; max-height:70vh; }
@@ -901,7 +903,7 @@ body.hk-modal-open{ overflow: hidden; }
 .conc-table th, .conc-table td{ border:1px solid #e5e7eb; padding:6px; text-align:left; font-size:12px; }
 .conc-table thead th{ background:#f3f4f6; position:sticky; top:0; }
 .conc-actions{ display:flex; gap:.5rem; justify-content:flex-end; margin-top:.75rem; }
-#btn-concentrado{ margin-left:.5rem; }
+#btn-concentrado{ position:fixed; top:10px; right:130px; z-index:10050; }
 
 </style>
 
@@ -2650,55 +2652,38 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 <script>
-// === Roles & Concentrado de Inventario ===
-// === Configuración de API (Centralizado) ===
-// Reemplaza con tu URL del Web App de Google Apps Script
-const API_URL   = 'REEMPLAZA_CON_TU_WEB_APP_URL';
-const API_TOKEN = 'CAMBIA_ESTE_TOKEN_LARGO';
+(function(){
+  if (window.__hk_roles_wired) return; window.__hk_roles_wired = true;
 
-function simpleHeaders(){ return {'Content-Type':'text/plain'}; } // evitar preflight
-async function apiAppend(entry){
-  try{
+  const API_URL   = 'https://script.google.com/macros/s/AKfycbz3bAcBcbSyF3VlIjrXNzoqhR7DMOEAdYU3GFvTAP7MsU18VbQJVzVQbv3VhfLwP2n1nA/exec';
+  const API_TOKEN = 'PARADISUS_INV_2025_xX7$K9';
+
+  function simpleHeaders(){ return {'Content-Type':'text/plain'}; }
+
+  async function apiAppend(entry){
     const res = await fetch(API_URL, {
-      method: 'POST',
-      headers: simpleHeaders(),
+      method: 'POST', headers: simpleHeaders(),
       body: JSON.stringify({action:'append', token: API_TOKEN, entry})
     });
     const data = await res.json();
     if(!res.ok || !data || data.status!=='ok') throw new Error((data&&data.error)||'append failed');
-    return true;
-  }catch(err){
-    console.error('API append error:', err);
-    throw err;
+    return data;
   }
-}
-async function apiList(){
-  const url = API_URL + '?action=list&token=' + encodeURIComponent(API_TOKEN);
-  const res = await fetch(url, {method:'GET'});
-  const data = await res.json();
-  if(!res.ok || !data || data.status!=='ok') throw new Error((data&&data.error)||'list failed');
-  return Array.isArray(data.rows) ? data.rows : [];
-}
 
-// === Cola offline (si no hay red) ===
-const QUEUE_KEY = 'HK_INV_QUEUE';
-function qLoad(){ try{ return JSON.parse(localStorage.getItem(QUEUE_KEY) || '[]'); }catch(_){ return []; } }
-function qSave(a){ try{ localStorage.setItem(QUEUE_KEY, JSON.stringify(a)); }catch(_){ } }
-function qPush(x){ const a = qLoad(); a.push(x); qSave(a); }
-async function flushQueue(){
-  const a = qLoad(); if(!a.length) return 0;
-  let ok = 0, fail = 0, keep = [];
-  for(const item of a){
-    try{ await apiAppend(item); ok++; }catch(_){ fail++; keep.push(item); }
+  async function apiList(){
+    const url = API_URL + '?action=list&token=' + encodeURIComponent(API_TOKEN);
+    const res = await fetch(url, {method:'GET'});
+    const data = await res.json();
+    if(!res.ok || !data || data.status!=='ok') throw new Error((data&&data.error)||'list failed');
+    return Array.isArray(data.rows) ? data.rows : [];
   }
-  qSave(keep);
-  return ok;
-}
 
-(function(){
-  if (window.__hk_roles_wired) return; window.__hk_roles_wired = true;
+  const QUEUE_KEY = 'HK_INV_QUEUE';
+  function qLoad(){ try{ return JSON.parse(localStorage.getItem(QUEUE_KEY)||'[]'); }catch(_){ return []; } }
+  function qSave(a){ try{ localStorage.setItem(QUEUE_KEY, JSON.stringify(a)); }catch(_){ } }
+  function qPush(x){ const a=qLoad(); a.push(x); qSave(a); }
+  async function flushQueue(){ const a=qLoad(); if(!a.length) return 0; let keep=[]; for(const it of a){ try{ await apiAppend(it); }catch(_){ keep.push(it); } } qSave(keep); return a.length - keep.length; }
 
-  // IDs existentes en MATRICULAS (no modificamos el mapa original)
   const ADMIN_IDS = { '3072167':'Luis', '3067888':'Manuel' };
   const SUP_IDS   = { '3077512':'Ximena', '3062148':'Silvia', '3071925':'Itzel', '3068694':'Dolores', '3075393':'Marisela' };
 
@@ -2710,33 +2695,13 @@ async function flushQueue(){
   }
 
   function updateRoleUI(){
-    try{
-      const btnConc = document.getElementById('btn-concentrado');
-      if(btnConc) btnConc.style.display = (hkGetRole()==='admin' ? 'inline-flex' : 'none');
-      if(typeof window.updateSessionUI === 'function') window.updateSessionUI();
-    }catch(e){}
+    const btnConc = document.getElementById('btn-concentrado');
+    if(btnConc) btnConc.style.display = (hkGetRole()==='admin' ? 'inline-flex' : 'none');
+    if(typeof window.updateSessionUI === 'function') try{ window.updateSessionUI(); }catch(_){}
   }
 
-  // Re-wire hkLogin para refrescar UI tras iniciar sesión
-  if (typeof window.hkLogin === 'function'){
-    const _hkLogin = window.hkLogin;
-    window.hkLogin = function(next){
-      _hkLogin(async function(){
-        try{ updateRoleUI(); }catch(e){}
-        try{ await flushQueue(); }catch(_){}
-        if(typeof next==='function') next();
-      });
-    };
-  }
-
-  // Persistencia simple en localStorage
-  const DATA_KEY = 'HK_INV_DATA';
-  function loadData(){ try{ return JSON.parse(localStorage.getItem(DATA_KEY) || '[]'); }catch(e){ return []; } }
-  function saveData(arr){ try{ localStorage.setItem(DATA_KEY, JSON.stringify(arr)); }catch(e){} }
-
-  // Colector de campos del inventario
   function collectInventory(hnum){
-    function val(id){ const el = document.getElementById(id); return el ? (el.type==='checkbox'? el.checked : el.value) : null; }
+    function val(id){ const el = document.getElementById(id); return el ? (el.type==='checkbox'? el.checked : el.value) : ''; }
     const entry = {
       fecha: new Date().toISOString(),
       habitacion: String(hnum||''),
@@ -2744,22 +2709,17 @@ async function flushQueue(){
       matricula: sessionStorage.getItem('HK_MAT') || '',
       sillas: val('sillas-cant'),
       cama: {
-        tipo: val('cama-tipo'),
+        tipo: '',
         protector: val('cama-protector'),
-        sabana: val('cama-sabana'),
+        sabana: val('cama-sabanas'),
         almohadas: val('cama-almohadas'),
         fundas: val('cama-fundas'),
-        protAlm: val('cama-protalmo'),
-        duvet: val('cama-duvet'),
-        fundaDuvet: val('cama-funda'),
+        protAlm: val('cama-prot-alm'),
+        duvet: val('cama-inserto'),
+        fundaDuvet: val('cama-cubre'),
         colorDuvet: val('cama-color')
       },
-      closet: {
-        toallasPlaya: val('closet-playa'),
-        bolsas: val('closet-bolsas'),
-        ganchos: val('closet-ganchos'),
-        albornoz: val('closet-albornoz')
-      },
+      closet: { toallasPlaya:'', bolsas:'', ganchos:'', albornoz:'' },
       bano: {
         categoria: val('ban-categoria'),
         bano: val('ban-bano'),
@@ -2774,12 +2734,10 @@ async function flushQueue(){
     return entry;
   }
 
-  // Hook: abrirInventarioPrincipal -> re-vincula el botón Guardar para almacenar datos
   if (typeof window.abrirInventarioPrincipal === 'function'){
     const _abrir = window.abrirInventarioPrincipal;
     window.abrirInventarioPrincipal = function(hnum){
       _abrir(hnum);
-      // Esperamos al siguiente ciclo para asegurar que el DOM del overlay existe
       setTimeout(function(){
         const saveBtn = document.getElementById('invp-guardar');
         if(saveBtn && !saveBtn.__hkwired){
@@ -2787,14 +2745,8 @@ async function flushQueue(){
           saveBtn.addEventListener('click', async function(){
             try{
               const entry = collectInventory(hnum);
-              try{
-                await apiAppend(entry);
-              }catch(e){
-                // Guarda en cola local y también en localStorage como respaldo
-                qPush(entry);
-                const arr = loadData(); arr.push(entry); saveData(arr);
-              }
-              // intenta drenar cola por si había pendientes
+              try{ await apiAppend(entry); }
+              catch(e){ qPush(entry); const arr = JSON.parse(localStorage.getItem('HK_INV_DATA')||'[]'); arr.push(entry); localStorage.setItem('HK_INV_DATA', JSON.stringify(arr)); }
               try{ await flushQueue(); }catch(_){}
             }catch(e){ console.error('No se pudo guardar el concentrado:', e); }
           }, {capture:true});
@@ -2803,22 +2755,27 @@ async function flushQueue(){
     };
   }
 
-  // UI y lógica del Concentrado (solo Admin)
   function renderTable(rows){
     if(!rows || !rows.length) return '<p>No hay registros todavía.</p>';
-    const headers = ['fecha','habitacion','usuario','matricula','sillas','cama.tipo','cama.protector','cama.sabana','cama.almohadas','cama.fundas','cama.protAlm','cama.duvet','cama.fundaDuvet','cama.colorDuvet','closet.toallasPlaya','closet.bolsas','closet.ganchos','closet.albornoz','bano.categoria','bano.bano','bano.mano','bano.facial','bano.tapete','bano.verdes','bano.color','notas'];
-    function get(obj, path){ return path.split('.').reduce((o,k)=> (o && o[k]!=null)? o[k] : '', obj); }
+    const prefer = ['fecha','habitacion','usuario','matricula','estado','anomalías','created_at','updated_at','fecha_servidor','fecha_dia'];
+    const set = new Set(); rows.forEach(r=> Object.keys(r).forEach(k=> set.add(k)));
+    const rest = Array.from(set).filter(k=> !prefer.includes(k)).sort();
+    const headers = prefer.filter(k=> set.has(k)).concat(rest);
+    function get(obj, k){ return (obj && obj[k]!=null)? obj[k] : ''; }
     let html = '<div class="table-wrap"><table class="conc-table"><thead><tr>' + headers.map(h=>'<th>'+h+'</th>').join('') + '</tr></thead><tbody>';
-    html += rows.map(r => '<tr>' + headers.map(h=>'<td>'+String(get(r,h)).replace(/</g,'&lt;')+'</td>').join('') + '</tr>').join('');
+    html += rows.map(r => '<tr>' + headers.map(h=>'<td>'+String(get(r,h)).toString().replace(/</g,'&lt;')+'</td>').join('') + '</tr>').join('');
     html += '</tbody></table></div>';
     return html;
   }
 
   function exportCSV(rows){
-    const headers = ['fecha','habitacion','usuario','matricula','sillas','cama.tipo','cama.protector','cama.sabana','cama.almohadas','cama.fundas','cama.protAlm','cama.duvet','cama.fundaDuvet','cama.colorDuvet','closet.toallasPlaya','closet.bolsas','closet.ganchos','closet.albornoz','bano.categoria','bano.bano','bano.mano','bano.facial','bano.tapete','bano.verdes','bano.color','notas'];
-    function get(obj, path){ return path.split('.').reduce((o,k)=> (o && o[k]!=null)? o[k] : '', obj); }
-    let csv = headers.join(',') + '\n';
-    csv += rows.map(r => headers.map(h => JSON.stringify(get(r,h))).join(',')).join('\n');
+    if(!rows || !rows.length){ alert('No hay datos.'); return; }
+    const prefer = ['fecha','habitacion','usuario','matricula','estado','anomalías','created_at','updated_at','fecha_servidor','fecha_dia'];
+    const set = new Set(); rows.forEach(r=> Object.keys(r).forEach(k=> set.add(k)));
+    const rest = Array.from(set).filter(k=> !prefer.includes(k)).sort();
+    const headers = prefer.filter(k=> set.has(k)).concat(rest);
+    let csv = headers.join(',') + '\\n';
+    csv += rows.map(r => headers.map(h => JSON.stringify(r[h] ?? '')).join(',')).join('\\n');
     const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a'); a.href = url; a.download = 'concentrado_inventario.csv'; a.click();
@@ -2845,7 +2802,7 @@ async function flushQueue(){
     const body = ov.querySelector('#conc-body');
     let data = [];
     try{ data = await apiList(); }
-    catch(e){ console.error('API list falló, usando respaldo local.', e); data = loadData(); }
+    catch(e){ console.error('API list falló, usando respaldo local.', e); try{ data = JSON.parse(localStorage.getItem('HK_INV_DATA')||'[]'); }catch(_){ data=[]; } }
     body.innerHTML = renderTable(data);
     ov.classList.add('activo'); ov.setAttribute('aria-hidden','false');
     const close = ()=>{ ov.classList.remove('activo'); ov.setAttribute('aria-hidden','true'); };
@@ -2854,7 +2811,6 @@ async function flushQueue(){
     ov.querySelector('#exp-pdf').onclick = ()=> exportPDF(body.innerHTML);
   }
 
-  // Wire botón de Concentrado
   document.addEventListener('DOMContentLoaded', async function(){
     const btn = document.getElementById('btn-concentrado');
     if(btn && !btn.__wired){ btn.__wired = true; btn.addEventListener('click', openConcentrado); }
@@ -2862,19 +2818,26 @@ async function flushQueue(){
     try{ await flushQueue(); }catch(_){}
   });
 
-  // Delegación defensiva para el botón Inventario: asegura login previo
+  if (typeof window.hkLogin === 'function'){
+    const _hkLogin = window.hkLogin;
+    window.hkLogin = function(next){
+      _hkLogin(async function(){
+        try{ updateRoleUI(); }catch(_){}
+        try{ await flushQueue(); }catch(_){}
+        if(typeof next==='function') next();
+      });
+    };
+  }
+
   document.addEventListener('click', function(e){
     const t = e.target.closest('.btn-inventario');
     if(t){
-      if(typeof window.hkHasSession === 'function' && hkHasSession()){
-        return; // ya logueado
-      }
+      if(typeof window.hkHasSession === 'function' && hkHasSession()) return;
       e.preventDefault(); e.stopPropagation();
       if(typeof window.hkLogin === 'function'){ hkLogin(()=>{}); }
     }
   }, true);
 
-  // Exponer utilidades
   window.hkGetRole = hkGetRole;
 })();
 </script>
