@@ -928,6 +928,18 @@ body.hk-modal-open{ overflow: hidden; }
 #inventarioOverlay .invp-actions{ position:sticky; bottom:0; background:#fff; padding-top:8px; z-index:1; }
 @media (max-height:700px){ #inventarioOverlay .modal-contenido{ max-height:calc(100vh - 16px); } }
 
+
+/* === CONC-FS-001: Pantalla completa para Concentrado (solo UI) === */
+#concentradoOverlay.fullscreen{ z-index: 9999; }
+#concentradoOverlay.fullscreen .modal-contenido{
+  width: 98vw !important;
+  max-width: none !important;
+  max-height: 94vh !important;
+  height: 94vh !important;
+}
+#concentradoOverlay.fullscreen .table-wrap{ height: calc(94vh - 120px) !important; }
+body.hk-no-scroll{ overflow: hidden !important; }
+
 </style>
 
 <style>
@@ -2961,6 +2973,55 @@ document.addEventListener('DOMContentLoaded', () => {
     window.abrirInventarioPrincipal=function(num){ _open(num); setTimeout(()=>{ aplicarSugeridos(num); },0); };
   }
   tryWire(); document.addEventListener('DOMContentLoaded', tryWire);
+})();
+</script>
+
+<script>
+(()=>{
+  if(window.__hkConcFsWired) return; window.__hkConcFsWired = true;
+
+  function ensureFsButton(){
+    const ov = document.getElementById('concentradoOverlay');
+    if(!ov) return;
+    // Busca toolbar (ya existente). Botones están en .right o en la barra superior
+    const toolbar = ov.querySelector('.conc-toolbar .right') || ov.querySelector('.conc-toolbar') || ov;
+    if(!toolbar || document.getElementById('conc-fullscreen-btn')) return;
+
+    const btn = document.createElement('button');
+    btn.id = 'conc-fullscreen-btn';
+    btn.type = 'button';
+    btn.textContent = 'Expandir';
+    btn.style.cssText = 'margin-left:8px;background:#10b981;color:#fff;border:none;border-radius:10px;padding:8px 12px;font-weight:700;cursor:pointer;';
+    btn.onclick = () => {
+      const on = ov.classList.toggle('fullscreen');
+      document.body.classList.toggle('hk-no-scroll', on);
+      btn.textContent = on ? 'Salir de pantalla completa' : 'Expandir';
+    };
+    // Inserta antes del botón Cerrar si existe; si no, al final
+    const closeBtn = ov.querySelector('#conc-cerrar');
+    if(closeBtn && closeBtn.parentNode===toolbar){
+      toolbar.insertBefore(btn, closeBtn);
+    }else{
+      toolbar.appendChild(btn);
+    }
+  }
+
+  function hookOpen(){
+    if(typeof window.openConcentrado!=='function') return;
+    if(window.__hkConcFsHooked) return;
+    window.__hkConcFsHooked = true;
+    const _open = window.openConcentrado;
+    window.openConcentrado = async function(){
+      await _open.apply(this, arguments);
+      setTimeout(ensureFsButton, 0);
+    };
+  }
+
+  // Intento inmediato y al cargar
+  hookOpen();
+  document.addEventListener('DOMContentLoaded', hookOpen);
+  // Por si ya está abierto cuando cargue el parche
+  document.addEventListener('readystatechange', ensureFsButton);
 })();
 </script>
 </body>
