@@ -83,6 +83,7 @@ body {
   width: auto;
 }
 
+
 @media (max-width: 600px) {
   .logo-catalogo {
     height: 62px; /* sigue siendo más grande que el texto pero no exagerado */
@@ -106,6 +107,7 @@ body {
 .zona-desplazable.arrastrando {
   cursor: grabbing;
 }
+
 
 .mensaje-inicial {
   text-align: center;
@@ -183,6 +185,7 @@ border-bottom: none;
   color: black;
 }
 
+
   .contenido-panel {
     position: relative;
   }
@@ -213,6 +216,7 @@ border-bottom: none;
     border-radius: 8px;
     box-shadow: 0 2px 6px rgba(0,0,0,0.2);
   }
+
 
 .galeria-habitacion {
   display: flex;
@@ -259,6 +263,9 @@ border-bottom: none;
   transition: transform 0.3s ease;
 }
 
+
+
+
 #zoom-img {
   max-width: 90%;
   max-height: 80%;
@@ -276,6 +283,7 @@ border-bottom: none;
   cursor: pointer;
   z-index: 10001;
 }
+
 
 .visor-oculto {
   display: none;
@@ -297,6 +305,8 @@ border-bottom: none;
   transition: transform 0.3s;
   cursor: zoom-out;
 }
+
+
 
 .piso {
   display: flex;
@@ -341,6 +351,7 @@ border-bottom: none;
   background-color: #f4a261;  /* Naranja suave */
   border: 2px solid #b76b3d;
 }
+
 
     .pasillo {
       width: 100%;
@@ -405,6 +416,7 @@ border-bottom: none;
   display: inline;
   word-break: break-word;
 }
+
 
 .conector-conectadas {
   display: inline-block;
@@ -643,20 +655,42 @@ border-bottom: none;
 .totales-tabla thead th{ background: linear-gradient(135deg, #00aaff22, #0077cc22); font-weight: 700; }
 .totales-tabla tbody tr:last-child td{ border-bottom: 0; }
 
-/* (video handicap legacy CSS removed) */
-/* tarjeta blanca del detalle */
-@media (max-width: 900px){/* (video css removed) *//* (legacy video style removed) */
+/* --- Video en detalle de habitación (handicap) --- */
+.video-habitacion{ position:absolute; top:16px; right:16px; width:520px; max-width:44%; background:#fff; border-radius:12px; box-shadow:0 12px 30px rgba(0,0,0,.18); overflow:hidden; }
+.video-ratio iframe, .video-ratio video{ position:absolute; inset:0; width:100%; height:100%; border:0; object-fit:contain; }
+.video-ratio video{ object-fit: contain; background:#000; }
+.contenido-inferior{ position:relative; }
+.contenido-inferior.con-video{ padding-right: calc(var(--video-width, 360px) + 24px); transition: padding-right .2s ease; } /* tarjeta blanca del detalle */
+@media (max-width: 900px){
+  .contenido-inferior.con-video{ padding-right:0; }
+  .video-habitacion{ position:static; width:100%; max-width:100%; margin-bottom:12px; }
 }
 
-/* (video zoom legacy CSS removed) */
+
+/* === Zoom de video === */
+.video-zoom-overlay{
+  display:none; position:fixed; inset:0; z-index:10000;
+  background:rgba(0,0,0,.85); align-items:center; justify-content:center;
+}
+.video-zoom-overlay.activo{ display:flex; }
+#zoom-video{ max-width:96vw; max-height:92vh; border-radius:12px; background:#000; outline:0; }
+
+
 /* Botón de reporte PDF */
 .btn-reporte{
   display:inline-block; padding:.45rem .8rem; border-radius:10px;
   background:#0ea5e9; color:#fff; text-decoration:none; font-weight:600;
   box-shadow:0 2px 8px rgba(0,0,0,.12); margin-left:.5rem;
 }
-.btn-reporte:hover{ filter:brightness(.95); }/* (legacy video style removed) */
+.btn-reporte:hover{ filter:brightness(.95); }
+
+/* === Ajuste puntual: reducir 25% el video Handicap anclado arriba-derecha === */
+#video-habitacion, .video-habitacion{
+  transform: scale(0.65);
+  transform-origin: top right;
+}
 /* (Opcional) Si se necesita diferente escala por viewport, ajustar aquí con media queries */
+
 
 /* === Ajustes de texto y flujo bajo el video === */
 .contenido-inferior p,
@@ -673,6 +707,7 @@ border-bottom: none;
 @media (max-width: 600px){
   .contenido-inferior { padding-right: 40vw; }
 }
+
 
 /* === Fix desbordamiento de tercera imagen en la galería === */
 .galeria-habitacion {
@@ -697,6 +732,7 @@ border-bottom: none;
   .bloque-imagen img { width: 220px; }
 }
 
+
 /* === Ajuste: reservar espacio solo para los primeros textos; galería a ancho completo === */
 /* Quita el padding-right global previo en el contenedor */
 .contenido-inferior { padding-right: 0 !important; }
@@ -717,6 +753,7 @@ border-bottom: none;
 .galeria-habitacion { justify-content: flex-start; }
 .bloque-imagen { width: min(100%, 360px); }
 .bloque-imagen img { width: 100%; height: auto; display: block; }
+
 
 /* === Galería: 3 imágenes corridas y alineadas en una fila === */
 .galeria-habitacion{
@@ -751,6 +788,7 @@ border-bottom: none;
   }
 }
 */
+
 
 /* === HK Inventario: botones + modal login + inventario principal === */
 .btn-inventario{
@@ -810,10 +848,12 @@ border-bottom: none;
 .modal-contenido h2{ margin-top:0; }
 /* === FIN estilos HK === */
 
+
 /* --- Prioridad máxima para Inventario --- */
 #inventarioOverlay{ z-index: 10100 !important; }
 body.hk-modal-open{ overflow: hidden; }
 /* ---------------------------------------- */
+
 
 /* --- Modal de éxito Inventario --- */
 .hk-success-overlay{
@@ -842,9 +882,8 @@ body.hk-modal-open{ overflow: hidden; }
   box-shadow:0 10px 20px rgba(16,185,129,.25);
 }
 .hk-btn-primary:hover{ filter:brightness(.97); }
-@keyframes hkPop{ from{ transform:scale(.98); opacity:0 } to{ transform:scale(1); opacity:1 } }/* (video css removed) */
-@media (max-width: 900px){/* (video css removed) */
-}/* (video css removed) */
+@keyframes hkPop{ from{ transform:scale(.98); opacity:0 } to{ transform:scale(1); opacity:1 } }
+/* --- fin éxito --- */
 
 </style>
 
@@ -901,12 +940,15 @@ body.hk-modal-open{ overflow: hidden; }
 
   <button id="btn-logout" class="btn-logout" onclick="hkLogout()" style="display:none">Cerrar sesión</button>
 
+
   <h1 class="titulo-catalogo">
   <span>Paradisus · Colección Exclusiva de Habitaciones & Suites</span>
   <img loading="lazy" src="https://res.cloudinary.com/dor6za85u/image/upload/v1754887647/ChatGPT_Image_10_ago_2025_09_47_11_p.m._btrjfp.png" 
        alt="Paradisus by Meliá" 
        class="logo-catalogo">
 </h1>
+
+
 
   <div class="habitacion-info-panel" id="panelHabitacion">
   <div class="habitacion-detalle" id="contenidoHabitacion">
@@ -950,6 +992,7 @@ body.hk-modal-open{ overflow: hidden; }
   </span>
 </div>
 <div id="totales-tabla" class="totales-tabla" style="padding: 10px 16px;"></div>
+
 
   <div class="zona-desplazable">
 
@@ -1329,6 +1372,8 @@ body.hk-modal-open{ overflow: hidden; }
 
 </div>
 
+
+
        <div class="pasillo"></div>
 
 <div class="columna-derecha">
@@ -1497,6 +1542,7 @@ body.hk-modal-open{ overflow: hidden; }
 <button class="habitacion-btn" data-num="4311">4311</button>
 </div>
 
+
 <div class="fila-base">
 <button class="habitacion-btn" data-num="4301">4301</button>
 <button class="habitacion-btn" data-num="4302">4302</button>
@@ -1514,6 +1560,7 @@ body.hk-modal-open{ overflow: hidden; }
 </div>
 
 <div class="pasillo"></div>
+
 
 <div class="fila-base">
 <button class="habitacion-btn" data-num="4229">4229</button>
@@ -1579,6 +1626,7 @@ body.hk-modal-open{ overflow: hidden; }
   </div>
 </div>
 
+
   <!-- Panel flotante inferior -->
   <div id="panelInferior" class="panel-inferior">
     <div id="mensajeSeleccion" class="mensaje-inicial">
@@ -1618,7 +1666,7 @@ async function mostrarInfo(num) {
       galeriaHTML += '</div>';
 
 panel.innerHTML = `
-  <div class="contenido-inferior">\n<!-- (legacy video container removed) -->\n
+  <div class="contenido-inferior">\n<aside id="video-habitacion" class="video-habitacion" hidden>\n  <div class="video-ratio">\n    <iframe id="video-embed" src="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen hidden></iframe>\n    <video id="video-mp4" controls playsinline hidden></video>\n  </div>\n</aside>\n
     <h3>${habitacion.titulo}</h3>
     <button class="btn-inventario" onclick="(hkHasSession()? abrirInventarioPrincipal(${num}) : hkLogin(()=>abrirInventarioPrincipal(${num})))">📋 Inventario</button>
 
@@ -1635,13 +1683,11 @@ panel.innerHTML = `
   </div>
 `;
     
-    
-    // (video injected block removed)
     // --- Video handicap (arriba-derecha) ---
     try {
   if (habitacion && (habitacion.discapacidad === true)) {
     const v = (window.VIDEOS_HAB && window.VIDEOS_HAB[num]) || window.HANDICAP_VIDEO_URL || "";
-    // (legacy setVideoHabitacion call removed);
+    setVideoHabitacion(v);
 
     // 🟢 Autoplay + mute aquí
     const video = document.querySelector("#video-mp4");
@@ -1659,7 +1705,7 @@ panel.innerHTML = `
 
   } else {
     stopVideoHabitacion();
-    // (legacy setVideoHabitacion call removed); // oculta
+    setVideoHabitacion(""); // oculta
   }
 }catch(e){}
 } else {
@@ -1716,7 +1762,9 @@ const num = boton.dataset.num || boton.textContent.trim();
 } else if (habitacion.tipo_cama === "D") {
   boton.classList.add("tipo-d");
 
+
 }
+
 
         // Verificar si tiene sofá cama
 const sofaIcon = `
@@ -1945,6 +1993,8 @@ document.addEventListener('keydown', (ev) => {
 });
 </script>
 
+
+
 <script>
 // ===== Carga JSON (tal cual) =====
 window.habitacionesData = window.habitacionesData || null;
@@ -2109,7 +2159,26 @@ function normalizarEmbed(u){
   return u;
 }
 
-// (legacy setVideoHabitacion removed)
+function setVideoHabitacion(url){
+  const box = document.getElementById('video-habitacion');
+  const iframe = document.getElementById('video-embed');
+  const mp4 = document.getElementById('video-mp4');
+  if(!box || !iframe || !mp4) return;
+
+  // Reset
+  box.hidden = true;
+  iframe.hidden = true; iframe.src = "";
+  mp4.hidden = true; mp4.removeAttribute('src'); mp4.load?.();
+
+  if(!url) return;
+
+  const u = String(url).trim();
+  if(/youtu\.be|youtube\.com|vimeo\.com/i.test(u)){
+    iframe.src = normalizarEmbed(u);
+    iframe.hidden = false;
+    box.hidden = false;
+    return;
+  }
   if(/\.(mp4)(\?|#|$)/i.test(u)){
     mp4.src = u;
     mp4.hidden = false;
@@ -2129,7 +2198,8 @@ window.VIDEOS_HAB = window.VIDEOS_HAB || {
   "4328": ""  // pega aquí el enlace del video
 };
 // URL por defecto si quieres usar 1 solo video para las 4
-// (HANDICAP_VIDEO_URL removed) // <-- opcional: pega aquí un enlace (YouTube/Vimeo o .mp4)
+window.HANDICAP_VIDEO_URL = "https://res.cloudinary.com/dor6za85u/video/upload/v1754942483/Ba%C3%B1o_Handicap_i1r6cg.mp4"; // <-- opcional: pega aquí un enlace (YouTube/Vimeo o .mp4)
+
 
 // === Zoom de Video ===
 function abrirZoomVideo(src){
@@ -2168,6 +2238,7 @@ document.addEventListener('DOMContentLoaded', () => {
 <div id="video-zoom-overlay" class="video-zoom-overlay" aria-hidden="true">
   <video id="zoom-video" controls playsinline muted></video>
 </div>
+
 
 <!-- Fallback inteligente para descargar el PDF en GitHub Pages -->
 <script>
@@ -2209,6 +2280,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 
+
 <script>
 document.addEventListener("DOMContentLoaded", function() {
     const videos = document.querySelectorAll(".modal-contenido video");
@@ -2219,6 +2291,7 @@ document.addEventListener("DOMContentLoaded", function() {
     });
 });
 </script>
+
 
 <script>
 (function() {
@@ -2477,6 +2550,7 @@ document.addEventListener('DOMContentLoaded', () => {
 })();
 </script>
 
+
 <script>
 // Utilidad para mostrar el modal de éxito
 (function(){
@@ -2497,33 +2571,6 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('keydown', onkey);
   };
 })();
-</script>
-
-<script>
-// === Helper: abrir/cerrar overlay de video ===
-// (video helper removed)
-    while(vz.firstChild){ vz.removeChild(vz.firstChild); }
-    // Source
-    var s = document.createElement('source');
-    s.src = src; s.type = 'video/mp4';
-    vz.appendChild(s);
-    vz.load();
-    ov.classList.add('activo'); ov.setAttribute('aria-hidden','false');
-    // Play
-    try{ var p = vz.play(); if(p && p.then) p.catch(()=>{}); }catch(e){}
-  }catch(e){}
-}
-// (video helper removed)
-  while(vz.firstChild){ vz.removeChild(vz.firstChild); }
-  ov.classList.remove('activo'); ov.setAttribute('aria-hidden','true');
-}
-document.addEventListener('DOMContentLoaded', function(){
-  var c = document.getElementById('hk-video-close');
-  var ov = document.getElementById('hk-video-overlay');
-  if(c) c.addEventListener('click', closeVideoOverlay);
-  if(ov) ov.addEventListener('click', function(e){ if(e.target === ov) closeVideoOverlay(); });
-  document.addEventListener('keydown', function(e){ if(e.key === 'Escape') closeVideoOverlay(); });
-});
 </script>
 
 </body>
