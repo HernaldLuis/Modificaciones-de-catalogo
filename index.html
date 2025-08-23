@@ -854,6 +854,37 @@ border-bottom: none;
 body.hk-modal-open{ overflow: hidden; }
 /* ---------------------------------------- */
 
+
+/* --- Modal de éxito Inventario --- */
+.hk-success-overlay{
+  position:fixed; inset:0; display:none; align-items:center; justify-content:center;
+  background: rgba(0,0,0,.35); backdrop-filter: blur(3px);
+  z-index: 10200;
+}
+.hk-success-overlay.activo{ display:flex; }
+.hk-success-card{
+  width:min(440px,92vw); background:#fff; border-radius:16px; padding:22px 22px 18px;
+  box-shadow:0 30px 60px rgba(0,0,0,.28); text-align:center;
+  animation: hkPop .18s ease-out;
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+}
+.hk-success-icon{
+  width:72px; height:72px; border-radius:999px; margin:4px auto 10px;
+  display:grid; place-items:center; font-size:36px; color:#10b981;
+  background: radial-gradient(circle at 30% 30%, #ecfdf5, #d1fae5);
+  border: 1px solid #bbf7d0;
+}
+.hk-success-title{ font-size:18px; font-weight:800; margin:6px 0 4px; color:#111827; }
+.hk-success-msg{ font-size:14px; color:#374151; margin:0 0 12px; }
+.hk-success-actions{ display:flex; justify-content:center; gap:8px; margin-top:8px; }
+.hk-btn-primary{
+  background:#10b981; color:#fff; border:none; border-radius:999px; padding:8px 16px; font-weight:700; cursor:pointer;
+  box-shadow:0 10px 20px rgba(16,185,129,.25);
+}
+.hk-btn-primary:hover{ filter:brightness(.97); }
+@keyframes hkPop{ from{ transform:scale(.98); opacity:0 } to{ transform:scale(1); opacity:1 } }
+/* --- fin éxito --- */
+
 </style>
 
 <style>
@@ -877,6 +908,18 @@ body.hk-modal-open{ overflow: hidden; }
 
 </head>
 <body>
+  <!-- Modal de Éxito Inventario -->
+  <div id="hkSuccessModal" class="hk-success-overlay" aria-hidden="true">
+    <div class="hk-success-card" role="dialog" aria-modal="true" aria-labelledby="hk-success-title">
+      <div class="hk-success-icon">✔</div>
+      <h3 id="hk-success-title" class="hk-success-title">¡Inventario guardado!</h3>
+      <p id="hk-success-msg" class="hk-success-msg">Tu registro se guardó correctamente.</p>
+      <div class="hk-success-actions">
+        <button id="hk-success-ok" class="hk-btn-primary">Listo</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Acceso Housekeeping Modal -->
   <div id="hkpin2" class="hkpin-overlay" aria-hidden="true">
     <div class="hkpin-modal" role="dialog" aria-modal="true" aria-labelledby="hkpin2-title">
@@ -2478,8 +2521,11 @@ document.addEventListener('DOMContentLoaded', () => {
       const save = document.getElementById('invp-guardar');
       if(save){
         save.onclick = ()=>{
-          alert('Inventario de la habitación ' + hnum + ' guardado (demo).');
-          document.getElementById('inventarioOverlay').classList.remove('activo');
+          showSuccessModal('Inventario de la habitación ' + hnum + ' guardado con éxito.', function(){
+          const ov = document.getElementById('inventarioOverlay');
+          if(ov) ov.classList.remove('activo');
+          try{ document.body.classList.remove('hk-modal-open'); }catch(e){}
+        });
         };
       }
     })(habitacionNum);
@@ -2501,6 +2547,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Al cargar, actualiza UI de sesión
   document.addEventListener('DOMContentLoaded', updateSessionUI);
+})();
+</script>
+
+
+<script>
+// Utilidad para mostrar el modal de éxito
+(function(){
+  window.showSuccessModal = function(message, onClose){
+    const ov  = document.getElementById('hkSuccessModal');
+    const msg = document.getElementById('hk-success-msg');
+    const ok  = document.getElementById('hk-success-ok');
+    if(!ov || !msg || !ok){ return alert(message||'Guardado.'); }
+    if(message) msg.textContent = message;
+    function close(){
+      ov.classList.remove('activo'); ov.setAttribute('aria-hidden','true');
+      document.removeEventListener('keydown', onkey);
+      if(typeof onClose === 'function') onClose();
+    }
+    function onkey(e){ if(e.key==='Escape' || e.key==='Enter' || e.key===' '){ close(); } }
+    ok.onclick = close;
+    ov.classList.add('activo'); ov.setAttribute('aria-hidden','false');
+    document.addEventListener('keydown', onkey);
+  };
 })();
 </script>
 
