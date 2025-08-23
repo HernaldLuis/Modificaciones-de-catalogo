@@ -899,16 +899,16 @@ body.hk-modal-open{ overflow: hidden; }
 /* ===== Concentrado (scoped) ===== */
 #concentradoOverlay{position:fixed;inset:0;background:rgba(17,24,39,.45);backdrop-filter:blur(3px);z-index:10040;display:none;align-items:center;justify-content:center}
 #concentradoOverlay.activo{display:flex}
-#concentradoOverlay .modal-contenido{width:min(1200px,96vw);max-height:90vh;background:#fff;border-radius:18px;box-shadow:0 20px 45px rgba(0,0,0,.3);overflow:hidden;display:flex;flex-direction:column}
+#concentradoOverlay .modal-contenido{width:clamp(720px,96vw,1500px);max-height:90vh;background:#fff;border-radius:18px;box-shadow:0 20px 45px rgba(0,0,0,.3);overflow:hidden;display:flex;flex-direction:column}
 #concentradoOverlay h2{margin:0;padding:14px 18px;font-size:18px;text-align:center;background:linear-gradient(135deg,#0ea5e9,#6366f1);color:#fff;letter-spacing:.3px}
-#concentradoOverlay .conc-toolbar{display:flex;gap:10px;align-items:center;justify-content:space-between;padding:10px 14px;background:#fafafa;border-bottom:1px solid #e5e7eb}
-#concentradoOverlay .conc-toolbar .left{display:flex;gap:10px;align-items:center}
-#concentradoOverlay .conc-toolbar input[type="search"]{padding:8px 10px;border:1px solid #d1d5db;border-radius:12px;min-width:260px}
-#concentradoOverlay .conc-stats{font-size:12px;color:#374151}
+#concentradoOverlay .conc-toolbar{display:flex;gap:10px;align-items:center;justify-content:space-between;padding:10px 14px;background:#fafafa;border-bottom:1px solid #e5e7eb;flex-wrap:wrap}
+#concentradoOverlay .conc-toolbar .left{display:flex;gap:10px;align-items:center;flex:1 1 auto;min-width:280px}
+#concentradoOverlay .conc-toolbar input[type="search"]{padding:8px 10px;border:1px solid #d1d5db;border-radius:12px;min-width:260px;max-width:420px;width:100%}
+#concentradoOverlay .conc-stats{font-size:12px;color:#374151;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:45vw}
 #concentradoOverlay .table-wrap{padding:0 14px 12px 14px;overflow:auto;max-height:100%}
 #concentradoOverlay .conc-table{width:100%;border-collapse:separate;border-spacing:0}
 #concentradoOverlay .conc-table thead th{position:sticky;top:0;z-index:1;background:#f8fafc;border-bottom:1px solid #e5e7eb;cursor:pointer;user-select:none}
-#concentradoOverlay .conc-table th,#concentradoOverlay .conc-table td{padding:8px 10px;border-right:1px solid #eef2f7;border-bottom:1px solid #eef2f7;font-size:12px;white-space:nowrap}
+#concentradoOverlay .conc-table th,#concentradoOverlay .conc-table td{padding:8px 10px;border-right:1px solid #eef2f7;border-bottom:1px solid #eef2f7;font-size:12px;white-space:nowrap;max-width:320px;overflow:hidden;text-overflow:ellipsis}
 #concentradoOverlay .conc-table tr:nth-child(even) td{background:#fcfdff}
 #concentradoOverlay .conc-table tr:hover td{background:#f1f5ff}
 #concentradoOverlay .conc-actions{padding:10px 14px;border-top:1px solid #e5e7eb;background:#fafafa;display:flex;gap:.5rem;justify-content:flex-end}
@@ -2739,7 +2739,7 @@ document.addEventListener('DOMContentLoaded', () => {
               <input id="conc-search" type="search" placeholder="Buscar habitacion/usuario/nota..." />\
               <div class="conc-stats" id="conc-stats"></div>\
             </div>\
-            <div class="right">\
+            <div class="right" style="display:flex;gap:8px;align-items:center;flex-shrink:0">\
               <button id="exp-excel" class="btn primary">Exportar Excel</button>\
               <button id="exp-pdf" class="btn primary">Exportar PDF</button>\
               <button id="conc-cerrar" class="btn danger">Cerrar</button>\
