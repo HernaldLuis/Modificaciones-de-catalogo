@@ -1686,7 +1686,9 @@ panel.innerHTML = `
     // --- Video handicap (arriba-derecha) ---
     try {
   if (habitacion && (habitacion.discapacidad === true)) {
-    const v = (window.VIDEOS_HAB && window.VIDEOS_HAB[num]) || window.HANDICAP_VIDEO_URL || "";
+    const v = (habitacion && (habitacion.video || habitacion.video_url)) 
+      ? (habitacion.video || habitacion.video_url)
+      : ((window.VIDEOS_HAB && window.VIDEOS_HAB[num]) || window.HANDICAP_VIDEO_URL || "");
     setVideoHabitacion(v);
 
     // 🟢 Autoplay + mute aquí
