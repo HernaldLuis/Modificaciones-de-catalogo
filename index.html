@@ -1686,10 +1686,22 @@ panel.innerHTML = `
     // --- Video handicap (arriba-derecha) ---
     try {
   if (habitacion && (habitacion.discapacidad === true)) {
-    const v = (habitacion && (habitacion.video || habitacion.video_url)) 
-      ? (habitacion.video || habitacion.video_url)
-      : ((window.VIDEOS_HAB && window.VIDEOS_HAB[num]) || window.HANDICAP_VIDEO_URL || "");
-    setVideoHabitacion(v);
+    (function(){
+  try{
+    const esHandicap = !!(habitacion && (
+      habitacion.discapacidad === true ||
+      habitacion.discapacidad === 'Adaptada' ||
+      habitacion.discapacidad === 'Sí' ||
+      habitacion.handicap === true ||
+      (habitacion.categoria && /handicap|adaptad/i.test(habitacion.categoria)) ||
+      (Array.isArray(habitacion.tags) && habitacion.tags.some(t=>/handicap/i.test(t)))
+    ));
+    let v = (habitacion && (habitacion.video || habitacion.video_url)) ||
+            ((window.VIDEOS_HAB && window.VIDEOS_HAB[num]) || '') ||
+            (window.HANDICAP_VIDEO_URL || '');
+    if(esHandicap && v){ setVideoHabitacion(v); }
+  }catch(e){}
+})();
     // Fallback obligado para Handicap
     try{
       if(habitacion && (habitacion.discapacidad || habitacion.handicap)){
