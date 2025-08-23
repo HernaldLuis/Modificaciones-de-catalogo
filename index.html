@@ -939,6 +939,11 @@ body.hk-modal-open{ overflow: hidden; }
 #concentradoOverlay.fullscreen .table-wrap{ height: calc(94vh - 120px) !important; }
 body.hk-no-scroll{ overflow: hidden !important; }
 
+
+/* === CONC-PURGE-001 (UI only) === */
+#conc-purge-btn{ background:#ef4444!important;color:#fff!important;border:none;border-radius:10px;padding:8px 12px;font-weight:700;cursor:pointer; }
+#conc-purge-btn:hover{ filter:brightness(0.95); }
+
 </style>
 
 <style>
@@ -3058,6 +3063,116 @@ document.addEventListener('DOMContentLoaded', () => {
   hookOpen();
   document.addEventListener('DOMContentLoaded', hookOpen);
   ensureFsButton();
+})();
+</script>
+
+<script>
+(()=>{
+  if(window.__hkConcPurgeWired) return; window.__hkConcPurgeWired = true;
+  const DEPURACION_MAT = "3072167";
+  const DEPURACION_PASS = "JRPNLS96050220H500";
+
+  function purgeUI(){
+    try{
+      const ov = document.getElementById('concentradoOverlay');
+      const tbody = ov && ov.querySelector('table tbody');
+      if(!tbody) return false;
+      // deja el header, limpia filas
+      tbody.innerHTML = "";
+      // contador
+      const counter = ov.querySelector('.conc-count');
+      if(counter) counter.textContent = "0 registros";
+      return true;
+    }catch(e){ console.error(e); return false; }
+  }
+
+  async function purgeBackendMaybe(){
+    // opcional: si en el index existe window.apiPurge, úsalo
+    try{
+      if (typeof window.apiPurge === 'function'){
+        const ok = await window.apiPurge();
+        return !!ok;
+      }
+      // fallback: intenta derivar base de apiList (si deja pista)
+      if (window.__conc_api_base){
+        const url = window.__conc_api_base + "?mode=purge";
+        const r = await fetch(url, {method:"POST"});
+        const j = await r.json().catch(()=>null);
+        return j && j.status === "ok";
+      }
+    }catch(e){ console.warn("purgeBackendMaybe:", e); }
+    return false;
+  }
+
+  window.__hkPurgeWithConfirm = async function(){
+    try{
+      if(!confirm("¿Eliminar/depurar el historial mostrado en Concentrado?")) return;
+      if(!confirm("Esta acción no se puede deshacer. ¿Confirmas?")) return;
+
+      const mat = (sessionStorage.getItem('matricula')||'').trim();
+      if(mat !== DEPURACION_MAT){
+        alert("Matrícula no autorizada para depuración.");
+        return;
+      }
+      const pass = prompt("Clave de depuración:");
+      if(pass !== DEPURACION_PASS){
+        alert("Clave incorrecta.");
+        return;
+      }
+
+      // Primero backend (si existe), luego UI
+      let done = await purgeBackendMaybe();
+      const uiDone = purgeUI();
+      if(done || uiDone){
+        alert(done ? "Historial eliminado (servidor) y limpiado en la vista." : "Historial limpiado en la vista (solo UI).");
+      }else{
+        alert("No se pudo depurar el historial.");
+      }
+    }catch(e){
+      console.error(e); alert("No se pudo depurar el historial.");
+    }
+  };
+
+  function placeBtn(){
+    const ov = document.getElementById('concentradoOverlay');
+    if(!ov) return;
+    const toolbar = ov.querySelector('.conc-toolbar .right') || ov.querySelector('.conc-toolbar') || ov;
+    if(!toolbar) return;
+    if(document.getElementById('conc-purge-btn')) return;
+
+    const btn = document.createElement('button');
+    btn.id = 'conc-purge-btn';
+    btn.type = 'button';
+    btn.textContent = 'Depurar';
+    btn.onclick = ()=> window.__hkPurgeWithConfirm();
+
+    // Inserta antes de "Cerrar" si existe, sino al final
+    const closeBtn = toolbar.querySelector('#conc-cerrar');
+    if (closeBtn && closeBtn.parentNode === toolbar){
+      toolbar.insertBefore(btn, closeBtn);
+    }else{
+      toolbar.appendChild(btn);
+    }
+  }
+
+  // Hook robusto
+  function hookOpen(){
+    if(typeof window.openConcentrado!=='function') return;
+    if(window.__hkConcPurgeHooked) return; window.__hkConcPurgeHooked = true;
+    const _open = window.openConcentrado;
+    window.openConcentrado = async function(){
+      const r = await _open.apply(this, arguments);
+      setTimeout(placeBtn, 0);
+      return r;
+    };
+  }
+
+  const mo = new MutationObserver(()=> placeBtn());
+  mo.observe(document.documentElement, { childList:true, subtree:true });
+
+  document.addEventListener('DOMContentLoaded', hookOpen);
+  hookOpen();
+  placeBtn();
 })();
 </script>
 </body>
