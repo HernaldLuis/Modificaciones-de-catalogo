@@ -790,6 +790,26 @@ border-bottom: none;
 }
 */
 
+
+/* --- Botón Inventario (oro) y Cerrar sesión (superior derecha) --- */
+.btn-inventario{
+  position: absolute;
+  top: 10px; right: 10px;
+  display: inline-flex; align-items: center; gap: .35rem;
+  padding: 8px 16px; border-radius: 999px; border: none;
+  background: linear-gradient(135deg,#c9a14a,#8a5a2b);
+  color: #fff; font-weight: 800; cursor: pointer;
+  box-shadow: 0 8px 18px rgba(0,0,0,.25);
+}
+.btn-inventario:hover{ filter: brightness(.97); }
+
+.btn-logout{
+  position: fixed; top: 10px; right: 12px; z-index: 10050;
+  padding: 6px 12px; border-radius: 999px; border: none;
+  background: #0ea5e9; color: #fff; font-weight: 700; cursor: pointer;
+  box-shadow: 0 6px 14px rgba(0,0,0,.18);
+}
+.btn-logout:hover{ filter: brightness(.95); }
 </style>
 
 <style>
@@ -813,6 +833,8 @@ border-bottom: none;
 
 </head>
 <body>
+  <button id="btn-logout" class="btn-logout" onclick="hkLogout()" style="display:none">Cerrar sesión</button>
+
 
   <h1 class="titulo-catalogo">
   <span>Paradisus · Colección Exclusiva de Habitaciones & Suites</span>
@@ -1541,6 +1563,8 @@ async function mostrarInfo(num) {
 panel.innerHTML = `
   <div class="contenido-inferior">\n<aside id="video-habitacion" class="video-habitacion" hidden>\n  <div class="video-ratio">\n    <iframe id="video-embed" src="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen hidden></iframe>\n    <video id="video-mp4" controls playsinline hidden></video>\n  </div>\n</aside>\n
     <h3>${habitacion.titulo}</h3>
+    <button class=\"btn-inventario\" onclick=\"(hkHasSession()? abrirInventarioPrincipal(${num}) : hkLogin(()=>abrirInventarioPrincipal(${num})))\">📋 Inventario</button>
+
     <p><strong>Categoría:</strong> ${habitacion.categoria} · ${habitacion.vista}</p>
     <p><strong>Habitación conectada:</strong> ${habitacion.habitacion_conectada ? habitacion.habitacion_conectada : 'No aplica'}</p>
     <p><strong>Piso:</strong> ${habitacion.piso}</p>
@@ -1803,7 +1827,75 @@ document.addEventListener('DOMContentLoaded', async () => {
   await initCategorias();
   aplicarFiltro('');
 });
-    </script>  <!-- ✅ Cierra aquí tu script principal -->
+    
+/* === HK Sesión e Inventario (Paso 1) === */
+(function(){
+  const SESSION_KEY = 'hk_inv_session';
+  const TTL = 5*60*60*1000; // 5 horas
+  const MATRICULAS = new Set(['3072167']); // TODO: agregar las otras 6
+
+  function now(){ return Date.now(); }
+  function hasSession(){
+    const t = +sessionStorage.getItem(SESSION_KEY) || 0;
+    return (now() - t) < TTL;
+  }
+  function setSession(){ sessionStorage.setItem(SESSION_KEY, String(now())); updateSessionUI(); }
+  function clearSession(){ sessionStorage.removeItem(SESSION_KEY); updateSessionUI(); }
+
+  // UI helpers
+  window.updateSessionUI = function(){
+    const btnLogout = document.getElementById('btn-logout');
+    if(btnLogout) btnLogout.style.display = hasSession() ? 'inline-flex' : 'none';
+    // Mostrar/ocultar botón Inventario en panel abierto
+    document.querySelectorAll('.btn-inventario').forEach(b=>{
+      b.style.pointerEvents = 'auto';
+      b.style.opacity = '1';
+    });
+  };
+
+  // Login flow (matrícula)
+  window.hkLogin = async function(next){
+    if(hasSession()){ if(typeof next==='function') next(); return; }
+    // Si tienes un modal visual propio, conéctalo aquí. Por ahora: prompt simple.
+    const pin = window.prompt('Acceso Housekeeping\nIngresa tu matrícula:');
+    if(pin && MATRICULAS.has(String(pin).trim())){
+      setSession();
+      if(typeof next==='function') next();
+      return;
+    }
+    alert('Matrícula inválida');
+  };
+
+  window.hkLogout = function(){
+    clearSession();
+    // Opcional: cerrar overlays de inventario
+    const inv = document.getElementById('inventarioOverlay');
+    if(inv) inv.classList.remove('activo');
+  };
+
+  // Apertura "Inventario principal" (placeholder modal por ahora)
+  window.abrirInventarioPrincipal = function(habitacionNum){
+    // Placeholder: modal simple hasta integrar el formulario largo
+    let ov = document.getElementById('inventarioOverlay');
+    if(!ov){
+      ov = document.createElement('div');
+      ov.id = 'inventarioOverlay';
+      ov.className = 'modal-mejoras';
+      ov.innerHTML = '<div class="modal-contenido"><h2 id="inv-titulo"></h2><p>Inventario principal (vista completa) — pendiente integrar.</p><div style="display:flex;gap:.5rem;justify-content:center;margin-top:1rem;"><button class="btn-volver" onclick="document.getElementById(\'inventarioOverlay\').classList.remove(\'activo\')">Cerrar</button></div></div>';
+      document.body.appendChild(ov);
+    }
+    const titulo = ov.querySelector('#inv-titulo');
+    if(titulo) titulo.textContent = 'Inventario · ' + habitacionNum;
+    ov.classList.add('activo');
+  };
+
+  // Expone hasSession para otras funciones si se necesita
+  window.hkHasSession = hasSession;
+  // Inicializa UI al cargar
+  document.addEventListener('DOMContentLoaded', updateSessionUI);
+})();
+
+</script>  <!-- ✅ Cierra aquí tu script principal -->
 
 <div id="modal-mejoras" class="modal-mejoras" role="dialog" aria-modal="true" aria-labelledby="titulo-novedades">
   <div class="modal-contenido">
