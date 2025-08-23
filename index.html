@@ -5,62 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Catálogo de Habitaciones</title>
   <style>
-
-/* === Inventario: Botón premium & Modal PIN elegante === */
-.boton-inventario{
-  display:inline-flex; align-items:center; gap:.55rem;
-  padding:.6rem 1rem; border-radius:999px;
-  font: 600 14px/1 'Playfair Display', Georgia, 'Times New Roman', serif;
-  color:#fff; background:linear-gradient(135deg,#c9a14a,#8a5a2b);
-  border:1px solid rgba(255,255,255,.22);
-  box-shadow:0 10px 25px rgba(138,90,43,.35), inset 0 1px 0 rgba(255,255,255,.25);
-  backdrop-filter:saturate(180%) blur(4px);
-  cursor:pointer; transition:transform .15s ease, box-shadow .2s ease, filter .2s ease;
-}
-.boton-inventario:hover{ transform:translateY(-1px); filter:brightness(1.05); box-shadow: 0 16px 30px rgba(138,90,43,.45); }
-.boton-inventario:active{ transform:translateY(0); box-shadow: 0 6px 16px rgba(138,90,43,.35); }
-.boton-inventario::before{
-  content:"🧾"; font-size:16px; line-height:1; margin-right:.1rem;
-}
-.hkpin2-overlay{
-  display:none; position:fixed; inset:0; z-index:100000;
-  background: radial-gradient(1200px 800px at 70% 20%, rgba(37,117,252,.18), transparent 60%),
-              rgba(0,0,0,.55);
-  backdrop-filter: blur(3px);
-  align-items:center; justify-content:center;
-}
-.hkpin2{
-  width:min(92vw, 380px);
-  background: linear-gradient(180deg,#ffffff, #f7f9ff);
-  border:1px solid rgba(0,0,0,.06);
-  border-radius:16px; padding:18px 16px 14px;
-  box-shadow: 0 24px 60px rgba(0,0,0,.35);
-  animation: hkpin2In .25s ease;
-}
-@keyframes hkpin2In{ from{ transform:translateY(8px); opacity:0;} to{ transform:none; opacity:1;} }
-.hkpin2 h3{ margin:0 0 4px; font-size:18px; font-weight:800; letter-spacing:.2px; }
-.hkpin2 .sub{ margin:0 0 12px; color:#556; font-size:13px; }
-.hkpin2 .row{ display:flex; gap:8px; align-items:center; margin:8px 0 14px; }
-.hkpin2-input{
-  flex:1; padding:12px; border-radius:12px; border:1px solid rgba(0,0,0,.12);
-  outline:none; font-size:16px; background:#fff; box-shadow: inset 0 1px 2px rgba(0,0,0,.06);
-}
-.hkpin2-toggle{ padding:11px 12px; border-radius:12px; border:1px solid rgba(0,0,0,.12); background:#f2f4ff; cursor:pointer; }
-.hkpin2-actions{ display:flex; justify-content:flex-end; gap:8px; }
-.hkbtn{ padding:.6rem .95rem; border-radius:12px; border:1px solid rgba(0,0,0,.1); background:#fff; cursor:pointer; font-weight:600; }
-.hkbtn.primary{ background:linear-gradient(135deg,#6a11cb,#2575fc); color:#fff; border:none; }
-.hkbtn.primary:hover{ filter:brightness(1.03); }
-.hkbtn:disabled{ opacity:.6; cursor:not-allowed; }
-
-
-
-/* Toolbar dentro del panel de detalle */
-.modal-toolbar{display:flex;gap:.5rem;align-items:center;margin:.5rem 0 1rem;flex-wrap:wrap}
-.btn{padding:.45rem .8rem;border-radius:.6rem;border:1px solid rgba(0,0,0,.12);background:#fff;cursor:pointer;box-shadow:0 1px 2px rgba(0,0,0,.08);}
-.btn.hk{font-weight:700;}
-.btn:hover{filter:brightness(0.98);}
-
-
 body {
   margin: 0;
   font-family: Arial, sans-serif;
@@ -385,9 +329,16 @@ border-bottom: none;
       background-color: #388e3c ; /*🔥 Estas seccion cambiar el color de las habitaciones cuando pones el cursor*/
     }
 
-    .habitacion-btn.disponible {  background-color:#c79b3b; color:#fff; border: 2px solid rgba(255,255,255,.6); font-weight: bold; }
+    .habitacion-btn.disponible {  
+  background-color:#e07b17;      /*🔥 Estas seccion cambiar el color de las habotaciones disponiblesx */
+  color: white;
+  border: 2px solid #0056b3;
+  font-weight: bold;
+}
 
-.habitacion-btn.disponible:hover { background-color: #a87f2d; }
+.habitacion-btn.disponible:hover {
+  background-color: #0056b3;
+}
 
     /* Tipo K - King */
 .habitacion-btn.tipo-k {
@@ -706,6 +657,7 @@ border-bottom: none;
 
 /* --- Video en detalle de habitación (handicap) --- */
 .video-habitacion{ position:absolute; top:16px; right:16px; width:520px; max-width:44%; background:#fff; border-radius:12px; box-shadow:0 12px 30px rgba(0,0,0,.18); overflow:hidden; }
+07.77%); background:#000; } /* 16:9 */
 .video-ratio iframe, .video-ratio video{ position:absolute; inset:0; width:100%; height:100%; border:0; object-fit:contain; }
 .video-ratio video{ object-fit: contain; background:#000; }
 .contenido-inferior{ position:relative; }
@@ -838,212 +790,6 @@ border-bottom: none;
 }
 */
 
-
-@media (max-width: 720px){
-  .galeria-habitacion{ 
-    display: grid !important;
-    grid-auto-flow: column;
-    grid-auto-columns: 80vw;
-    overflow-x: auto;
-    grid-template-columns: none;
-    scroll-snap-type: x mandatory;
-    -webkit-overflow-scrolling: touch;
-  }
-  .bloque-imagen{ scroll-snap-align: center; }
-}
-
-
-
-/* === HK Inventario: marca visual cuando una habitación ya tiene registro de sillas === */
-.habitacion-btn.inventario-ok{
-  outline: 3px solid #c79b3b; /* dorado */
-  box-shadow: 0 0 0 3px rgba(199,155,59,0.25);
-}
-
-/* Botón flotante "Comenzar" dentro del panel inferior */
-.hk-comenzar {
-  position: fixed;
-  right: 24px;
-  bottom: 24px;
-  z-index: 10050;
-  display: none;
-  align-items: center;
-  gap: .5rem;
-  padding: .7rem 1rem;
-  border-radius: 999px;
-  background: linear-gradient(135deg,#c9a14a,#8a5a2b);
-  color: #fff;
-  font-weight: 700;
-  border: 0;
-  box-shadow: 0 10px 24px rgba(138,90,43,.35);
-  cursor: pointer;
-}
-
-/* Modal de Sillas */
-.hk-modal-overlay{
-  display:none; position:fixed; inset:0; z-index:10060;
-  background:rgba(0,0,0,.55); align-items:center; justify-content:center;
-  backdrop-filter: blur(2px);
-}
-.hk-modal-overlay.activo{ display:flex; }
-.hk-modal{
-  width:min(92vw, 520px);
-  background:#fff; border-radius:16px; padding:18px; 
-  box-shadow: 0 24px 60px rgba(0,0,0,.35);
-}
-.hk-modal h3{ margin:0 0 8px; font-size:1.2rem; font-weight:800; }
-.hk-form-row{ display:flex; gap:10px; align-items:center; margin:10px 0; }
-.hk-form-row label{ min-width:160px; font-weight:600; }
-.hk-form-row input[type="number"]{ width:120px; padding:.4rem .6rem; border:1px solid #ddd; border-radius:10px; }
-.hk-form-row textarea{ width:100%; min-height:80px; padding:.6rem; border:1px solid #ddd; border-radius:10px; resize:vertical; }
-.hk-actions{ display:flex; justify-content:flex-end; gap:10px; margin-top:12px; }
-.hk-btn{ padding:.55rem .9rem; border-radius:10px; border:1px solid rgba(0,0,0,.1); cursor:pointer; font-weight:700; }
-.hk-btn.primary{ background: linear-gradient(135deg,#c9a14a,#8a5a2b); color:#fff; border:none; }
-.hk-badge-usuario{ font-size:.92rem; opacity:.85; margin-top:6px; }
-
-
-.hk-stepper{ display:inline-flex; align-items:center; gap:8px; }
-.hk-stepper button{ width:34px; height:34px; border-radius:8px; border:1px solid #ddd; background:#fafafa; font-weight:900; cursor:pointer; }
-.hk-stepper input{ width:90px; text-align:center; }
-
-
-/* === Historial de sillas (por habitación) === */
-.hk-ultima-act { font-size:.9rem; opacity:.8; margin:6px 0 8px; }
-.hk-hist-toggle { margin:6px 0 10px; display:inline-flex; gap:6px; align-items:center; cursor:pointer; font-weight:700; }
-.hk-hist { display:none; border:1px dashed #ddd; border-radius:12px; padding:10px; background:#fafafa; max-height:220px; overflow:auto; }
-.hk-hist-item { font-size:.9rem; border-bottom:1px solid #eee; padding:6px 0; display:flex; justify-content:space-between; gap:10px; }
-.hk-hist-item:last-child { border-bottom:none; }
-.hk-hist-meta { opacity:.75; }
-.hk-hist-actions button { border:1px solid #ddd; border-radius:8px; background:#fff; padding:.25rem .5rem; cursor:pointer; font-weight:700; }
-
-
-/* Fuerza estilo premium del botón Inventario sobre .btn */
-.btn.hk.boton-inventario, .boton-inventario.btn.hk {
-  background: linear-gradient(135deg,#c9a14a,#8a5a2b) !important;
-  color:#fff !important;
-  border-color: rgba(255,255,255,.22) !important;
-}
-
-
-/* === Logout control (discreto, arriba-derecha) === */
-.hk-logout {
-  position: fixed; top: 12px; right: 14px; z-index: 10080;
-  padding: .45rem .7rem; border-radius: 999px;
-  background: rgba(255,255,255,.6);
-  border: 1px solid rgba(0,0,0,.08);
-  backdrop-filter: blur(6px) saturate(160%);
-  font-weight: 700; font-size: .9rem; cursor: pointer;
-  display: none;
-}
-.hk-logout:hover { background: rgba(255,255,255,.9); }
-
-/* Confirmación de cierre de sesión */
-.hk-logout-overlay{
-  display:none; position:fixed; inset:0; z-index:10100;
-  background:rgba(0,0,0,.55); align-items:center; justify-content:center;
-  backdrop-filter: blur(2px);
-}
-.hk-logout-overlay.activo{ display:flex; }
-.hk-logout-modal{
-  width:min(92vw, 420px);
-  background:#fff; border-radius:16px; padding:18px;
-  box-shadow: 0 24px 60px rgba(0,0,0,.35);
-}
-.hk-logout-modal h3{ margin:0 0 8px; font-size:1.15rem; font-weight:800; }
-.hk-logout-modal p{ margin:.2rem 0 .8rem; opacity:.85; }
-.hk-logout-actions{ display:flex; justify-content:flex-end; gap:10px; }
-.hk-logout-btn{ padding:.55rem .9rem; border-radius:10px; border:1px solid rgba(0,0,0,.1); cursor:pointer; font-weight:700; }
-.hk-logout-btn.primary{ background: linear-gradient(135deg,#c9a14a,#8a5a2b); color:#fff; border:none; }
-
-
-/* === Ajustes de texto responsivo (modales y mensajes) === */
-.hk-modal h3,
-.hk-logout-modal h3{
-  font-size: clamp(1.05rem, 2.2vw, 1.25rem);
-  line-height: 1.25;
-}
-.hk-badge-usuario,
-.hk-ultima-act,
-#hk-room-label{
-  font-size: clamp(.92rem, 1.8vw, 1.05rem);
-  line-height: 1.35;
-  word-break: break-word;
-  hyphens: auto;
-}
-.hk-modal p,
-.hk-logout-modal p,
-.hk-logout-modal .hk-logout-actions .hk-logout-btn{
-  font-size: clamp(.92rem, 1.65vw, 1rem);
-  line-height: 1.4;
-}
-
-.mensaje-flotante{
-  position: fixed;
-  left: 50%;
-  transform: translateX(-50%);
-  bottom: 18px;
-  background: rgba(0,0,0,.78);
-  color: #fff;
-  padding: .5rem .8rem;
-  border-radius: 10px;
-  font-weight: 700;
-  font-size: clamp(.9rem, 1.8vw, 1rem);
-  max-width: 92vw;
-  text-align: center;
-  z-index: 10090;
-}
-
-/* Asegurar que cualquier texto dentro del modal no se recorte */
-.hk-modal, .hk-logout-modal{
-  word-break: break-word;
-  hyphens: auto;
-}
-
-
-/* === Anti-desborde en modales (texto y controles) === */
-.hk-modal, .hk-logout-modal{
-  box-sizing: border-box;
-  max-width: 100%;
-  overflow: hidden;              /* evita que algo se salga de la tarjeta */
-}
-.hk-modal *, .hk-logout-modal *{
-  max-width: 100%;
-  white-space: normal;           /* fuerza corte en textos largos */
-  overflow-wrap: anywhere;       /* permite corte en cualquier punto si es necesario */
-}
-
-/* Filas del formulario: que envuelvan en pantallas pequeñas */
-.hk-form-row{
-  display: flex;
-  flex-wrap: wrap;               /* permite salto de línea si no cabe */
-  align-items: center;
-  gap: 10px;
-}
-.hk-form-row label{
-  flex: 1 1 160px;               /* etiqueta flexible, mínimo 160px */
-}
-.hk-form-row .hk-stepper,
-.hk-form-row input[type="number"],
-.hk-form-row textarea{
-  flex: 1 1 240px;               /* campo flexible */
-  min-width: 0;                  /* permite encogerse dentro del contenedor */
-}
-
-/* Ajuste fino del título para que no empuje el layout */
-.hk-modal h3{
-  margin-top: 0;
-  word-break: break-word;
-}
-
-/* En móviles, reduce padding para evitar overflow visual */
-@media (max-width: 520px){
-  .hk-modal, .hk-logout-modal{ padding: 14px; }
-  .hk-form-row label{ flex: 1 1 120px; }
-  .hk-form-row .hk-stepper,
-  .hk-form-row input[type="number"],
-  .hk-form-row textarea{ flex: 1 1 180px; }
-}
-
 </style>
 
 <style>
@@ -1063,42 +809,6 @@ border-bottom: none;
     transform: scale(1.6); /* zoom al hacer clic */
     cursor: zoom-out;
 }
-</style>
-
-
-<!-- HK-INVENTARIO-START -->
-<style>
-/* ===== HK Inventario (aislado y seguro para index) ===== */
-.hk-inv-btn {
-  position: absolute; top: .5rem; right: .5rem; z-index: 10010;
-  display: inline-flex; align-items: center; gap: .35rem;
-  padding: .35rem .65rem; border-radius: 999px;
-  background: #17a2ff; color: #fff; font-weight: 700; font-size: .9rem;
-  border: none; cursor: pointer; box-shadow: 0 6px 18px rgba(0,0,0,.25);
-}
-.hk-start-btn {
-  right: auto; left: .5rem;
-  background: linear-gradient(135deg,#c9a14a,#8a5a2b); 
-  box-shadow: 0 10px 24px rgba(138,90,43,.35), inset 0 0 0 1px rgba(255,255,255,.18);
-}
-  position: absolute; top: .5rem; right: .5rem; z-index: 10010;
-  display: inline-flex; align-items: center; gap: .35rem;
-  padding: .35rem .65rem; border-radius: 999px;
-  background: #17a2ff; color: #fff; font-weight: 700; font-size: .9rem;
-  border: none; cursor: pointer; box-shadow: 0 6px 18px rgba(0,0,0,.25);
-}
-.hk-inv-side {
-  position: absolute; top: 0; right: 0; height: 100%; width: min(92vw, 360px);
-  background: #fff; border-left: 1px solid rgba(0,0,0,.12);
-  box-shadow: -10px 0 30px rgba(0,0,0,.18);
-  transform: translateX(100%); transition: transform .28s ease;
-  padding: .9rem; overflow: auto; z-index: 10009;
-}
-.hk-inv-side.hk-open { transform: translateX(0%); }
-.hk-inv-side h3 { margin: .2rem 0 .6rem; font-size: 1.05rem; }
-.hk-inv-muted { color: #666; font-size: .92rem; }
-/* Asegurar que las tarjetas del modal puedan albergar overlay sin romper layout */
-.bloque-imagen { position: relative; }
 </style>
 
 </head>
@@ -1803,7 +1513,297 @@ border-bottom: none;
   <img loading="lazy" id="zoom-img" src="" alt="Zoom" />
 </div>
 
-    <!-- ✅ Cierra aquí tu script principal -->
+  <script>
+
+async function mostrarInfo(num) {
+  const panel = document.getElementById("panelInferior");
+  const mensaje = document.getElementById("mensajeSeleccion");
+  if (mensaje) mensaje.style.display = "none";
+
+  try {
+    const response = await fetch("habitaciones.json");
+    const data = await response.json();
+
+    if (data[num]) {
+      const habitacion = data[num];
+
+      let galeriaHTML = '<div class="galeria-habitacion">';
+      habitacion.imagenes.forEach((imagen) => {
+        galeriaHTML += `
+          <div class="bloque-imagen">
+            <img loading="lazy" src="${imagen.src}" alt="${imagen.etiqueta}" onclick="hacerZoom(this.src)" />
+            <p><strong>${imagen.etiqueta}</strong></p>
+          </div>
+        `;
+      });
+      galeriaHTML += '</div>';
+
+panel.innerHTML = `
+  <div class="contenido-inferior">\n<aside id="video-habitacion" class="video-habitacion" hidden>\n  <div class="video-ratio">\n    <iframe id="video-embed" src="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen hidden></iframe>\n    <video id="video-mp4" controls playsinline hidden></video>\n  </div>\n</aside>\n
+    <h3>${habitacion.titulo}</h3>
+    <p><strong>Categoría:</strong> ${habitacion.categoria} · ${habitacion.vista}</p>
+    <p><strong>Habitación conectada:</strong> ${habitacion.habitacion_conectada ? habitacion.habitacion_conectada : 'No aplica'}</p>
+    <p><strong>Piso:</strong> ${habitacion.piso}</p>
+    <p><strong>Capacidad:</strong> ${habitacion.capacidad} · ${habitacion.fumadores ? '' : 'No fumadores'}</p>
+    <p><strong>Tipo de cama:</strong> ${habitacion.tipo_cama}</p>
+    <p><strong>Sofá cama:</strong> ${habitacion.sofa ? 'Incluido' : 'No disponible'}</p>
+    <p><strong>Accesibilidad:</strong> ${habitacion.discapacidad ? 'Adaptada' : 'No adaptada'}</p>
+    <p><strong>Características:</strong> ${habitacion.caracteristicas.join(', ')}</p>
+    ${galeriaHTML}
+    <button class="btn-volver" onclick="cerrarPanelInferior()">Cerrar</button>
+  </div>
+`;
+    
+    // --- Video handicap (arriba-derecha) ---
+    try {
+  if (habitacion && (habitacion.discapacidad === true)) {
+    const v = (window.VIDEOS_HAB && window.VIDEOS_HAB[num]) || window.HANDICAP_VIDEO_URL || "";
+    setVideoHabitacion(v);
+
+    // 🟢 Autoplay + mute aquí
+    const video = document.querySelector("#video-mp4");
+    if(video){
+      video.muted = true;        // 🔇 requerido en móviles
+      video.setAttribute("muted","");
+      video.playsInline = true;  // evita fullscreen en iOS
+      video.autoplay = true;     // autoplay
+      video.loop = true;         // 🔁 se repite al terminar
+      video.currentTime = 0;
+
+      const p = video.play();
+      if(p && typeof p.catch === "function") p.catch(()=>{});
+    }
+
+  } else {
+    stopVideoHabitacion();
+    setVideoHabitacion(""); // oculta
+  }
+}catch(e){}
+} else {
+      panel.innerHTML = `
+        <div class="contenido-inferior">
+          <p>🔍 Información no disponible para la habitación ${num}.</p>
+          <button class="btn-volver" onclick="cerrarPanelInferior()">Cerrar</button>
+        </div>
+      `;
+    }
+
+    panel.style.display = "block";
+    document.body.style.overflow = "hidden";
+  } catch (error) {
+    panel.innerHTML = `
+      <div class="contenido-inferior">
+        <p>⚠️ Error al cargar la información. Intenta de nuevo.</p>
+        <button class="btn-volver" onclick="cerrarPanelInferior()">Cerrar</button>
+      </div>
+    `;
+    panel.style.display = "block";
+    document.body.style.overflow = "hidden";
+  }
+}
+
+function cerrarPanelInferior() {
+  const panel = document.getElementById("panelInferior");
+  const mensaje = document.getElementById("mensajeSeleccion");
+
+  panel.style.display = "none";
+  document.body.style.overflow = "auto";
+
+  if (mensaje) mensaje.style.display = "block";
+}
+
+async function marcarHabitacionesDisponibles() {
+  try {
+    const response = await fetch("habitaciones.json");
+    const data = await response.json();
+    const botones = document.querySelectorAll(".habitacion-btn");
+
+    botones.forEach(boton => {
+const num = boton.dataset.num || boton.textContent.trim();
+      const habitacion = data[num];
+
+      if (habitacion) {
+        boton.classList.add("disponible");
+
+        // Determinar tipo de cama
+        const tipoCama = habitacion.tipo_cama === "K" ? "K" : "D";
+
+        if (habitacion.tipo_cama === "K") {
+  boton.classList.add("tipo-k");
+} else if (habitacion.tipo_cama === "D") {
+  boton.classList.add("tipo-d");
+
+
+}
+
+
+        // Verificar si tiene sofá cama
+const sofaIcon = `
+  ${habitacion.sofa ? '<img loading="lazy" src="https://res.cloudinary.com/dor6za85u/image/upload/v1753173371/sof%C3%A0_pzyjdc.png" style="height: 18px; vertical-align: middle;" />' : ''}
+  ${habitacion.discapacidad ? '<span style="font-size: 1.2em;">♿</span>' : ''}
+`;
+
+        // Crear nuevo contenido
+        boton.innerHTML = `
+          <div style="display: flex; flex-direction: column; align-items: center;">
+            <div>${num}</div>
+            <div style="font-size: 0.9em;">${tipoCama}${sofaIcon}</div>
+          </div>
+        `;
+      }
+    });
+  } catch (error) {
+    console.error("Error al cargar habitaciones disponibles:", error);
+  }
+}
+
+// Ejecutar al cargar
+window.addEventListener("DOMContentLoaded", marcarHabitacionesDisponibles);
+
+    let datosActuales = {}; // Aquí guardaremos los datos iniciales para comparar más adelante
+
+document.addEventListener("DOMContentLoaded", () => {
+  const botones = document.querySelectorAll(".habitacion-btn");
+  botones.forEach(boton => {
+    boton.addEventListener("click", () => {
+      const num = boton.dataset.num;
+      mostrarInfo(num);
+    });
+  });
+});
+
+// Drag-scroll solo una vez
+const zona = document.querySelector('.zona-desplazable');
+let isDown = false, startX, scrollLeft;
+
+zona.addEventListener('mousedown', (e) => {
+  isDown = true;
+  zona.classList.add('arrastrando');
+  startX = e.pageX - zona.offsetLeft;
+  scrollLeft = zona.scrollLeft;
+});
+zona.addEventListener('mouseleave', () => { isDown = false; zona.classList.remove('arrastrando'); });
+zona.addEventListener('mouseup', () => { isDown = false; zona.classList.remove('arrastrando'); });
+zona.addEventListener('mousemove', (e) => {
+  if (!isDown) return;
+  e.preventDefault();
+  const x = e.pageX - zona.offsetLeft;
+  zona.scrollLeft = scrollLeft - (x - startX);
+});
+
+    async function actualizarHabitacionesSilenciosamente() {
+  try {
+    const response = await fetch("habitaciones.json");
+    const nuevosDatos = await response.json();
+    const botones = document.querySelectorAll(".habitacion-btn");
+
+    botones.forEach(boton => {
+      const num = boton.dataset.num || boton.textContent.trim();
+      const nuevaData = nuevosDatos[num];
+      const actualData = datosActuales[num];
+
+      if (nuevaData && JSON.stringify(nuevaData) !== JSON.stringify(actualData)) {
+        const tipoCama = nuevaData.tipo_cama === "K" ? "K" : "D";
+
+if (nuevaData.tipo_cama === "K") {
+  boton.classList.add("tipo-k");
+} else if (nuevaData.tipo_cama === "D") {
+  boton.classList.add("tipo-d");
+}
+
+        const sofaIcon = `
+          ${nuevaData.sofa ? '<img loading="lazy" src="https://res.cloudinary.com/dor6za85u/image/upload/v1753173371/sof%C3%A0_pzyjdc.png" style="height: 18px; vertical-align: middle;" />' : ''}
+          ${nuevaData.discapacidad ? '<span style="font-size: 1.2em;">♿</span>' : ''}
+        `;
+
+        boton.innerHTML = `
+          <div style="display: flex; flex-direction: column; align-items: center;">
+            <div>${num}</div>
+            <div style="font-size: 0.9em;">${tipoCama}${sofaIcon}</div>
+          </div>
+        `;
+
+        boton.classList.add("disponible");
+      }
+    });
+
+    datosActuales = nuevosDatos;
+
+  } catch (error) {
+    console.warn("No se pudo actualizar habitaciones en segundo plano:", error);
+  }
+}
+setInterval(actualizarHabitacionesSilenciosamente, 5000); // Se actualiza cada 5 segundos
+
+document.addEventListener('DOMContentLoaded', async () => {
+  const sel = document.getElementById('filtro-categoria');
+  const btnClear = document.getElementById('btn-limpiar-filtro');
+  const totalEl = document.getElementById('total-coincidencias-categoria');
+
+  let habitacionesData = null;
+
+  // Cargar JSON de habitaciones
+  async function cargarHabitaciones() {
+    if (!habitacionesData) {
+      const resp = await fetch('habitaciones.json');
+      habitacionesData = await resp.json();
+    }
+    return habitacionesData;
+  }
+
+  // Llenar select con categorías
+  async function initCategorias() {
+    const data = await cargarHabitaciones();
+    const categorias = new Set(Object.values(data).map(h => h.categoria).filter(Boolean));
+    [...categorias].sort().forEach(cat => {
+      const opt = document.createElement('option');
+      opt.value = cat;
+      opt.textContent = cat;
+      sel.appendChild(opt);
+    });
+  }
+
+  // Aplicar filtro visual
+  async function aplicarFiltro(categoria) {
+  const data = await cargarHabitaciones();
+  let count = 0;
+
+  // Quitamos espacios y normalizamos
+  const catSel = (categoria || '').trim();
+
+  document.querySelectorAll('.habitacion-btn').forEach(btn => {
+    const num = btn.dataset.num || btn.textContent.trim();
+    const habitacion = data[num];
+    const catHab = ((habitacion && habitacion.categoria) || '').trim();
+
+    if (catSel) {
+      // Si hay una categoría seleccionada, comparar
+      const coincide = catHab.toLowerCase() === catSel.toLowerCase();
+      btn.classList.toggle('filtro-activo', coincide);
+      btn.classList.toggle('filtro-inactivo', !coincide);
+      if (coincide) count++;
+    } else {
+      // Si está en "Todas", limpiar clases
+      btn.classList.remove('filtro-activo', 'filtro-inactivo');
+      count++;
+    }
+  });
+
+  totalEl.textContent = count;
+}
+
+  // Eventos
+  sel.addEventListener('change', e => aplicarFiltro(e.target.value));
+  btnClear.addEventListener('click', () => {
+    sel.value = '';
+    aplicarFiltro('');
+  });
+
+  // Inicializar
+  await initCategorias();
+  aplicarFiltro('');
+});
+    </script>  <!-- ✅ Cierra aquí tu script principal -->
 
 <div id="modal-mejoras" class="modal-mejoras" role="dialog" aria-modal="true" aria-labelledby="titulo-novedades">
   <div class="modal-contenido">
@@ -2200,1488 +2200,5 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 </script>
-
-<script>
-/*! HK Inventario (modal de vistas) — aislado para index */
-(function(){
-  const HK_PIN = '246810';                // Acceso Housekeeping (temporal)
-  const SESSION_KEY = 'hk_inv_session';
-  const TTL = 5*60*60*1000;               // 5h
-
-  let HAB_ACTUAL = null;                  // Número de habitación activa
-
-  function now(){ return Date.now(); }
-  function hasSession(){
-    const t = +sessionStorage.getItem(SESSION_KEY) || 0;
-    return (now() - t) < TTL;
-  }
-  function setSession(){
-    sessionStorage.setItem(SESSION_KEY, String(now()));
-  }
-  function pedirPIN(next){
-    if(hasSession()){ if(typeof next==='function') next(); return; }
-    // Usa modal si existe; de lo contrario, prompt de emergencia
-    if (typeof window.pedirPINModal === 'function'){
-      pedirPINModal().then(pin=>{
-        if(String(pin).trim() === HK_PIN){
-          setSession();
-          if(typeof next==='function') next();
-          // Revelar botón Comenzar si existe
-          try{
-            document.querySelectorAll('.hk-start-btn').forEach(b=> b.style.display='inline-flex');
-          }catch(e){}
-        } else {
-          alert('PIN incorrecto');
-        }
-      });
-    } else {
-      const pin = prompt('Acceso Housekeeping — PIN:');
-      if(String(pin).trim() === HK_PIN){
-        setSession();
-        if(typeof next==='function') next();
-        try{
-          document.querySelectorAll('.hk-start-btn').forEach(b=> b.style.display='inline-flex');
-        }catch(e){}
-      } else {
-        alert('PIN incorrecto');
-      }
-    }
-  }
-
-Detectamos cuando se abre el modal de VISTAS (no tocamos otros modales)
-  // Criterios: presencia de tarjetas .bloque-imagen dentro de un contenedor tipo modal.
-  const MODAL_SEL = '.modal-contenido, .modal, .modal-content, .lightbox, .galeria-modal, .modal-vistas, [role="dialog"]';
-
-  function isRoomViewsModal(root){
-    if(!root) return false;
-    // Debe contener al menos una tarjeta de imagen
-    if(!root.querySelector('.bloque-imagen')) return false;
-    // Extra: suele contener texto "Habitación" en el encabezado
-    const txt = (root.textContent||'').toLowerCase();
-    if(!txt.includes('habitación')) return false;
-    return true;
-  }
-
-  function ensureSidePanel(root){
-    let side = root.querySelector('.hk-inv-side');
-    if(side) return side;
-    side = document.createElement('aside');
-    side.className = 'hk-inv-side';
-    side.innerHTML = '<h3>Inventario</h3><div class="hk-inv-muted" id="hk-side-status">Cargando…</div><div id="hk-side-body" class="hk-inv-muted">Panel listo.</div>';
-    root.appendChild(side);
-    return side;
-  }
-
-  function obtenerDatosHabitacion(num){
-    const fuentes = ['habitaciones','HABITACIONES','habitacionesData','dataHabitaciones'];
-    let datos = null;
-    for(const k of fuentes){ const ref = window[k]; if(ref && typeof ref==='object' && ref[num]){ datos = ref[num]; break; } }
-    const panel = document.querySelector('.panel-info,#panel-info');
-    let tipo = (datos && datos.tipo_cama) ? String(datos.tipo_cama).toUpperCase() : 'K';
-    if(panel){ const m = (panel.textContent||'').match(/Tipo\s*de\s*cama\s*:\s*([KD])/i); if(m) tipo = m[1].toUpperCase(); }
-    let catInv = (datos && (datos.categoria_inventario || datos.categoriaInventario)) || 'Normal';
-    return { habitacion: String(num||'—'), categoria: catInv, tipo_cama: tipo };
-  }
-
-  function mountInventario(side, datos){
-    const status = side.querySelector('#hk-side-status');
-    const body = side.querySelector('#hk-side-body');
-    status.textContent = 'Hab. ' + datos.habitacion + ' · ' + datos.categoria + ' · Cama ' + datos.tipo_cama;
-    if(window.Inventario && typeof window.Inventario.mountInventario === 'function'){
-      const cont = document.createElement('div');
-      body.replaceWith(cont);
-      window.Inventario.mountInventario(cont, {
-        habitacion: datos.habitacion,
-        categoria: datos.categoria,
-        tipo_cama: datos.tipo_cama
-      });
-    }else{
-      body.innerHTML = 'Incluye <code>inventario.js</code> para ver el formulario.';
-    }
-  }
-
-  function injectButton(root){
-    // Elegimos la primera tarjeta de imagen del modal
-    const card = root.querySelector('.bloque-imagen, figure, .card-imagen, .gallery-item');
-    if(!card) return;
-    if(card.querySelector('.hk-inv-btn')) return; // no duplicar
-    const btn = document.createElement('button');
-    btn.className = 'hk-inv-btn';
-    btn.type = 'button';
-    btn.textContent = 'Inventario';
-    btn.addEventListener('click', function(){
-      const datos = obtenerDatosHabitacion(HAB_ACTUAL);
-      const abrir = ()=>{
-        const side = ensureSidePanel(root);
-        side.classList.add('hk-open');
-        mountInventario(side, datos);
-        btn.textContent = 'Inventario (abierto)';
-      };
-      pedirPIN(abrir);
-    });
-    card.appendChild(btn);
-    // --- Botón "Comenzar" (solo visible con sesión activa) ---
-    (function(){
-      try{
-        // usar 'root' del cierre de injectButton
-        const start = document.createElement('button');
-        start.className = 'hk-inv-btn hk-start-btn';
-        start.type = 'button';
-        start.textContent = 'Comenzar';
-        start.style.marginLeft = '.5rem';
-        start.style.display = (sessionStorage.getItem('hk_inv_session') && (Date.now()-(+sessionStorage.getItem('hk_inv_session'))) < (5*60*60*1000)) ? 'inline-flex' : 'none';
-        start.addEventListener('click', function(){
-          const datos = obtenerDatosHabitacion(HAB_ACTUAL);
-          const abrir = ()=>{
-            const side = ensureSidePanel(root);
-            side.classList.add('hk-open');
-            mountInventario(side, datos);
-          };
-          // Si no hay sesión válida, pedir PIN y luego abrir:
-          if((Date.now()-(+sessionStorage.getItem('hk_inv_session')||0)) < (5*60*60*1000)){
-            abrir();
-          }else{
-            pedirPIN(abrir);
-          }
-        });
-        card.appendChild(start);
-      }catch(e){}
-    })();
-  }
-
-  // Mutación del DOM: cuando aparezca un modal de vistas, inyectamos
-  const mo = new MutationObserver((records)=>{
-    records.forEach(rec=>{
-      for(const node of rec.addedNodes){
-        if(!(node instanceof Element)) continue;
-        const root = node.matches && node.matches(MODAL_SEL) ? node : node.querySelector && node.querySelector(MODAL_SEL);
-        if(root && isRoomViewsModal(root)){
-          injectButton(root);
-        }
-      }
-    });
-  });
-  mo.observe(document.documentElement, { childList:true, subtree:true });
-
-  // Parcheamos mostrarInfo para registrar habitación activa
-  function patchMostrarInfo(){
-    if(typeof window.mostrarInfo !== 'function') return false;
-    if(window.mostrarInfo.__hkPatched) return true;
-    const orig = window.mostrarInfo;
-    window.mostrarInfo = async function(num){
-      HAB_ACTUAL = num;
-      return await orig.apply(this, arguments);
-    };
-    window.mostrarInfo.__hkPatched = true;
-    return true;
-  }
-  if(!patchMostrarInfo()){
-    const t = setInterval(()=>{ if(patchMostrarInfo()) clearInterval(t); }, 300);
-  }
-})();
-</script>
-<!-- HK-INVENTARIO-END -->
-
-
-<script>
-// Handler global para Inventario en panel de detalle
-window.HK_CTX = window.HK_CTX || { habitacionActual: null };
-async function handleInventarioClick(num){
-  try{ window.HK_CTX.habitacionActual = String(num); }catch(e){}
-  // Valida PIN (usa tu propio flujo si ya existe)
-  const KEY='HK_PIN_OK';
-  try { if (sessionStorage.getItem(KEY)==='1') { /* ok */ } else {
-    const pin = prompt('PIN de Housekeeping:');
-    if(pin==='246810'){ sessionStorage.setItem(KEY,'1'); }
-    else { alert('PIN incorrecto.'); return; }
-  }} catch(e){}
-  // Abre panel inventario (integra tu función real si existe)
-  if (typeof window.abrirInventarioHK === 'function') {
-    return window.abrirInventarioHK(num);
-  }
-  const panel = document.getElementById('panel-inventario') || document.querySelector('.hk-inventario-panel');
-  if (panel){
-    panel.classList.add('abierto','activo');
-    const lbl = panel.querySelector('#inv-room-label'); if (lbl) lbl.textContent = 'Habitación ' + num;
-    const hidden = panel.querySelector('input[name="habitacion_num"]'); if (hidden) hidden.value = num;
-  } else {
-    alert('Inventario para Habitación ' + num + ' (stub). Integra abrirInventarioHK(num).');
-  }
-}
-</script>
-
-<script>
-// Override para integrar flujo multiusuario + Sillas
-(function(){
-  window.__HK_afterLogin = null;
-  const _get = (id)=>document.getElementById(id);
-
-  function tryOpenSillas(){
-    // Usa la función ya definida en el módulo de sillas
-    if (typeof openSillas === "function") {
-      openSillas();
-      return true;
-    }
-    return false;
-  }
-
-  window.handleInventarioClick = function(num){
-    try{ window.HK_CTX = window.HK_CTX || {}; window.HK_CTX.habitacionActual = String(num); }catch(e){}
-    // Reflejar selección en nuestro módulo
-    try {
-      window.HK_CURRENT_ROOM = String(num);
-      const btnC = _get("hk-comenzar");
-      if (btnC) btnC.style.display = "inline-flex";
-    }catch(e){}
-
-    // Si hay sesión activa -> abre sillas directo
-    try {
-      if (typeof getSession === "function" && typeof isActive === "function"){
-        const s = getSession();
-        if (isActive(s)){ tryOpenSillas(); return; }
-      }
-    } catch(e){}
-
-    // Si no hay sesión: abrir modal y esperar login para abrir sillas
-    try {
-      if (typeof openPIN === "function"){ openPIN(); }
-      window.__HK_afterLogin = function(){
-        tryOpenSillas();
-      };
-    } catch(e){}
-  };
-})();
-</script>
-
-
-<!-- Modal PIN elegante -->
-<div id="hkpin2-overlay" class="hkpin2-overlay" role="dialog" aria-modal="true" aria-labelledby="hkpin2-title">
-  <div class="hkpin2">
-    <h3 id="hkpin2-title">Acceso Housekeeping</h3>
-    <p class="sub">Ingresa tu PIN para abrir el inventario de la habitación seleccionada.</p>
-    <div class="row">
-      <input id="hkpin2-input" class="hkpin2-input" type="password" placeholder="PIN" inputmode="numeric" autocomplete="one-time-code" />
-      <button id="hkpin2-toggle" class="hkpin2-toggle" aria-label="Mostrar/ocultar">👁️</button>
-    </div>
-    <div class="hkpin2-actions">
-      <button id="hkpin2-cancel" class="hkbtn">Cancelar</button>
-      <button id="hkpin2-ok" class="hkbtn primary">Ingresar</button>
-    </div>
-  </div>
-</div>
-
-
-<script>
-window.HK_CTX = window.HK_CTX || { habitacionActual: null };
-(function(){
-  const OVER = document.getElementById('hkpin2-overlay');
-  const INP  = document.getElementById('hkpin2-input');
-  const OK   = document.getElementById('hkpin2-ok');
-  const CAN  = document.getElementById('hkpin2-cancel');
-  const TOG  = document.getElementById('hkpin2-toggle');
-  const KEY  = 'HK_PIN_OK';
-  const PIN  = '246810'; // reemplaza por tu PIN o validación real
-
-  function show(){ OVER.style.display='flex'; setTimeout(()=>INP?.focus(), 40); }
-  function hide(){ OVER.style.display='none'; }
-
-  function pedirPINModal(){
-    return new Promise((resolve)=>{
-      function cleanup(){
-        OK.removeEventListener('click', onok);
-        CAN.removeEventListener('click', oncancel);
-        TOG.removeEventListener('click', ontoggle);
-        INP.removeEventListener('keydown', onkey);
-      }
-      function onok(){
-        const val = INP.value.trim();
-        if(val === PIN){ try{ sessionStorage.setItem(KEY,'1'); }catch(e){} cleanup(); hide(); resolve(true); }
-        else { INP.select(); INP.focus(); }
-      }
-      function oncancel(){ cleanup(); hide(); resolve(false); }
-      function onkey(e){ if(e.key==='Enter') onok(); if(e.key==='Escape') oncancel(); }
-      function ontoggle(){ INP.type = (INP.type==='password' ? 'text' : 'password'); INP.focus(); }
-
-      INP.value='';
-      OK.addEventListener('click', onok);
-      CAN.addEventListener('click', oncancel);
-      TOG.addEventListener('click', ontoggle);
-      INP.addEventListener('keydown', onkey);
-      show();
-    });
-  }
-
-  // Reemplaza el flujo del botón Inventario
-  window.handleInventarioClick = async function(num){
-    try { window.HK_CTX.habitacionActual = String(num); } catch(e){}
-    try { if (sessionStorage.getItem(KEY) === '1') return window.abrirInventarioHK?.(num); } catch(e){}
-    const ok = await pedirPINModal();
-    if(!ok) return;
-    if (typeof window.abrirInventarioHK === 'function') return window.abrirInventarioHK(num);
-    // Fallback simple
-    alert('Inventario para Habitación ' + num + ' (stub). Integra abrirInventarioHK(num).');
-  };
-})();
-</script>
-
-
-<button id="hk-comenzar" class="hk-comenzar" type="button">▶️ Comenzar</button>
-
-<div id="hk-sillas-overlay" class="hk-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="hk-sillas-title">
-  <div class="hk-modal">
-    <h3 id="hk-sillas-title">Sillas de habitación <span id="hk-room-label"></span></h3>
-    <div class="hk-badge-usuario" id="hk-usuario-label"></div>
-    <div id="hk-ultima-actualizacion" class="hk-ultima-act">Sin registros previos.</div>
-    <div id="hk-hist-toggle" class="hk-hist-toggle">🕘 Ver historial</div>
-    <div id="hk-hist" class="hk-hist">
-      <div id="hk-hist-list"></div>
-    </div>
-
-
-    <div class="hk-form-row"><label for="hk-sillas-cantidad">Cantidad de sillas</label><div class="hk-stepper"><button type="button" class="hk-stepper-dec" aria-label="Disminuir">−</button><input id="hk-sillas-cantidad" type="number" min="0" max="6" step="1" value="0"><button type="button" class="hk-stepper-inc" aria-label="Aumentar">+</button></div></div>
-    <div class="hk-form-row">
-      <label for="hk-sillas-notas">Notas</label>
-      <textarea id="hk-sillas-notas" placeholder="Observaciones (opcional)"></textarea>
-    </div>
-
-    <div class="hk-actions">
-      <button type="button" class="hk-btn" id="hk-sillas-cancelar">Cancelar</button>
-      <button type="button" class="hk-btn primary" id="hk-sillas-guardar">Guardar</button>
-    </div>
-  </div>
-</div>
-
-
-<script>
-/* ===== HK Multiusuario + Registro de Sillas ===== */
-(function(){
-  // --- Usuarios proporcionados ---
-  const USERS = {
-    "3068694": { nombre: "Cifuentes María Dolores", rol: "SUP HSK" },
-    "3071925": { nombre: "Amezquita Valencia Zinia Itzel", rol: "SUP HSK" },
-    "3075393": { nombre: "Jiménez López Juana Marisela", rol: "SUP HSK" },
-    "3077512": { nombre: "Florencio García Cynthia Ximena", rol: "SUP HSK" },
-    "3072167": { nombre: "Juárez Pineda Luis Hernaldo", rol: "ASIST. ADMVO" },
-    "3062148": { nombre: "Pérez Otero Silvia", rol: "ASIST. OPERATIVA" },
-    "3067888": { nombre: "Migoni García Manuel", rol: "AMA DE LLAVES EJEC" }
-  };
-
-  const STORAGE_KEY = "HK_INV_SESSION_V2";
-  const LOG_KEY = "HK_INV_LOGS";
-  const ROOMS_KEY = "HK_ROOM_ITEMS"; // Persistencia por habitación
-  const DURATION_MS = 8 * 60 * 60 * 1000;
-
-  const btnInventario = document.getElementById("btn-inventario");
-  const overlayPIN = document.getElementById("hkpin2-overlay");
-  const inputPIN = document.getElementById("hkpin2-input");
-
-  // UI para sillas
-  const btnComenzar = document.getElementById("hk-comenzar");
-  const sillasOverlay = document.getElementById("hk-sillas-overlay");
-  const roomLabel = document.getElementById("hk-room-label");
-  const userLabel = document.getElementById("hk-usuario-label");
-  const inputCant = document.getElementById("hk-sillas-cantidad");
-  const inputNotas = document.getElementById("hk-sillas-notas");
-  const btnGuardar = document.getElementById("hk-sillas-guardar");
-  /* --- Login helpers & wiring (overlay PIN usado como matrícula) --- */
-  function validateMatricula(m){
-    return !!USERS[(m||"").trim()];
-  }
-  window.HK_validate = validateMatricula;
-
-  // Abre/cierra el modal de matrícula (overlay existente)
-  function openPIN(){
-    if(!overlayPIN) return;
-    overlayPIN.style.display = "flex";
-    setTimeout(()=>overlayPIN.classList.add("activo"), 0);
-    if (inputPIN){ inputPIN.type="text"; inputPIN.placeholder="Matrícula"; inputPIN.value=""; inputPIN.focus(); }
-  }
-  function closePIN(){
-    if(!overlayPIN) return;
-    overlayPIN.classList.remove("activo");
-    setTimeout(()=>overlayPIN.style.display = "none", 200);
-  }
-
-  // Click en Inventario: si sesión activa, abre panel si aplica; si no, pide matrícula
-  if (btnInventario){
-    btnInventario.addEventListener("click", ()=>{
-      const sess = getSession();
-      if (isActive(sess)){
-        // acceso directo (si usas panel lateral)
-        // const side = document.querySelector(".hk-inv-side"); if(side) side.classList.add("hk-open");
-      } else {
-        openPIN();
-      }
-    });
-  }
-
-  // Enter en input de matrícula
-  if (inputPIN){
-    inputPIN.addEventListener("keydown", function(ev){
-      if (ev.key === "Enter"){
-        const m = (inputPIN.value||"").trim();
-        if (validateMatricula(m)){
-          setSession(m);
-        closePIN();
-        if (window.__HK_afterLogin){ try{ window.__HK_afterLogin(); }catch(e){} window.__HK_afterLogin=null; }
-if (window.__HK_afterLogin){ try{ window.__HK_afterLogin(); }catch(e){} window.__HK_afterLogin=null; }
-} else {
-          inputPIN.setCustomValidity("Matrícula no reconocida");
-          inputPIN.reportValidity();
-          setTimeout(()=>inputPIN.setCustomValidity(""), 1800);
-        }
-      }
-    });
-  }
-
-  // Click en botón Aceptar del modal de matrícula
-  (function(){
-    const btnOK = document.getElementById("hkpin2-ok");
-    if (btnOK && inputPIN){
-      btnOK.addEventListener("click", function(){
-        const m = (inputPIN.value||"").trim();
-        if (validateMatricula(m)){
-          setSession(m);
-        closePIN();
-        if (window.__HK_afterLogin){ try{ window.__HK_afterLogin(); }catch(e){} window.__HK_afterLogin=null; }
-if (window.__HK_afterLogin){ try{ window.__HK_afterLogin(); }catch(e){} window.__HK_afterLogin=null; }
-} else {
-          inputPIN.setCustomValidity("Matrícula no reconocida");
-          inputPIN.reportValidity();
-          setTimeout(()=>inputPIN.setCustomValidity(""), 1800);
-        }
-      });
-    }
-  })();
-
-  const MAX_HISTORY = 50;
-  const elUltima = document.getElementById("hk-ultima-actualizacion");
-  const elHistToggle = document.getElementById("hk-hist-toggle");
-  const elHist = document.getElementById("hk-hist");
-  const elHistList = document.getElementById("hk-hist-list");
-
-  function formatFecha(ts){
-    try { return new Date(ts).toLocaleString("es-MX", { dateStyle:"medium", timeStyle:"short" }); }
-    catch(e){ return new Date(ts).toLocaleString(); }
-  }
-
-  function getRoomData(num){
-    const data = loadRoomsData();
-    return data[num] || {};
-  }
-  function setRoomData(num, payload){
-    const data = loadRoomsData();
-    data[num] = Object.assign({}, data[num]||{}, payload);
-    saveRoomsData(data);
-  }
-
-  function renderUltima(num){
-    const d = getRoomData(num);
-    const last = (d.sillas_historial && d.sillas_historial.length) ? d.sillas_historial[d.sillas_historial.length-1] : d.sillas;
-    if (last && typeof last.ts === "number"){
-      elUltima.textContent = `Última actualización: ${formatFecha(last.ts)} · ${last.nombre}`;
-    } else {
-      elUltima.textContent = "Sin registros previos.";
-    }
-  }
-
-  function renderHistorial(num){
-    const d = getRoomData(num);
-    const hist = (d.sillas_historial||[]).slice().reverse(); // mostrar recientes primero
-    elHistList.innerHTML = "";
-    if (!hist.length){
-      elHistList.innerHTML = "<div class='hk-hist-item'><div class='hk-hist-meta'>No hay historial aún.</div></div>";
-      return;
-    }
-    hist.forEach((entry, i)=>{
-      const wrap = document.createElement("div");
-      wrap.className = "hk-hist-item";
-      const meta = document.createElement("div");
-      meta.className = "hk-hist-meta";
-      meta.textContent = `${formatFecha(entry.ts)} · ${entry.nombre} · Cant: ${entry.cantidad}` + (entry.notas ? ` · "${entry.notas}"` : "");
-      const actions = document.createElement("div");
-      actions.className = "hk-hist-actions";
-      const restore = document.createElement("button");
-      restore.textContent = "Restaurar";
-      restore.addEventListener("click", ()=>{
-        // Solo carga los valores al formulario; el guardado crea una nueva versión
-        inputCant.value = entry.cantidad;
-        inputNotas.value = entry.notas || "";
-      });
-      actions.appendChild(restore);
-      wrap.appendChild(meta);
-      wrap.appendChild(actions);
-      elHistList.appendChild(wrap);
-    });
-  }
-
-  // Toggle del historial
-  if (elHistToggle){
-    elHistToggle.addEventListener("click", ()=>{
-      const isOpen = elHist.style.display === "block";
-      elHist.style.display = isOpen ? "none" : "block";
-      elHistToggle.textContent = isOpen ? "🕘 Ver historial" : "🗂️ Ocultar historial";
-      if (!isOpen && HK_CURRENT_ROOM){
-        renderHistorial(HK_CURRENT_ROOM);
-      }
-    });
-  }
-
-  const btnCancelar = document.getElementById("hk-sillas-cancelar");
-
-  // Exponer helpers a window si no existen
-  function now(){ return Date.now(); }
-  function fmt(t){ return new Date(t).toLocaleString("es-MX"); }
-  function getSession(){
-    try{ const raw = localStorage.getItem(STORAGE_KEY); return raw ? JSON.parse(raw) : null; }catch(e){ return null; }
-  }
-  function isActive(sess){
-    return sess && USERS[sess.matricula] && sess.expiresAt > now();
-  }
-  function setSession(matricula){
-    const startedAt = now();
-    const expiresAt = startedAt + DURATION_MS;
-    const perfil = USERS[matricula];
-    const sess = { matricula, nombre: perfil.nombre, rol: perfil.rol, startedAt, expiresAt };
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(sess));
-    return sess;
-  }
-  function audit(action, payload){
-    try {
-      const raw = localStorage.getItem(LOG_KEY);
-      const arr = raw ? JSON.parse(raw) : [];
-      const sess = getSession();
-      const base = isActive(sess) ? { matricula: sess.matricula, nombre: sess.nombre, rol: sess.rol } : {};
-      arr.push(Object.assign({ ts: now(), action }, base, (payload||{})));
-      localStorage.setItem(LOG_KEY, JSON.stringify(arr));
-    } catch(e){}
-  }
-  window.getHKSession = window.getHKSession || function(){ const s=getSession(); return isActive(s)?s:null; };
-  window.auditHK = window.auditHK || audit;
-
-  // Detectar habitación seleccionada (delegación de eventos)
-  let HK_CURRENT_ROOM = null;
-  document.addEventListener("click", (e)=>{
-    const btn = e.target.closest && e.target.closest(".habitacion-btn");
-    if(btn && btn.dataset.num){
-      HK_CURRENT_ROOM = btn.dataset.num;
-      // Mostrar botón comenzar si hay sesión activa
-      const sess = getSession();
-      btnComenzar.style.display = isActive(sess) ? "inline-flex" : "none";
-    }
-  });
-
-  // Al cargar, marcar habitaciones ya registradas (sillas)
-  function loadRoomsData(){
-    try{ return JSON.parse(localStorage.getItem(ROOMS_KEY)||"{}"); }catch(e){ return {}; }
-  }
-  function saveRoomsData(data){
-    localStorage.setItem(ROOMS_KEY, JSON.stringify(data));
-  }
-  function markRegisteredRooms(){
-    const data = loadRoomsData();
-    document.querySelectorAll(".habitacion-btn[data-num]").forEach(b=>{
-      const num = b.dataset.num;
-      if (data[num] && data[num].sillas && typeof data[num].sillas.cantidad === "number"){
-        b.classList.add("inventario-ok");
-      }
-    });
-  }
-  markRegisteredRooms();
-
-  // Mostrar modal de sillas
-  function openSillas(){
-    if(!HK_CURRENT_ROOM){
-      alert("Selecciona una habitación primero.");
-      return;
-    }
-    const sess = getSession();
-    if(!isActive(sess)){
-      alert("Inicia sesión con tu matrícula para registrar.");
-      return;
-    }
-    roomLabel.textContent = "· " + HK_CURRENT_ROOM;
-    userLabel.textContent = `Hola ${sess.nombre.split(" ")[0]}, gusto en verte. ¿Qué vamos a registrar hoy? (${new Date().toLocaleDateString("es-MX", { weekday:'long', year:'numeric', month:'long', day:'numeric' })})`;
-    // cargar valores previos si existen
-    const data = loadRoomsData();
-    const prev = (data[HK_CURRENT_ROOM] && data[HK_CURRENT_ROOM].sillas) ? data[HK_CURRENT_ROOM].sillas : null;
-    inputCant.value = prev ? prev.cantidad : 0;
-    inputNotas.value = prev ? (prev.notas||"") : "";
-    // actualizar UI de última actualización e historial (cerrado por defecto)
-    if (elHist){ elHist.style.display = "none"; }
-    renderUltima(HK_CURRENT_ROOM);
-    sillasOverlay.classList.add("activo");
-  
-  }
-  function closeSillas(){
-    sillasOverlay.classList.remove("activo");
-  }
-
-  btnComenzar && btnComenzar.addEventListener("click", openSillas);
-  btnCancelar && btnCancelar.addEventListener("click", closeSillas);
-  sillasOverlay && sillasOverlay.addEventListener("click", (e)=>{
-    if(e.target === sillasOverlay) closeSillas();
-  });
-
-  // Guardar registro
-  btnGuardar && btnGuardar.addEventListener("click", ()=>{
-    const sess = getSession();
-    if(!isActive(sess)){ alert("Sesión caducada. Inicia sesión de nuevo."); return; }
-    const cantidad = parseInt(inputCant.value || "0", 10);
-    const notas = (inputNotas.value || "").trim();
-
-    if(isNaN(cantidad) || cantidad < 0){ alert("Cantidad inválida."); return; }
-
-    const data = loadRoomsData();
-    data[HK_CURRENT_ROOM] = data[HK_CURRENT_ROOM] || {};
-
-    const entry = {
-      cantidad,
-      notas,
-      by: sess.matricula,
-      nombre: sess.nombre,
-      ts: now()
-    };
-
-    // historial
-    const hist = (data[HK_CURRENT_ROOM].sillas_historial || []);
-    hist.push(entry);
-    if (hist.length > MAX_HISTORY){ data[HK_CURRENT_ROOM].sillas_historial = hist.slice(hist.length - MAX_HISTORY); }
-    else { data[HK_CURRENT_ROOM].sillas_historial = hist; }
-
-    // último
-    data[HK_CURRENT_ROOM].sillas = entry;
-
-    saveRoomsData(data);
-    audit("save_sillas", { habitacion: HK_CURRENT_ROOM, cantidad });
-
-    // Marca visual
-    const btn = document.querySelector(`.habitacion-btn[data-num="${HK_CURRENT_ROOM}"]`);
-    if(btn) btn.classList.add("inventario-ok");
-
-    closeSillas();
-    // Feedback rápido
-    const m = document.createElement("div");
-    m.className = "mensaje-flotante";
-    m.textContent = `Sillas registradas para ${HK_CURRENT_ROOM} · ${cantidad}`;
-    document.body.appendChild(m);
-    setTimeout(()=>{ m.remove(); }, 2000);
-  });// Mostrar/ocultar botón "Comenzar" en base a la sesión
-  function refreshComenzar(){
-    const sess = getSession();
-    btnComenzar.style.display = isActive(sess) && HK_CURRENT_ROOM ? "inline-flex" : "none";
-  }
-  setInterval(refreshComenzar, 1000);
-
-  // Tip: si ya tienes otro módulo de sesión, este respeta STORAGE_KEY/USERS y reutiliza helpers.
-})();
-</script>
-
-
-<script>
-(function(){
-  // Botón "Aceptar" del modal de matrícula (si existe)
-  const overlayPIN = document.getElementById("hkpin2-overlay");
-  const inputPIN = document.getElementById("hkpin2-input");
-  const btnOK = document.getElementById("hkpin2-ok");
-  if (overlayPIN && inputPIN && btnOK) {
-    btnOK.addEventListener("click", function(){
-      // Reutiliza la validación del módulo principal si está presente
-      try {
-        // Trigger Enter key behavior programmatically
-        const evt = new KeyboardEvent("keydown", {key:"Enter"});
-        inputPIN.dispatchEvent(evt);
-      } catch(e) {
-        // Fallback: setSession si el index integra validateMatricula en window
-        const m = (inputPIN.value||"").trim();
-        if (window.validateMatricula && window.setSession) {
-          if (window.validateMatricula(m)) {
-            window.setSession(m);
-          }
-        }
-      }
-    });
-  }
-})();
-</script>
-
-
-<script>
-(function(){
-  const inp = document.getElementById("hk-sillas-cantidad");
-  const dec = document.querySelector(".hk-stepper-dec");
-  const inc = document.querySelector(".hk-stepper-inc");
-  function clamp(v){
-    const min = parseInt(inp.getAttribute("min")||"0",10);
-    const max = parseInt(inp.getAttribute("max")||"99",10);
-    if (isNaN(v)) v = 0;
-    return Math.max(min, Math.min(max, v));
-  }
-  if (dec) dec.addEventListener("click", ()=>{
-    const v = clamp(parseInt(inp.value||"0",10) - 1);
-    inp.value = v;
-  });
-  if (inc) inc.addEventListener("click", ()=>{
-    const v = clamp(parseInt(inp.value||"0",10) + 1);
-    inp.value = v;
-  });
-})();
-</script>
-
-
-<button id="hk-logout" class="hk-logout" type="button" aria-label="Cerrar sesión">Cerrar sesión</button>
-
-<div id="hk-logout-overlay" class="hk-logout-overlay" role="dialog" aria-modal="true" aria-labelledby="hk-logout-title">
-  <div class="hk-logout-modal">
-    <h3 id="hk-logout-title">Cerrar sesión</h3>
-    <p>¿Seguro que deseas cerrar la sesión actual? Se requerirá matrícula para volver a ingresar.</p>
-    <div class="hk-logout-actions">
-      <button type="button" class="hk-logout-btn" id="hk-logout-cancel">Cancelar</button>
-      <button type="button" class="hk-logout-btn primary" id="hk-logout-accept">Cerrar sesión</button>
-    </div>
-  </div>
-</div>
-
-
-<script>
-(function(){
-  const STORAGE_KEY = "HK_INV_SESSION_V2";
-  const btnLogout = document.getElementById("hk-logout");
-  const overlay = document.getElementById("hk-logout-overlay");
-  const btnCancel = document.getElementById("hk-logout-cancel");
-  const btnAccept = document.getElementById("hk-logout-accept");
-
-  function sessActive(){
-    try{
-      if (typeof window.getHKSession === "function"){
-        return !!window.getHKSession();
-      }
-      // Fallback: read key directly
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) return false;
-      const s = JSON.parse(raw);
-      return s && typeof s.expiresAt === "number" && s.expiresAt > Date.now();
-    }catch(e){ return false; }
-  }
-
-  function showLogout(v){
-    if (!btnLogout) return;
-    btnLogout.style.display = v ? "inline-flex" : "none";
-  }
-
-  function doLogout(){
-    try{ localStorage.removeItem(STORAGE_KEY); }catch(e){}
-    try{ sessionStorage.removeItem('HK_PIN_OK'); }catch(e){}
-    // Oculta controles dependientes de sesión
-    try{
-      const btnC = document.getElementById("hk-comenzar");
-      if (btnC) btnC.style.display = "none";
-    }catch(e){}
-    showLogout(false);
-    // Mini feedback
-    try {
-      const m = document.createElement("div");
-      m.className = "mensaje-flotante";
-      m.textContent = "Sesión cerrada";
-      document.body.appendChild(m);
-      setTimeout(()=>{ m.remove(); }, 1800);
-    } catch(e){}
-  }
-
-  function openConfirm(){ overlay && (overlay.classList.add("activo")); }
-  function closeConfirm(){ overlay && (overlay.classList.remove("activo")); }
-
-  // Wire events
-  btnLogout && btnLogout.addEventListener("click", openConfirm);
-  btnCancel && btnCancel.addEventListener("click", closeConfirm);
-  overlay && overlay.addEventListener("click", (e)=>{ if(e.target===overlay) closeConfirm(); });
-  btnAccept && btnAccept.addEventListener("click", function(){
-    doLogout();
-    closeConfirm();
-  });
-
-  // Poll to keep visibility in sync (lightweight)
-  setInterval(()=>{ showLogout(sessActive()); }, 1000);
-
-  // Also show immediately if already active on load
-  showLogout(sessActive());
-})();
-</script>
-
-
-<!-- INICIO: BLOQUES DE INVENTARIO (Cama / Clóset / Baño) - Inserción no intrusiva -->
-<div id="bloques-inventario-extendidos" style="margin-top:1rem;">
-  <!-- HABITACIÓN (Sillas ya existente; aquí solo dejamos el placeholder) -->
-  <details open>
-    <summary style="font-weight:600; font-size:1.05rem;">🏠 Habitación</summary>
-    <div class="inventario-zona" data-zona="habitacion">
-      <!--
-        Nota: La sección de Sillas ya existe en tu index.
-        Si deseas, podemos clonar su bloque aquí o mantenerla donde está.
-        Este contenedor queda listo para futuras extensiones (más artículos de habitación).
-      -->
-    </div>
-  </details>
-
-  <!-- CAMA -->
-  <details>
-    <summary style="font-weight:600; font-size:1.05rem;">🛏️ Cama</summary>
-    <div class="inventario-zona" data-zona="cama">
-      <div class="fila">
-        <label for="tipo-cama">Tipo de cama</label>
-        <select id="tipo-cama">
-          <option value="K">K — 1 cama king</option>
-          <option value="D">D — 2 camas matrimoniales</option>
-        </select>
-        <small>(Si es D, todo lo de cama se multiplica x2)</small>
-      </div>
-      <div class="grid-inventario">
-        <label>Protector</label><input type="number" min="0" step="1" value="1" data-item="protector">
-        <label>Sábanas</label><input type="number" min="0" step="1" value="1" data-item="sabanas">
-        <label>Almohadas</label><input type="number" min="0" step="1" value="2" data-item="almohadas">
-        <label>Fundas</label><input type="number" min="0" step="1" value="2" data-item="fundas">
-        <label>Protector de almohadas</label><input type="number" min="0" step="1" value="2" data-item="protector_almohadas">
-        <label>Inserto (dúvet)</label><input type="number" min="0" step="1" value="1" data-item="duvet">
-        <label>Cubre dúvet</label><input type="number" min="0" step="1" value="1" data-item="cubre_duvet">
-        <label>Color (cubre dúvet)</label>
-        <select data-item="color_cubre_duvet">
-          <option value="blanco">Blanco</option>
-          <option value="cafe">Café</option>
-        </select>
-      </div>
-    </div>
-  </details>
-
-  <!-- CLÓSET -->
-  <details>
-    <summary style="font-weight:600; font-size:1.05rem;">🧳 Clóset</summary>
-    <div class="inventario-zona" data-zona="closet">
-      <div class="grid-inventario">
-        <label>Cobertor</label><input type="number" min="0" step="1" value="1" data-item="cobertor">
-        <label>Almohada matrimonial</label><input type="number" min="0" step="1" value="1" data-item="almohada_mat">
-        <label>Funda matrimonial</label><input type="number" min="0" step="1" value="1" data-item="funda_mat">
-        <label>Protector matrimonial</label><input type="number" min="0" step="1" value="1" data-item="protector_mat">
-        <label>Bolsa de tela</label><input type="number" min="0" step="1" value="1" data-item="bolsa_tela">
-      </div>
-    </div>
-  </details>
-
-  <!-- BAÑO -->
-  <details>
-    <summary style="font-weight:600; font-size:1.05rem;">🚿 Baño</summary>
-    <div class="inventario-zona" data-zona="bano">
-      <div class="fila">
-        <label for="categoria-habitacion">Categoría</label>
-        <select id="categoria-habitacion">
-          <option value="Normal">Normal</option>
-          <option value="Swing Up">Swing Up</option>
-          <option value="Master Suite">Master Suite</option>
-        </select>
-        <small>Nota: Swing Up y Master Suite usan toallas/tapetes color café.</small>
-      </div>
-      <div class="grid-inventario">
-        <label>Toallas de baño</label><input type="number" min="0" step="1" value="4" data-item="toalla_bano">
-        <label>Toallas de mano</label><input type="number" min="0" step="1" value="4" data-item="toalla_mano">
-        <label>Toallas faciales</label><input type="number" min="0" step="1" value="2" data-item="toalla_facial">
-        <label>Tapetes</label><input type="number" min="0" step="1" value="1" data-item="tapete">
-        <label>Toallas verdes de alberca</label><input type="number" min="0" step="1" value="0" data-item="toalla_verde">
-        <label>Color (toallas/tapetes)</label>
-        <select id="color-toallas">
-          <option value="blanco">Blanco</option>
-          <option value="cafe">Café</option>
-        </select>
-      </div>
-      <small id="nota-ubicacion-swing" style="display:none;">
-        Distribución Swing/Master: baño + tina/escalera; verdes dentro de la bolsa de playa.
-      </small>
-    </div>
-  </details>
-</div>
-
-<style>
-/* estilos mínimos reutilizables y no intrusivos */
-#bloques-inventario-extendidos .grid-inventario {
-  display:grid; grid-template-columns: 1fr 120px; gap:.5rem 1rem; align-items:center;
-}
-#bloques-inventario-extendidos .fila { display:flex; gap:.75rem; align-items:center; margin:.25rem 0 .75rem; flex-wrap:wrap;}
-#bloques-inventario-extendidos details { background: rgba(0,0,0,.03); border-radius:12px; padding:.75rem 1rem; margin:.5rem 0;}
-#bloques-inventario-extendidos summary { cursor:pointer; outline:none; }
-#bloques-inventario-extendidos input[type="number"], 
-#bloques-inventario-extendidos select { padding:.35rem .5rem; border-radius:8px; border:1px solid rgba(0,0,0,.2); }
-@media (prefers-reduced-motion: reduce){
-  #bloques-inventario-extendidos *{ animation:none !important; transition:none !important; }
-}
-</style>
-
-<script>
-// JS aislado para no interferir con tu lógica existente
-(function(){
-  function setCamaMultiplicador(){
-    const tipo = document.getElementById('tipo-cama');
-    if(!tipo) return;
-    const mult = (tipo.value === 'D') ? 2 : 1;
-    const zona = document.querySelector('[data-zona="cama"]');
-    if(!zona) return;
-    zona.querySelectorAll('input[type="number"][data-item]').forEach(inp => {
-      const base = Number(inp.getAttribute('data-base') || inp.value);
-      if(!inp.hasAttribute('data-base')) inp.setAttribute('data-base', String(base));
-      inp.value = String(base * mult);
-    });
-  }
-
-  function setBanoPorCategoria(){
-    const catSel = document.getElementById('categoria-habitacion');
-    const colorSel = document.getElementById('color-toallas');
-    const zona = document.querySelector('[data-zona="bano"]');
-    const nota = document.getElementById('nota-ubicacion-swing');
-    if(!catSel || !zona) return;
-
-    const toalla_bano = zona.querySelector('input[data-item="toalla_bano"]');
-    const toalla_mano = zona.querySelector('input[data-item="toalla_mano"]');
-    const toalla_facial = zona.querySelector('input[data-item="toalla_facial"]');
-    const tapete = zona.querySelector('input[data-item="tapete"]');
-    const verde = zona.querySelector('input[data-item="toalla_verde"]');
-
-    const cat = catSel.value;
-    if(cat === 'Normal'){
-      toalla_bano.value = 4;
-      toalla_mano.value = 4;
-      toalla_facial.value = 2;
-      tapete.value = 1;
-      verde.value = 0;
-      if(colorSel){ colorSel.disabled = false; colorSel.value = 'blanco'; }
-      if(nota) nota.style.display = 'none';
-    } else if(cat === 'Swing Up'){
-      toalla_bano.value = 6;  // 4 baño + 2 junto a tina
-      toalla_mano.value = 5;  // 4 baño + 1 junto a tina
-      toalla_facial.value = 2;
-      tapete.value = 2;       // 1 baño + 1 tina
-      verde.value = 2;
-      if(colorSel){ colorSel.disabled = true; colorSel.value = 'cafe'; }
-      if(nota) nota.style.display = 'inline';
-    } else { // Master Suite
-      toalla_bano.value = 6;
-      toalla_mano.value = 7;  // 4 baño, 2 canasta, 1 tina
-      toalla_facial.value = 2;
-      tapete.value = 4;       // 2 lavabos, 1 escalera, 1 regadera
-      verde.value = 2;
-      if(colorSel){ colorSel.disabled = true; colorSel.value = 'cafe'; }
-      if(nota) nota.style.display = 'inline';
-    }
-  }
-
-  document.addEventListener('change', (e)=>{
-    if(e.target && e.target.id === 'tipo-cama'){ setCamaMultiplicador(); }
-    if(e.target && e.target.id === 'categoria-habitacion'){ setBanoPorCategoria(); }
-  });
-
-  // inicializar con valores por defecto
-  document.addEventListener('DOMContentLoaded', ()=>{
-    setCamaMultiplicador();
-    setBanoPorCategoria();
-  });
-})();
-</script>
-<!-- FIN: BLOQUES DE INVENTARIO -->
-
-
-<!-- === HK INVENTARIO · MODAL INTEGRADO (Sillas + Cama + Clóset + Baño) === -->
-<div class="hk-modal-overlay" id="hkInvOverlay" aria-hidden="true">
-  <div class="hk-modal" role="dialog" aria-modal="true" aria-labelledby="hkInvTitle">
-    <h3 id="hkInvTitle">Inventario · <span id="hkInvRoom">—</span></h3>
-    <div class="hk-badge-usuario" id="hkInvSub">Hola, ¿qué registramos hoy?</div>
-
-    <!-- Toggle historial -->
-    <label class="hk-hist-toggle">
-      <input type="checkbox" id="hkHistToggle"> Ocultar historial
-    </label>
-    <div class="hk-ultima-act" id="hkInvUltima">Sin registros previos.</div>
-    <div class="hk-hist" id="hkInvHist">No hay historial aún.</div>
-
-    <hr style="margin:10px 0; opacity:.3;">
-
-    <!-- HABITACIÓN: Sillas -->
-    <div class="hk-form-row">
-      <label for="hkSillas">Cantidad de sillas</label>
-      <div class="hk-stepper">
-        <button type="button" id="hkMinus">-</button>
-        <input type="number" id="hkSillas" min="0" value="0">
-        <button type="button" id="hkPlus">+</button>
-      </div>
-    </div>
-
-    <!-- CAMA -->
-    <details style="margin:6px 0;" id="hkCamaBlock">
-      <summary style="font-weight:800;">🛏️ Cama</summary>
-      <div class="hk-form-row">
-        <label for="hkTipoCama">Tipo de cama</label>
-        <select id="hkTipoCama">
-          <option value="K">K — 1 cama king</option>
-          <option value="D">D — 2 camas matrimoniales</option>
-        </select>
-      </div>
-      <div class="hk-form-row"><label>Protector</label><input type="number" id="hkCamaProtector" min="0" value="1"></div>
-      <div class="hk-form-row"><label>Sábanas</label><input type="number" id="hkCamaSabanas" min="0" value="1"></div>
-      <div class="hk-form-row"><label>Almohadas</label><input type="number" id="hkCamaAlmohadas" min="0" value="2"></div>
-      <div class="hk-form-row"><label>Fundas</label><input type="number" id="hkCamaFundas" min="0" value="2"></div>
-      <div class="hk-form-row"><label>Protector de almohadas</label><input type="number" id="hkCamaProtAlm" min="0" value="2"></div>
-      <div class="hk-form-row"><label>Inserto (dúvet)</label><input type="number" id="hkCamaDuvet" min="0" value="1"></div>
-      <div class="hk-form-row">
-        <label>Cubre dúvet</label>
-        <input type="number" id="hkCamaCubre" min="0" value="1">
-      </div>
-      <div class="hk-form-row">
-        <label>Color (cubre dúvet)</label>
-        <select id="hkCamaColor">
-          <option value="blanco">Blanco</option>
-          <option value="cafe">Café</option>
-        </select>
-      </div>
-    </details>
-
-    <!-- CLÓSET -->
-    <details style="margin:6px 0;" id="hkClosetBlock">
-      <summary style="font-weight:800;">🧳 Clóset</summary>
-      <div class="hk-form-row"><label>Cobertor</label><input type="number" id="hkClosetCobertor" min="0" value="1"></div>
-      <div class="hk-form-row"><label>Almohada matrimonial</label><input type="number" id="hkClosetAlm" min="0" value="1"></div>
-      <div class="hk-form-row"><label>Funda matrimonial</label><input type="number" id="hkClosetFunda" min="0" value="1"></div>
-      <div class="hk-form-row"><label>Protector matrimonial</label><input type="number" id="hkClosetProt" min="0" value="1"></div>
-      <div class="hk-form-row"><label>Bolsa de tela</label><input type="number" id="hkClosetBolsa" min="0" value="1"></div>
-    </details>
-
-    <!-- BAÑO -->
-    <details style="margin:6px 0;" id="hkBanoBlock">
-      <summary style="font-weight:800;">🚿 Baño</summary>
-      <div class="hk-form-row">
-        <label for="hkCategoria">Categoría</label>
-        <select id="hkCategoria">
-          <option value="Normal">Normal</option>
-          <option value="Swing Up">Swing Up</option>
-          <option value="Master Suite">Master Suite</option>
-        </select>
-      </div>
-      <div class="hk-form-row"><label>Toallas de baño</label><input type="number" id="hkBanioBano" min="0" value="4"></div>
-      <div class="hk-form-row"><label>Toallas de mano</label><input type="number" id="hkBanioMano" min="0" value="4"></div>
-      <div class="hk-form-row"><label>Toallas faciales</label><input type="number" id="hkBanioFacial" min="0" value="2"></div>
-      <div class="hk-form-row"><label>Tapetes</label><input type="number" id="hkBanioTapete" min="0" value="1"></div>
-      <div class="hk-form-row"><label>Toallas verdes de alberca</label><input type="number" id="hkBanioVerde" min="0" value="0"></div>
-      <div class="hk-form-row">
-        <label>Color (toallas/tapetes)</label>
-        <select id="hkBanioColor">
-          <option value="blanco">Blanco</option>
-          <option value="cafe">Café</option>
-        </select>
-      </div>
-      <div class="hk-inv-muted" id="hkNotaUbic">Normal: sin verdes. Swing/Master: cafés y 2 verdes en bolsa de playa.</div>
-    </details>
-
-    <div class="hk-form-row">
-      <label for="hkNotas">Notas</label>
-      <textarea id="hkNotas" placeholder="Observaciones (opcional)"></textarea>
-    </div>
-
-    <div class="hk-actions">
-      <button class="hk-btn" id="hkCancelar">Cancelar</button>
-      <button class="hk-btn primary" id="hkGuardar">Guardar</button>
-    </div>
-  </div>
-</div>
-
-<script>
-(function(){
-  const q = sel => document.querySelector(sel);
-  const qa = sel => Array.from(document.querySelectorAll(sel));
-  let currentRoom = null;
-
-  // Attach to room buttons
-  function attachHandlers(){
-    qa('.habitacion-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const num = btn.getAttribute('data-num') || btn.textContent.trim();
-        openModal(num);
-      });
-    });
-  }
-
-  // Open modal
-  function openModal(room){
-    currentRoom = room;
-    q('#hkInvRoom').textContent = room;
-    // Reset form
-    q('#hkSillas').value = 0;
-    q('#hkTipoCama').value = 'K';
-    setCamaMultiplicador(); // sets cama baseline
-
-    q('#hkCategoria').value = 'Normal';
-    applyCategoriaDefaults();
-
-    q('#hkNotas').value = '';
-    q('#hkHistToggle').checked = false;
-    q('#hkInvHist').style.display = 'block';
-
-    renderHistorial(room);
-    q('#hkInvOverlay').classList.add('activo');
-    q('#hkInvOverlay').setAttribute('aria-hidden','false');
-  }
-
-  // Close modal
-  function closeModal(){
-    q('#hkInvOverlay').classList.remove('activo');
-    q('#hkInvOverlay').setAttribute('aria-hidden','true');
-  }
-
-  // Historial
-  function key(room){ return 'inv_' + room; }
-  function load(room){
-    try { return JSON.parse(localStorage.getItem(key(room)) || '[]'); }
-    catch(e){ return []; }
-  }
-  function save(room, list){
-    localStorage.setItem(key(room), JSON.stringify(list));
-  }
-  function renderHistorial(room){
-    const list = load(room);
-    const hist = q('#hkInvHist');
-    const ultima = q('#hkInvUltima');
-    hist.innerHTML = '';
-    if(list.length === 0){
-      hist.textContent = 'No hay historial aún.';
-      ultima.textContent = 'Sin registros previos.';
-    }else{
-      list.slice().reverse().forEach(item => {
-        const row = document.createElement('div');
-        row.className = 'hk-hist-item';
-        const left = document.createElement('div');
-        left.innerHTML = '<strong>' + (item.fecha || '') + '</strong><br>' +
-          (item.resumen || '');
-        const right = document.createElement('div');
-        right.className = 'hk-hist-meta';
-        right.textContent = item.usuario || '';
-        row.appendChild(left); row.appendChild(right);
-        hist.appendChild(row);
-      });
-      const last = list[list.length-1];
-      ultima.textContent = 'Último: ' + (last.fecha || '');
-    }
-
-    // marcar botón de habitación si tiene registros
-    qa('.habitacion-btn').forEach(b=>{
-      const num = b.getAttribute('data-num') || b.textContent.trim();
-      const has = load(num).length > 0;
-      b.classList.toggle('inventario-ok', has);
-    });
-  }
-
-  // Cama multiplicador
-  function setCamaMultiplicador(){
-    const mult = (q('#hkTipoCama').value === 'D') ? 2 : 1;
-    const mapa = [
-      ['#hkCamaProtector', 1],
-      ['#hkCamaSabanas', 1],
-      ['#hkCamaAlmohadas', 2],
-      ['#hkCamaFundas', 2],
-      ['#hkCamaProtAlm', 2],
-      ['#hkCamaDuvet', 1],
-      ['#hkCamaCubre', 1],
-    ];
-    mapa.forEach(([sel, base]) => { q(sel).value = base * mult; });
-  }
-
-  // Baño por categoría
-  function applyCategoriaDefaults(){
-    const cat = q('#hkCategoria').value;
-    if(cat === 'Normal'){
-      q('#hkBanioBano').value = 4;
-      q('#hkBanioMano').value = 4;
-      q('#hkBanioFacial').value = 2;
-      q('#hkBanioTapete').value = 1;
-      q('#hkBanioVerde').value = 0;
-      q('#hkBanioColor').disabled = false;
-      q('#hkBanioColor').value = 'blanco';
-      q('#hkNotaUbic').textContent = 'Normal: sin verdes. Swing/Master: cafés y 2 verdes en bolsa de playa.';
-    } else if(cat === 'Swing Up'){
-      q('#hkBanioBano').value = 6;   // 4 baño + 2 junto a tina
-      q('#hkBanioMano').value = 5;   // 4 baño + 1 junto a tina
-      q('#hkBanioFacial').value = 2;
-      q('#hkBanioTapete').value = 2; // 1 baño + 1 tina
-      q('#hkBanioVerde').value = 2;
-      q('#hkBanioColor').disabled = true;
-      q('#hkBanioColor').value = 'cafe';
-      q('#hkNotaUbic').textContent = 'Swing Up: cafés, 2 verdes en bolsa de playa (baño + tina).';
-    } else { // Master Suite
-      q('#hkBanioBano').value = 6;
-      q('#hkBanioMano').value = 7;   // 4 baño, 2 canasta, 1 tina
-      q('#hkBanioFacial').value = 2;
-      q('#hkBanioTapete').value = 4; // 2 lavabos, 1 escalera, 1 regadera
-      q('#hkBanioVerde').value = 2;
-      q('#hkBanioColor').disabled = true;
-      q('#hkBanioColor').value = 'cafe';
-      q('#hkNotaUbic').textContent = 'Master Suite: cafés, 2 verdes en bolsa de playa (tina + escalera).';
-    }
-  }
-
-  // Save
-  function guardar(){
-    if(!currentRoom) return;
-    const now = new Date();
-    const stamp = now.toLocaleString();
-
-    const data = {
-      room: currentRoom,
-      fecha: stamp,
-      usuario: '',
-      sillas: Number(q('#hkSillas').value || 0),
-      cama: {
-        tipo: q('#hkTipoCama').value,
-        protector: Number(q('#hkCamaProtector').value || 0),
-        sabanas: Number(q('#hkCamaSabanas').value || 0),
-        almohadas: Number(q('#hkCamaAlmohadas').value || 0),
-        fundas: Number(q('#hkCamaFundas').value || 0),
-        protector_almohadas: Number(q('#hkCamaProtAlm').value || 0),
-        duvet: Number(q('#hkCamaDuvet').value || 0),
-        cubre_duvet: Number(q('#hkCamaCubre').value || 0),
-        color_cubre_duvet: q('#hkCamaColor').value
-      },
-      closet: {
-        cobertor: Number(q('#hkClosetCobertor').value || 0),
-        almohada_matrimonial: Number(q('#hkClosetAlm').value || 0),
-        funda_matrimonial: Number(q('#hkClosetFunda').value || 0),
-        protector_matrimonial: Number(q('#hkClosetProt').value || 0),
-        bolsa_tela: Number(q('#hkClosetBolsa').value || 0)
-      },
-      bano: {
-        categoria: q('#hkCategoria').value,
-        toalla_bano: Number(q('#hkBanioBano').value || 0),
-        toalla_mano: Number(q('#hkBanioMano').value || 0),
-        toalla_facial: Number(q('#hkBanioFacial').value || 0),
-        tapete: Number(q('#hkBanioTapete').value || 0),
-        toalla_verde: Number(q('#hkBanioVerde').value || 0),
-        color: q('#hkBanioColor').value
-      },
-      notas: q('#hkNotas').value.trim()
-    };
-
-    // Resumen corto para historial
-    data.resumen = `Sillas: ${data.sillas} · Cama(${data.cama.tipo}) almoh:${data.cama.almohadas} · Baño(${data.bano.categoria}) baño:${data.bano.toalla_bano}, mano:${data.bano.toalla_mano}, tapete:${data.bano.tapete}, verdes:${data.bano.toalla_verde}`;
-
-    const list = load(currentRoom);
-    list.push(data);
-    save(currentRoom, list);
-
-    renderHistorial(currentRoom);
-    closeModal();
-  }
-
-  // Events
-  document.addEventListener('click', (e)=>{
-    if(e.target.id === 'hkCancelar'){ closeModal(); }
-    if(e.target.id === 'hkGuardar'){ guardar(); }
-    if(e.target.id === 'hkMinus'){ const v = q('#hkSillas'); v.value = Math.max(0, (Number(v.value)||0) - 1); }
-    if(e.target.id === 'hkPlus'){ const v = q('#hkSillas'); v.value = (Number(v.value)||0) + 1; }
-    if(e.target.id === 'hkHistToggle'){
-      const on = q('#hkHistToggle').checked;
-      q('#hkInvHist').style.display = on ? 'none' : 'block';
-    }
-    // Close when clicking outside
-    if(e.target.id === 'hkInvOverlay'){ closeModal(); }
-  });
-
-  document.addEventListener('change', (e)=>{
-    if(e.target && e.target.id === 'hkTipoCama'){ setCamaMultiplicador(); }
-    if(e.target && e.target.id === 'hkCategoria'){ applyCategoriaDefaults(); }
-  });
-
-  document.addEventListener('DOMContentLoaded', ()=>{
-    attachHandlers();
-    // Marcar habitaciones con registros ya existentes
-    qa('.habitacion-btn').forEach(b=>{
-      const num = b.getAttribute('data-num') || b.textContent.trim();
-      if((load(num) || []).length > 0) b.classList.add('inventario-ok');
-    });
-  });
-})();
-</script>
-
-
-<!-- === HK · HISTORIAL (Listado + Exportaciones) === -->
-<style>
-  .hk-historial-wrap{margin:16px 0; padding:12px; border:1px solid rgba(0,0,0,.1); border-radius:12px; background:rgba(0,0,0,.02);}
-  .hk-hist-toolbar{display:flex; gap:.5rem; flex-wrap:wrap; align-items:center; margin-bottom:.75rem;}
-  .hk-hist-toolbar .hk-btn{padding:.5rem .75rem; border-radius:10px; border:1px solid rgba(0,0,0,.2); cursor:pointer; background:#fff;}
-  .hk-hist-toolbar .hk-btn.primary{background:#222; color:#fff;}
-  .hk-hist-table{width:100%; border-collapse:collapse; font-size:.93rem; background:#fff;}
-  .hk-hist-table th, .hk-hist-table td{border:1px solid rgba(0,0,0,.12); padding:.4rem .5rem; text-align:left; vertical-align:top;}
-  .hk-hist-table th{background:rgba(0,0,0,.05);}
-  .hk-hist-badge{font-weight:600; opacity:.8; margin-bottom:.5rem;}
-  .hk-hidden{display:none;}
-  @media print {
-    .no-print{display:none !important;}
-    .hk-historial-wrap{border:none; background:#fff;}
-  }
-</style>
-
-<section id="hkHistorialSection" class="hk-historial-wrap hk-hidden">
-  <div class="hk-hist-badge" id="hkHistUserBadge">—</div>
-  <div class="hk-hist-toolbar no-print">
-    <button class="hk-btn primary" id="hkHistRefresh">Refrescar</button>
-    <button class="hk-btn" id="hkExportCSV">Exportar Excel (CSV)</button>
-    <button class="hk-btn" id="hkExportPDF">Exportar PDF</button>
-    <span style="margin-left:auto"></span>
-    <label>Filtrar por habitación:</label>
-    <input type="text" id="hkFilterRoom" placeholder="ej. 1507" style="padding:.35rem .5rem; border-radius:8px; border:1px solid rgba(0,0,0,.2);">
-  </div>
-  <div style="overflow:auto;">
-    <table class="hk-hist-table" id="hkHistTable">
-      <thead>
-        <tr>
-          <th>Fecha</th>
-          <th>Usuario</th>
-          <th>Habitación</th>
-          <th>Resumen</th>
-          <th>Detalles</th>
-        </tr>
-      </thead>
-      <tbody id="hkHistTBody">
-      </tbody>
-    </table>
-  </div>
-</section>
-
-<script>
-(function(){
-  const SKEY = 'hk_session';
-  const ALLOWED = new Set([
-    "3068694","3071925","3075393","3077512","3072167","3062148","3067888"
-  ]);
-
-  // Detect existing helpers (from previous scripts)
-  const q = sel => document.querySelector(sel);
-  const qa = sel => Array.from(document.querySelectorAll(sel));
-
-  // Read session (with TTL if defined)
-  function safeGetSession(){
-    try{
-      if(typeof getSession === 'function'){ return getSession(); }
-      const raw = localStorage.getItem(SKEY);
-      return raw ? JSON.parse(raw) : null;
-    }catch(e){ return null; }
-  }
-
-  function canSeeHistorial(){
-    const ses = safeGetSession();
-    return !!(ses && ALLOWED.has(String(ses.matricula)));
-  }
-
-  // Mount/Toggle UI based on access
-  function renderHistorialAccess(){
-    const sec = q('#hkHistorialSection');
-    const badge = q('#hkHistUserBadge');
-    const ses = safeGetSession();
-    if(!sec) return;
-    if(canSeeHistorial()){
-      sec.classList.remove('hk-hidden');
-      if(ses){
-        const dt = new Date();
-        const fecha = dt.toLocaleDateString(undefined, {weekday:'long', year:'numeric', month:'long', day:'numeric'});
-        badge.textContent = `Hola ${ses.nombre}, aquí está tu historial. (${fecha})`;
-      }
-      loadAndRenderHistorial();
-    }else{
-      sec.classList.add('hk-hidden');
-    }
-  }
-
-  // Load all localStorage entries inv_* and render into table
-  function loadAndRenderHistorial(){
-    const tbody = q('#hkHistTBody');
-    if(!tbody) return;
-    tbody.innerHTML = '';
-    const filt = (q('#hkFilterRoom')?.value || '').trim();
-    const rows = [];
-
-    for(let i=0;i<localStorage.length;i++){
-      const k = localStorage.key(i);
-      if(!/^inv_/.test(k)) continue;
-      const room = k.replace(/^inv_/, '');
-      if(filt && !room.includes(filt)) continue;
-      try{
-        const list = JSON.parse(localStorage.getItem(k) || '[]');
-        list.forEach(item=>{
-          rows.push({
-            fecha: item.fecha || '',
-            usuario: item.usuario || '',
-            room: item.room || room,
-            resumen: item.resumen || '',
-            detalles: JSON.stringify(item)
-          });
-        });
-      }catch(e){}
-    }
-
-    rows.sort((a,b)=> new Date(a.fecha) - new Date(b.fecha)); // cronológico asc
-    rows.forEach(r=>{
-      const tr = document.createElement('tr');
-      const tdF = document.createElement('td'); tdF.textContent = r.fecha;
-      const tdU = document.createElement('td'); tdU.textContent = r.usuario;
-      const tdR = document.createElement('td'); tdR.textContent = r.room;
-      const tdS = document.createElement('td'); tdS.textContent = r.resumen;
-      const tdD = document.createElement('td'); tdD.textContent = r.detalles;
-      tr.appendChild(tdF); tr.appendChild(tdU); tr.appendChild(tdR); tr.appendChild(tdS); tr.appendChild(tdD);
-      tbody.appendChild(tr);
-    });
-  }
-
-  // Export CSV (Excel abre CSV sin problema)
-  function exportCSV(){
-    const tbl = q('#hkHistTable');
-    let csv = '';
-    const rows = tbl.querySelectorAll('tr');
-    rows.forEach(row=>{
-      const cols = row.querySelectorAll('th,td');
-      const line = Array.from(cols).map(c => {
-        const t = (c.textContent || '').replace(/"/g,'""');
-        return `"${t}"`;
-      }).join(',');
-      csv += line + '\n';
-    });
-    const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'historial_inventario.csv';
-    document.body.appendChild(a); a.click(); document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  }
-
-  // Export PDF -> usamos window.print() con estilos de impresión
-  function exportPDF(){
-    window.print();
-  }
-
-  // Events
-  document.addEventListener('click', (e)=>{
-    if(e.target && e.target.id === 'hkHistRefresh'){ renderHistorialAccess(); }
-    if(e.target && e.target.id === 'hkExportCSV'){ exportCSV(); }
-    if(e.target && e.target.id === 'hkExportPDF'){ exportPDF(); }
-  });
-  document.addEventListener('input', (e)=>{
-    if(e.target && e.target.id === 'hkFilterRoom'){ loadAndRenderHistorial(); }
-  });
-
-  // Init on DOM ready and when session changes (best effort)
-  document.addEventListener('DOMContentLoaded', ()=>{
-    renderHistorialAccess();
-  });
-  // If your renderSessionState exists, hook it
-  if(typeof renderSessionState === 'function'){
-    const _orig = renderSessionState;
-    window.renderSessionState = function(){
-      _orig();
-      renderHistorialAccess();
-    };
-  }
-})();
-</script>
-
 </body>
 </html>
