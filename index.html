@@ -1642,7 +1642,7 @@ body.hk-modal-open{ overflow: hidden; }
 
   <script>
 
-async function mostrarInfo(num) {
+async async function mostrarInfo(num) {
   const panel = document.getElementById("panelInferior");
   const mensaje = document.getElementById("mensajeSeleccion");
   if (mensaje) mensaje.style.display = "none";
@@ -1683,25 +1683,35 @@ panel.innerHTML = `
   </div>
 `;
     
+    
+    // --- Video Handicap (autoplay silencioso, solo handicap) ---
+    try{
+      const esHandicap = !!(habitacion && (
+        habitacion.discapacidad === true ||
+        habitacion.discapacidad === 'Adaptada' ||
+        habitacion.discapacidad === 'Sí' ||
+        habitacion.handicap === true ||
+        (habitacion.categoria && /handicap|adaptad/i.test(habitacion.categoria)) ||
+        (Array.isArray(habitacion.tags) && habitacion.tags.some(t=>/handicap/i.test(t)))
+      ));
+      if(esHandicap){
+        const v = (habitacion.video || habitacion.video_url) ||
+                  ((window.VIDEOS_HAB && window.VIDEOS_HAB[num]) || '') ||
+                  (window.HANDICAP_VIDEO_URL || '');
+        if(v){ setVideoHabitacion(v); }
+      }else{
+        const box = document.getElementById('video-habitacion');
+        if(box) box.hidden = true;
+      }
+    }catch(_e){}
+    // --- fin video handicap ---
     // --- Video handicap (arriba-derecha) ---
     try {
   if (habitacion && (habitacion.discapacidad === true)) {
-    (function(){
-  try{
-    const esHandicap = !!(habitacion && (
-      habitacion.discapacidad === true ||
-      habitacion.discapacidad === 'Adaptada' ||
-      habitacion.discapacidad === 'Sí' ||
-      habitacion.handicap === true ||
-      (habitacion.categoria && /handicap|adaptad/i.test(habitacion.categoria)) ||
-      (Array.isArray(habitacion.tags) && habitacion.tags.some(t=>/handicap/i.test(t)))
-    ));
-    let v = (habitacion && (habitacion.video || habitacion.video_url)) ||
-            ((window.VIDEOS_HAB && window.VIDEOS_HAB[num]) || '') ||
-            (window.HANDICAP_VIDEO_URL || '');
-    if(esHandicap && v){ setVideoHabitacion(v); }
-  }catch(e){}
-})();
+    const v = (habitacion && (habitacion.video || habitacion.video_url)) 
+      ? (habitacion.video || habitacion.video_url)
+      : ((window.VIDEOS_HAB && window.VIDEOS_HAB[num]) || window.HANDICAP_VIDEO_URL || "");
+    setVideoHabitacion(v);
     // Fallback obligado para Handicap
     try{
       if(habitacion && (habitacion.discapacidad || habitacion.handicap)){
