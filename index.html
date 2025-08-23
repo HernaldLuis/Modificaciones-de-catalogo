@@ -897,11 +897,7 @@ body.hk-modal-open{ overflow: hidden; }
 
 
 /* === HK: Consolidado Inventario (Admin) === */
-#hk-admin-btn{
-  display:none; position:absolute; top:8px; left:12px; z-index:10020;
-  padding:6px 12px; border:none; border-radius:999px; font-weight:800; cursor:pointer;
-  background:#111827; color:#fff; box-shadow:0 8px 18px rgba(0,0,0,.25);
-}
+#hk-admin-btn{ display:none; position:absolute; top:8px; left:12px; z-index:10020; padding:6px 12px; border:none; border-radius:999px; font-weight:800; cursor:pointer; background:#111827; color:#fff; box-shadow:0 8px 18px rgba(0,0,0,.25);}
 #hk-admin-btn.show{ display:inline-flex; align-items:center; gap:6px; }
 #hkConsolidado{
   position:fixed; inset:0; display:none; align-items:center; justify-content:center;
@@ -924,7 +920,17 @@ body.hk-modal-open{ overflow: hidden; }
 .hk-table thead th{ position:sticky; top:0; background:#f3f4f6; z-index:1; }
 .hk-table th, .hk-table td{ border-bottom:1px solid #eee; padding:6px 8px; text-align:left; }
 .hk-chip{ display:inline-flex; align-items:center; padding:2px 6px; border-radius:999px; background:#f3f4f6; font-size:12px; }
-@media (max-width: 720px){ #hk-admin-btn{ left:auto; right:12px; } }
+@media (max-width: 720px){ #hk-admin-btn{ display:none; position:absolute; top:8px; left:12px; z-index:10020; padding:6px 12px; border:none; border-radius:999px; font-weight:800; cursor:pointer; background:#111827; color:#fff; box-shadow:0 8px 18px rgba(0,0,0,.25);} }
+
+
+/* Subtabla: Última vez por habitación + filtros */
+.hk-subbar{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin:6px 0 10px; }
+.hk-subbar input[type="text"], .hk-subbar input[type="number"]{
+  padding:6px 8px; border:1px solid #ddd; border-radius:8px; font-size:12px;
+}
+.hk-subtitle{ font-size:14px; font-weight:800; margin:10px 0 6px; color:#111827; }
+.hk-table.small td, .hk-table.small th{ font-size:12px; padding:4px 6px; }
+.hk-badge-warn{ display:inline-block; padding:2px 6px; border-radius:999px; background:#fef3c7; color:#92400e; font-size:11px; }
 
 </style>
 
@@ -2526,7 +2532,8 @@ document.addEventListener('DOMContentLoaded', () => {
             <input id="invp-hide-hist" type="checkbox"> Ocultar historial
           </label>
         </div>
-        <div id="invp-histbox" class="invp-hist">No hay historial aún.</div>
+        <div id="invp-last" class="invp-hist" style="background:#eef6ff;border-color:#bfdbfe;">Último inventario: (sin registro)</div>
+        <div id="invp-histbox"  class="invp-hist">No hay historial aún.</div>
 
         <div class="invp-section">Cantidad de sillas</div>
         <div class="invp-row">
@@ -2626,7 +2633,18 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         };
       }
-    })(habitacionNum);
+        })(habitacionNum);
+    // Mostrar último inventario (si hay)
+    try{
+      const lastRaw = localStorage.getItem('HK_INV_last_'+habitacionNum);
+      const lastBox = document.getElementById('invp-last');
+      if(lastRaw && lastBox){
+        const r = JSON.parse(lastRaw);
+        const [f,t] = (function(d){ d=new Date(d); const pad=n=>String(n).padStart(2,'0'); return [`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`, `${pad(d.getHours())}:${pad(d.getMinutes())}`]; })(r.ts);
+        lastBox.textContent = `Último inventario: ${f} ${t} — ${(r.user&&r.user.name)||'usuario'} (hab ${r.room})`;
+      }
+    }catch(_){}
+
 
     
     // asegurar que el overlay esté al final del body (top del stack)
@@ -2684,6 +2702,26 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
     </div>
     <div id="hkConMeta" style="margin-bottom:6px; color:#374151; font-size:12px;"></div>
+    <div class="hk-subtitle">Filtros rápidos</div>
+    <div class="hk-subbar">
+      <label style="font-size:12px;color:#374151;">Habitación</label>
+      <input id="fltRoom" type="text" placeholder="Ej. 1501">
+      <label style="font-size:12px;color:#374151;">Sin inventario hace ≥ (días)</label>
+      <input id="fltDias" type="number" min="0" placeholder="Ej. 7" style="width:90px;">
+      <button class="hk-btn" id="fltAplicar">Aplicar</button>
+      <button class="hk-btn" id="fltLimpiar">Limpiar</button>
+    </div>
+
+    <div class="hk-subtitle">Última vez por habitación</div>
+    <div style="overflow:auto;">
+      <table class="hk-table small" id="hkConUltTabla">
+        <thead>
+          <tr><th>Habitación</th><th>Fecha</th><th>Hora</th><th>Usuario</th><th>Hace</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
     <div style="overflow:auto;">
       <table class="hk-table" id="hkConTabla">
         <thead>
@@ -2707,6 +2745,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const STORAGE_KEY = 'HK_INV_EVENTS';
   const SESSION_KEY = 'hk_inv_session';
   const ADMINS = new Set(['3072167','3067888']); // Luis, Manuel
+  function isAdmin(){ try{ const u=getUser(); return hasSession() && ADMINS.has(u.id); }catch(e){ return false; } }
   // util
   function now(){ return new Date(); }
   function pad(n){ return String(n).padStart(2,'0'); }
@@ -2813,9 +2852,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function toggleAdminBtn(){
     const btn = document.getElementById('hk-admin-btn');
     if(!btn) return;
-    const u = getUser();
-    const show = hasSession() && ADMINS.has(u.id);
-    btn.classList.toggle('show', !!show);
+    btn.classList.toggle('show', isAdmin());
   }
   window.addEventListener('storage', toggleAdminBtn);
   document.addEventListener('DOMContentLoaded', toggleAdminBtn);
@@ -2849,7 +2886,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
   function openConsolidado(){
+    if(!isAdmin()) { try{ alert('Acceso restringido'); }catch(e){} return; }
     renderConsolidado();
+    const fr = document.getElementById('fltRoom'), fd = document.getElementById('fltDias');
+    renderUltimas(fr?.value.trim()||'', (fd && fd.value) ? parseInt(fd.value,10) : undefined);
+
     const ov = document.getElementById('hkConsolidado');
     if(!ov) return;
     ov.classList.add('activo'); ov.setAttribute('aria-hidden','false');
@@ -2900,9 +2941,10 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   // Bind UI
   document.addEventListener('DOMContentLoaded', function(){
+    try{ if(!isAdmin()){ const ov=document.getElementById('hkConsolidado'); if(ov){ ov.classList.remove('activo'); ov.setAttribute('aria-hidden','true'); } } }catch(e){}
     const btn = document.getElementById('hk-admin-btn');
     if(btn){
-      btn.addEventListener('click', openConsolidado);
+      btn.addEventListener('click', function(){ if(isAdmin()) openConsolidado(); else try{ alert('Acceso restringido'); }catch(e){} });
     }
     const c1 = document.getElementById('hkConClose');
     const c2 = document.getElementById('hkConsolidado');
@@ -2912,7 +2954,50 @@ document.addEventListener('DOMContentLoaded', () => {
     const pr = document.getElementById('hkPrint');
     if(ex) ex.addEventListener('click', exportCSV);
     if(pr) pr.addEventListener('click', doPrint);
+
+    // Filtros
+    const fr = document.getElementById('fltRoom');
+    const fd = document.getElementById('fltDias');
+    const fa = document.getElementById('fltAplicar');
+    const fl = document.getElementById('fltLimpiar');
+    function applyFilters(){
+      const room = fr?.value.trim()||'';
+      const days = fd && fd.value ? parseInt(fd.value,10) : undefined;
+      renderUltimas(room, days);
+    }
+    if(fa) fa.addEventListener('click', applyFilters);
+    if(fl) fl.addEventListener('click', function(){ if(fr) fr.value=''; if(fd) fd.value=''; renderUltimas('', undefined); });
+
   });
+
+
+  function daysAgo(ts){
+    const ms = Date.now() - ts;
+    return Math.floor(ms / (1000*60*60*24));
+  }
+  function renderUltimas(fRoom, minDays){
+    const data = readEvents();
+    const byRoom = {};
+    data.forEach(r=>{
+      const key = String(r.room||'');
+      if(!key) return;
+      if(!byRoom[key] || r.ts > byRoom[key].ts){ byRoom[key] = r; }
+    });
+    const rows = Object.entries(byRoom).sort((a,b)=>a[0].localeCompare(b[0]));
+    const tb = document.querySelector('#hkConUltTabla tbody');
+    if(!tb) return;
+    tb.innerHTML = '';
+    rows.forEach(([room, r])=>{
+      const [f,t] = fmtDateTime(r.ts);
+      const d = daysAgo(r.ts);
+      if(fRoom && !room.includes(fRoom)) return;
+      if(typeof minDays === 'number' && minDays>0 && d < minDays) return;
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${room}</td><td>${f}</td><td>${t}</td><td>${r.user?.name||''}</td>
+                      <td>${d} día(s) ${d>=7?'<span class="hk-badge-warn">revisar</span>':''}</td>`;
+      tb.appendChild(tr);
+    });
+  }
 
 })(); // fin HK persistencia
 </script>
