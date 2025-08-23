@@ -848,6 +848,12 @@ border-bottom: none;
 .modal-contenido h2{ margin-top:0; }
 /* === FIN estilos HK === */
 
+
+/* --- Prioridad máxima para Inventario --- */
+#inventarioOverlay{ z-index: 10100 !important; }
+body.hk-modal-open{ overflow: hidden; }
+/* ---------------------------------------- */
+
 </style>
 
 <style>
@@ -2477,6 +2483,18 @@ document.addEventListener('DOMContentLoaded', () => {
         };
       }
     })(habitacionNum);
+
+    
+    // asegurar que el overlay esté al final del body (top del stack)
+    try{ document.body.appendChild(ov); }catch(e){}
+    // bloquear cierre por clic fuera (mantener modal hasta Guardar/Cancelar)
+    try{
+      ov.addEventListener('click', function(e){
+        if(e.target === ov){ e.stopPropagation(); e.stopImmediatePropagation(); /* opcional: animación */ }
+      }, {capture:true});
+    }catch(e){}
+    // bloquear scroll de fondo mientras esté abierto
+    try{ document.body.classList.add('hk-modal-open'); }catch(e){}
 
     ov.classList.add('activo');
   };
