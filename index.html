@@ -896,14 +896,30 @@ body.hk-modal-open{ overflow: hidden; }
 }
 
 
-/* === Concentrado (solo Admin) === */
-#concentradoOverlay .modal-contenido{ max-width: 96vw; max-height: 92vh; }
-.table-wrap{ overflow:auto; max-height:70vh; }
-.conc-table{ width:100%; border-collapse:collapse; }
-.conc-table th, .conc-table td{ border:1px solid #e5e7eb; padding:6px; text-align:left; font-size:12px; }
-.conc-table thead th{ background:#f3f4f6; position:sticky; top:0; }
-.conc-actions{ display:flex; gap:.5rem; justify-content:flex-end; margin-top:.75rem; }
-#btn-concentrado{ position:fixed; top:10px; right:130px; z-index:10050; }
+/* ===== Concentrado (scoped) ===== */
+#concentradoOverlay{position:fixed;inset:0;background:rgba(17,24,39,.45);backdrop-filter:blur(3px);z-index:10040;display:none;align-items:center;justify-content:center}
+#concentradoOverlay.activo{display:flex}
+#concentradoOverlay .modal-contenido{width:min(1200px,96vw);max-height:90vh;background:#fff;border-radius:18px;box-shadow:0 20px 45px rgba(0,0,0,.3);overflow:hidden;display:flex;flex-direction:column}
+#concentradoOverlay h2{margin:0;padding:14px 18px;font-size:18px;text-align:center;background:linear-gradient(135deg,#0ea5e9,#6366f1);color:#fff;letter-spacing:.3px}
+#concentradoOverlay .conc-toolbar{display:flex;gap:10px;align-items:center;justify-content:space-between;padding:10px 14px;background:#fafafa;border-bottom:1px solid #e5e7eb}
+#concentradoOverlay .conc-toolbar .left{display:flex;gap:10px;align-items:center}
+#concentradoOverlay .conc-toolbar input[type="search"]{padding:8px 10px;border:1px solid #d1d5db;border-radius:12px;min-width:260px}
+#concentradoOverlay .conc-stats{font-size:12px;color:#374151}
+#concentradoOverlay .table-wrap{padding:0 14px 12px 14px;overflow:auto;max-height:100%}
+#concentradoOverlay .conc-table{width:100%;border-collapse:separate;border-spacing:0}
+#concentradoOverlay .conc-table thead th{position:sticky;top:0;z-index:1;background:#f8fafc;border-bottom:1px solid #e5e7eb;cursor:pointer;user-select:none}
+#concentradoOverlay .conc-table th,#concentradoOverlay .conc-table td{padding:8px 10px;border-right:1px solid #eef2f7;border-bottom:1px solid #eef2f7;font-size:12px;white-space:nowrap}
+#concentradoOverlay .conc-table tr:nth-child(even) td{background:#fcfdff}
+#concentradoOverlay .conc-table tr:hover td{background:#f1f5ff}
+#concentradoOverlay .conc-actions{padding:10px 14px;border-top:1px solid #e5e7eb;background:#fafafa;display:flex;gap:.5rem;justify-content:flex-end}
+#concentradoOverlay .btn{border:none;padding:8px 12px;border-radius:10px;cursor:pointer}
+#concentradoOverlay .btn.ok{background:#10b981;color:#fff}
+#concentradoOverlay .btn.primary{background:#3b82f6;color:#fff}
+#concentradoOverlay .btn.danger{background:#ef4444;color:#fff}
+#concentradoOverlay .spinner{width:16px;height:16px;border:2px solid #fff;border-top-color:transparent;border-radius:50%;display:inline-block;animation:concspin 0.8s linear infinite;margin-left:6px}
+@keyframes concspin{to{transform:rotate(360deg)}}
+#hk-badge{position:fixed;top:10px;right:10px;padding:6px 10px;border-radius:999px;font-size:12px;font-weight:600;z-index:10060;background:#ef4444;color:#fff;box-shadow:0 4px 10px rgba(0,0,0,.15)}
+#hk-badge.ok{background:#10b981}
 
 </style>
 
@@ -960,6 +976,7 @@ body.hk-modal-open{ overflow: hidden; }
 
   <button id="btn-logout" class="btn-logout" onclick="hkLogout()" style="display:none">Cerrar sesión</button>
 <a id="btn-concentrado" class="btn-reporte" style="display:none" href="javascript:void(0)">📊 Concentrado</a>
+<span id="hk-badge" style="display:none"></span>
 
 
   <h1 class="titulo-catalogo">
@@ -2652,64 +2669,45 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 <script>
-(function(){
-  if (window.__hk_roles_wired) return; window.__hk_roles_wired = true;
+(function(){ if (window.__hk_concentrado_done) return; window.__hk_concentrado_done = true;
 
-  const API_URL   = 'https://script.google.com/macros/s/AKfycbz3bAcBcbSyF3VlIjrXNzoqhR7DMOEAdYU3GFvTAP7MsU18VbQJVzVQbv3VhfLwP2n1nA/exec';
-  const API_TOKEN = 'PARADISUS_INV_2025_xX7$K9';
+  const API_URL   = "https://script.google.com/macros/s/AKfycbz3bAcBcbSyF3VlIjrXNzoqhR7DMOEAdYU3GFvTAP7MsU18VbQJVzVQbv3VhfLwP2n1nA/exec";
+  const API_TOKEN = "PARADISUS_INV_2025_xX7$K9";
 
-  function simpleHeaders(){ return {'Content-Type':'text/plain'}; }
+  const ADMIN_IDS = { "3072167":"Luis", "3067888":"Manuel" };
+  const SUP_IDS   = { "3077512":"Ximena", "3062148":"Silvia", "3071925":"Itzel", "3068694":"Dolores", "3075393":"Marisela" };
 
-  async function apiAppend(entry){
-    const res = await fetch(API_URL, {
-      method: 'POST', headers: simpleHeaders(),
-      body: JSON.stringify({action:'append', token: API_TOKEN, entry})
-    });
-    const data = await res.json();
-    if(!res.ok || !data || data.status!=='ok') throw new Error((data&&data.error)||'append failed');
-    return data;
-  }
+  function getRole(){ try{ const id=(sessionStorage.getItem('HK_MAT')||'').trim(); if(ADMIN_IDS[id]) return 'admin'; if(SUP_IDS[id]) return 'supervisor'; }catch(_){} return 'none'; }
+  function el(sel,root){ return (root||document).querySelector(sel); }
+  function els(sel,root){ return Array.from((root||document).querySelectorAll(sel)); }
+  function h(elm,ev,fn){ elm && elm.addEventListener(ev,fn); }
 
+  function hdr(){ return {'Content-Type':'text/plain'}; }
   async function apiList(){
-    const url = API_URL + '?action=list&token=' + encodeURIComponent(API_TOKEN);
-    const res = await fetch(url, {method:'GET'});
-    const data = await res.json();
-    if(!res.ok || !data || data.status!=='ok') throw new Error((data&&data.error)||'list failed');
-    return Array.isArray(data.rows) ? data.rows : [];
+    const r = await fetch(API_URL + '?action=list&token=' + encodeURIComponent(API_TOKEN));
+    const j = await r.json(); if(!r.ok || !j || j.status!=='ok') throw new Error((j&&j.error)||'list failed'); return j.rows||[];
+  }
+  async function apiAppend(entry){
+    const r = await fetch(API_URL, { method:'POST', headers: hdr(), body: JSON.stringify({action:'append', token: API_TOKEN, entry}) });
+    const j = await r.json(); if(!r.ok || !j || j.status!=='ok') throw new Error((j&&j.error)||'append failed'); return j;
   }
 
-  const QUEUE_KEY = 'HK_INV_QUEUE';
-  function qLoad(){ try{ return JSON.parse(localStorage.getItem(QUEUE_KEY)||'[]'); }catch(_){ return []; } }
-  function qSave(a){ try{ localStorage.setItem(QUEUE_KEY, JSON.stringify(a)); }catch(_){ } }
-  function qPush(x){ const a=qLoad(); a.push(x); qSave(a); }
-  async function flushQueue(){ const a=qLoad(); if(!a.length) return 0; let keep=[]; for(const it of a){ try{ await apiAppend(it); }catch(_){ keep.push(it); } } qSave(keep); return a.length - keep.length; }
+  const QK='HK_INV_QUEUE';
+  const qLoad=()=>{ try{return JSON.parse(localStorage.getItem(QK)||'[]');}catch(_){return[];} };
+  const qSave=a=>{ try{localStorage.setItem(QK,JSON.stringify(a));}catch(_){} };
+  const qPush=x=>{ const a=qLoad(); a.push(x); qSave(a); };
+  async function flushQueue(){ const a=qLoad(); if(!a.length) return 0; let keep=[]; for(const it of a){ try{ await apiAppend(it); }catch(_){ keep.push(it); } } qSave(keep); return a.length-keep.length; }
 
-  const ADMIN_IDS = { '3072167':'Luis', '3067888':'Manuel' };
-  const SUP_IDS   = { '3077512':'Ximena', '3062148':'Silvia', '3071925':'Itzel', '3068694':'Dolores', '3075393':'Marisela' };
-
-  function hkGetRole(){
-    const id = (sessionStorage.getItem('HK_MAT')||'').trim();
-    if(ADMIN_IDS[id]) return 'admin';
-    if(SUP_IDS[id])   return 'supervisor';
-    return 'none';
-  }
-
-  function updateRoleUI(){
-    const btnConc = document.getElementById('btn-concentrado');
-    if(btnConc) btnConc.style.display = (hkGetRole()==='admin' ? 'inline-flex' : 'none');
-    if(typeof window.updateSessionUI === 'function') try{ window.updateSessionUI(); }catch(_){}
-  }
-
-  function collectInventory(hnum){
-    function val(id){ const el = document.getElementById(id); return el ? (el.type==='checkbox'? el.checked : el.value) : ''; }
-    const entry = {
+  function collect(hnum){
+    function val(id){ const e=el('#'+id); return e?(e.type==='checkbox'? e.checked : e.value):''; }
+    return {
       fecha: new Date().toISOString(),
       habitacion: String(hnum||''),
-      usuario: sessionStorage.getItem('HK_NAME') || '',
-      matricula: sessionStorage.getItem('HK_MAT') || '',
+      usuario: sessionStorage.getItem('HK_NAME')||'',
+      matricula: sessionStorage.getItem('HK_MAT')||'',
       sillas: val('sillas-cant'),
       cama: {
-        tipo: '',
+        tipo:'',
         protector: val('cama-protector'),
         sabana: val('cama-sabanas'),
         almohadas: val('cama-almohadas'),
@@ -2721,126 +2719,165 @@ document.addEventListener('DOMContentLoaded', () => {
       },
       closet: { toallasPlaya:'', bolsas:'', ganchos:'', albornoz:'' },
       bano: {
-        categoria: val('ban-categoria'),
-        bano: val('ban-bano'),
-        mano: val('ban-mano'),
-        facial: val('ban-facial'),
-        tapete: val('ban-tapete'),
-        verdes: val('ban-verdes'),
-        color: val('ban-color')
+        categoria: val('ban-categoria'), bano: val('ban-bano'), mano: val('ban-mano'),
+        facial: val('ban-facial'), tapete: val('ban-tapete'), verdes: val('ban-verdes'), color: val('ban-color')
       },
       notas: val('invp-notas')
     };
-    return entry;
   }
 
+  function ensureOverlay(){
+    let ov = el('#concentradoOverlay');
+    if(!ov){
+      ov = document.createElement('div');
+      ov.id='concentradoOverlay';
+      ov.innerHTML = '\
+        <div class="modal-contenido" role="dialog" aria-modal="true">\
+          <h2>Concentrado de Inventarios</h2>\
+          <div class="conc-toolbar">\
+            <div class="left">\
+              <input id="conc-search" type="search" placeholder="Buscar habitacion/usuario/nota..." />\
+              <div class="conc-stats" id="conc-stats"></div>\
+            </div>\
+            <div class="right">\
+              <button id="exp-excel" class="btn primary">Exportar Excel</button>\
+              <button id="exp-pdf" class="btn primary">Exportar PDF</button>\
+              <button id="conc-cerrar" class="btn danger">Cerrar</button>\
+            </div>\
+          </div>\
+          <div class="table-wrap"><div id="conc-body">Cargando...</div></div>\
+          <div class="conc-actions" style="display:none"></div>\
+        </div>';
+      document.body.appendChild(ov);
+    }
+    return ov;
+  }
+
+  function renderTable(rows){
+    if(!rows || !rows.length) return '<p>No hay registros todavia.</p>';
+    const prefer=['fecha','habitacion','usuario','matricula','estado','anomalias','created_at','updated_at','fecha_servidor','fecha_dia'];
+    const keys=Array.from(rows.reduce((s,o)=> (Object.keys(o).forEach(k=>s.add(k)),s), new Set()));
+    const headers=prefer.filter(k=>keys.includes(k)).concat(keys.filter(k=>!prefer.includes(k)).sort());
+    let th = headers.map(h=>'<th data-key="'+h+'">'+h+'</th>').join('');
+    let body = rows.map(r=>'<tr>'+headers.map(h=>'<td>'+(r[h]??'')+'</td>').join('')+'</tr>').join('');
+    return '<table class="conc-table"><thead><tr>'+th+'</tr></thead><tbody>'+body+'</tbody></table>';
+  }
+
+  function sortByKey(rows, key, dir){
+    const m = dir==='desc'?-1:1;
+    rows.sort((a,b)=>{ const av=(a[key]??'').toString(); const bv=(b[key]??'').toString(); return av.localeCompare(bv, undefined, {numeric:true})*m; });
+  }
+
+  function exportCSV(){
+    const ov=el('#concentradoOverlay'); const table=el('.conc-table', ov); let csv='';
+    if(table){
+      const rows=els('tr', table);
+      const cell=td=> (td.innerText||'').replace(/\r?\n/g,' ').trim();
+      csv = rows.map(tr => els(':scope > *', tr).map(td => JSON.stringify(cell(td))).join(',')).join('\n');
+    } else if (ov && ov.__data){
+      const rows = ov.__data||[]; if(!rows.length) return alert('No hay datos.');
+      const prefer=['fecha','habitacion','usuario','matricula','estado','anomalias','created_at','updated_at','fecha_servidor','fecha_dia'];
+      const set=new Set(); rows.forEach(r=>Object.keys(r).forEach(k=>set.add(k)));
+      const headers=prefer.filter(k=>set.has(k)).concat(Array.from(set).filter(k=>!prefer.includes(k)).sort());
+      csv = headers.join(',')+'\n'+rows.map(r=>headers.map(h=>JSON.stringify(r[h]??'')).join(',')).join('\n');
+    } else return alert('No hay datos.');
+    const blob=new Blob(['\ufeff', csv],{type:'text/csv;charset=utf-8;'}); const url=URL.createObjectURL(blob);
+    const a=document.createElement('a'); a.href=url; a.download='concentrado_inventario.csv'; a.click(); setTimeout(()=>URL.revokeObjectURL(url),1000);
+  }
+
+  function exportPDF(){
+    const ov=el('#concentradoOverlay'); const wrap=el('.table-wrap', ov); const html=wrap?wrap.innerHTML:'<p>Sin datos</p>';
+    const w=window.open('', '_blank'); if(!w) return alert('Permite ventanas emergentes para exportar a PDF.');
+    const css='<style>body{font-family:Arial,sans-serif;padding:16px}h1{font-size:18px;margin:0 0 10px}table{width:100%;border-collapse:collapse}th,td{border:1px solid #ddd;padding:6px;font-size:12px;white-space:nowrap}th{background:#f3f4f6;position:sticky;top:0}tr:nth-child(even) td{background:#fcfdff}</style>';
+    w.document.write('<html><head><meta charset="utf-8"><title>Concentrado</title>'+css+'</head><body><h1>Concentrado de Inventarios</h1>'+html+'</body></html>');
+    w.document.close(); w.focus(); w.print();
+  }
+
+  async function openConcentrado(){
+    if(getRole()!=='admin') return alert('Solo administradores pueden ver el concentrado.');
+    const ov=ensureOverlay(); el('#conc-body', ov).innerHTML='<div style="padding:18px">Cargando<span class="spinner"></span></div>';
+    ov.classList.add('activo'); ov.setAttribute('aria-hidden','false');
+    try{
+      const data = await apiList();
+      ov.__data = data.slice();
+      el('#conc-body', ov).innerHTML = renderTable(ov.__data);
+      refreshStats(ov); wireSort(ov);
+    }catch(e){
+      console.error(e);
+      let data=[]; try{ data = JSON.parse(localStorage.getItem('HK_INV_DATA')||'[]'); }catch(_){}
+      ov.__data = data;
+      el('#conc-body', ov).innerHTML = renderTable(ov.__data);
+      refreshStats(ov); wireSort(ov);
+    }
+  }
+
+  function refreshStats(ov){
+    const s = el('#conc-stats', ov);
+    const n = (ov.__data||[]).length;
+    const last = n? (ov.__data[ov.__data.length-1].fecha_servidor || ov.__data[ov.__data.length-1].created_at || '') : '';
+    s.textContent = n + ' registros' + (last ? (' • ultimo: ' + last) : '');
+  }
+
+  function wireSort(ov){
+    const table = el('.conc-table', ov); if(!table) return;
+    const headers = els('th', table);
+    headers.forEach(th => {
+      let dir = 'asc';
+      h(th,'click',()=>{ const key=th.getAttribute('data-key'); if(!key) return; sortByKey(ov.__data, key, dir); dir = dir==='asc'?'desc':'asc'; el('#conc-body', ov).innerHTML=renderTable(ov.__data); wireSort(ov); });
+    });
+  }
+
+  document.addEventListener('input', function(e){
+    if(e.target && e.target.id==='conc-search'){
+      const term = e.target.value.toLowerCase().trim();
+      const ov = el('#concentradoOverlay'); if(!ov || !ov.__data) return;
+      const base = ov.__data_all || (ov.__data_all = ov.__data.slice());
+      if(!term) ov.__data = base.slice();
+      else ov.__data = base.filter(r => JSON.stringify(r).toLowerCase().includes(term));
+      el('#conc-body', ov).innerHTML = renderTable(ov.__data);
+      wireSort(ov); refreshStats(ov);
+    }
+  });
+
+  document.addEventListener('click', function(e){
+    if(e.target && e.target.id==='btn-concentrado') openConcentrado();
+    if(e.target && e.target.id==='conc-cerrar'){ const ov=el('#concentradoOverlay'); if(ov){ ov.classList.remove('activo'); ov.setAttribute('aria-hidden','true'); } }
+    if(e.target && e.target.id==='exp-excel') exportCSV();
+    if(e.target && e.target.id==='exp-pdf') exportPDF();
+  });
+
   if (typeof window.abrirInventarioPrincipal === 'function'){
-    const _abrir = window.abrirInventarioPrincipal;
+    const _open = window.abrirInventarioPrincipal;
     window.abrirInventarioPrincipal = function(hnum){
-      _abrir(hnum);
+      _open(hnum);
       setTimeout(function(){
-        const saveBtn = document.getElementById('invp-guardar');
-        if(saveBtn && !saveBtn.__hkwired){
-          saveBtn.__hkwired = true;
-          saveBtn.addEventListener('click', async function(){
-            try{
-              const entry = collectInventory(hnum);
-              try{ await apiAppend(entry); }
-              catch(e){ qPush(entry); const arr = JSON.parse(localStorage.getItem('HK_INV_DATA')||'[]'); arr.push(entry); localStorage.setItem('HK_INV_DATA', JSON.stringify(arr)); }
-              try{ await flushQueue(); }catch(_){}
-            }catch(e){ console.error('No se pudo guardar el concentrado:', e); }
+        const save = document.getElementById('invp-guardar');
+        if(save && !save.__wired){
+          save.__wired = true;
+          save.addEventListener('click', async function(){
+            try{ const entry = collect(hnum); try{ await apiAppend(entry); }catch(_e){ qPush(entry); } try{ await flushQueue(); }catch(_e){} }catch(err){ console.error(err); }
           }, {capture:true});
         }
       }, 0);
     };
   }
 
-  function renderTable(rows){
-    if(!rows || !rows.length) return '<p>No hay registros todavía.</p>';
-    const prefer = ['fecha','habitacion','usuario','matricula','estado','anomalías','created_at','updated_at','fecha_servidor','fecha_dia'];
-    const set = new Set(); rows.forEach(r=> Object.keys(r).forEach(k=> set.add(k)));
-    const rest = Array.from(set).filter(k=> !prefer.includes(k)).sort();
-    const headers = prefer.filter(k=> set.has(k)).concat(rest);
-    function get(obj, k){ return (obj && obj[k]!=null)? obj[k] : ''; }
-    let html = '<div class="table-wrap"><table class="conc-table"><thead><tr>' + headers.map(h=>'<th>'+h+'</th>').join('') + '</tr></thead><tbody>';
-    html += rows.map(r => '<tr>' + headers.map(h=>'<td>'+String(get(r,h)).toString().replace(/</g,'&lt;')+'</td>').join('') + '</tr>').join('');
-    html += '</tbody></table></div>';
-    return html;
-  }
-
-  function exportCSV(rows){
-    if(!rows || !rows.length){ alert('No hay datos.'); return; }
-    const prefer = ['fecha','habitacion','usuario','matricula','estado','anomalías','created_at','updated_at','fecha_servidor','fecha_dia'];
-    const set = new Set(); rows.forEach(r=> Object.keys(r).forEach(k=> set.add(k)));
-    const rest = Array.from(set).filter(k=> !prefer.includes(k)).sort();
-    const headers = prefer.filter(k=> set.has(k)).concat(rest);
-    let csv = headers.join(',') + '\\n';
-    csv += rows.map(r => headers.map(h => JSON.stringify(r[h] ?? '')).join(',')).join('\\n');
-    const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a'); a.href = url; a.download = 'concentrado_inventario.csv'; a.click();
-    setTimeout(()=>URL.revokeObjectURL(url), 1000);
-  }
-
-  function exportPDF(innerHTML){
-    const w = window.open('', '_blank');
-    if(!w){ alert('Permite ventanas emergentes para exportar a PDF.'); return; }
-    w.document.write('<html><head><title>Concentrado Inventario</title><meta charset="utf-8"><style>body{font-family:Arial, sans-serif; padding:16px;} table{width:100%; border-collapse:collapse;} th,td{border:1px solid #ddd; padding:6px; font-size:12px;} th{background:#f3f4f6;}</style></head><body>'+innerHTML+'</body></html>');
-    w.document.close(); w.focus(); w.print();
-  }
-
-  async function openConcentrado(){
-    if(hkGetRole()!=='admin'){ alert('Solo administradores pueden ver el concentrado.'); return; }
-    let ov = document.getElementById('concentradoOverlay');
-    if(!ov){
-      ov = document.createElement('div');
-      ov.id = 'concentradoOverlay';
-      ov.className = 'modal-mejoras';
-      ov.innerHTML = '<div class="modal-contenido" role="dialog" aria-modal="true"><h2>Concentrado de Inventarios</h2><div id="conc-body"></div><div class="conc-actions"><button id="exp-excel" class="btn-ok">Exportar Excel</button><button id="exp-pdf" class="btn-reporte">Exportar PDF</button><button id="conc-cerrar" class="btn-cancel">Cerrar</button></div></div>';
-      document.body.appendChild(ov);
-    }
-    const body = ov.querySelector('#conc-body');
-    let data = [];
-    try{ data = await apiList(); }
-    catch(e){ console.error('API list falló, usando respaldo local.', e); try{ data = JSON.parse(localStorage.getItem('HK_INV_DATA')||'[]'); }catch(_){ data=[]; } }
-    body.innerHTML = renderTable(data);
-    ov.classList.add('activo'); ov.setAttribute('aria-hidden','false');
-    const close = ()=>{ ov.classList.remove('activo'); ov.setAttribute('aria-hidden','true'); };
-    ov.querySelector('#conc-cerrar').onclick = close;
-    ov.querySelector('#exp-excel').onclick = ()=> exportCSV(data);
-    ov.querySelector('#exp-pdf').onclick = ()=> exportPDF(body.innerHTML);
+  async function badgeCheck(){
+    const bd = document.getElementById('hk-badge'); if(!bd) return;
+    bd.style.display = 'inline-block'; bd.textContent = 'Comprobando...';
+    try{ await apiList(); bd.textContent='Central'; bd.classList.add('ok'); }
+    catch(_e){ bd.textContent='Local'; bd.classList.remove('ok'); }
+    if(getRole()!=='admin') bd.style.display='none';
   }
 
   document.addEventListener('DOMContentLoaded', async function(){
     const btn = document.getElementById('btn-concentrado');
-    if(btn && !btn.__wired){ btn.__wired = true; btn.addEventListener('click', openConcentrado); }
-    updateRoleUI();
+    if(btn) btn.style.display = (getRole()==='admin' ? 'inline-flex' : 'none');
     try{ await flushQueue(); }catch(_){}
+    badgeCheck();
   });
 
-  if (typeof window.hkLogin === 'function'){
-    const _hkLogin = window.hkLogin;
-    window.hkLogin = function(next){
-      _hkLogin(async function(){
-        try{ updateRoleUI(); }catch(_){}
-        try{ await flushQueue(); }catch(_){}
-        if(typeof next==='function') next();
-      });
-    };
-  }
-
-  document.addEventListener('click', function(e){
-    const t = e.target.closest('.btn-inventario');
-    if(t){
-      if(typeof window.hkHasSession === 'function' && hkHasSession()) return;
-      e.preventDefault(); e.stopPropagation();
-      if(typeof window.hkLogin === 'function'){ hkLogin(()=>{}); }
-    }
-  }, true);
-
-  window.hkGetRole = hkGetRole;
-})();
-</script>
+})();</script>
 
 </body>
 </html>
