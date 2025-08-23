@@ -1690,6 +1690,12 @@ panel.innerHTML = `
       ? (habitacion.video || habitacion.video_url)
       : ((window.VIDEOS_HAB && window.VIDEOS_HAB[num]) || window.HANDICAP_VIDEO_URL || "");
     setVideoHabitacion(v);
+    // Fallback obligado para Handicap
+    try{
+      if(habitacion && (habitacion.discapacidad || habitacion.handicap)){
+        if(!v && window.HANDICAP_VIDEO_URL) setVideoHabitacion(window.HANDICAP_VIDEO_URL);
+      }
+    }catch(_e){}
 
     // 🟢 Autoplay + mute aquí
     const video = document.querySelector("#video-mp4");
