@@ -2651,6 +2651,50 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <script>
 // === Roles & Concentrado de Inventario ===
+// === Configuración de API (Centralizado) ===
+// Reemplaza con tu URL del Web App de Google Apps Script
+const API_URL   = 'REEMPLAZA_CON_TU_WEB_APP_URL';
+const API_TOKEN = 'CAMBIA_ESTE_TOKEN_LARGO';
+
+function simpleHeaders(){ return {'Content-Type':'text/plain'}; } // evitar preflight
+async function apiAppend(entry){
+  try{
+    const res = await fetch(API_URL, {
+      method: 'POST',
+      headers: simpleHeaders(),
+      body: JSON.stringify({action:'append', token: API_TOKEN, entry})
+    });
+    const data = await res.json();
+    if(!res.ok || !data || data.status!=='ok') throw new Error((data&&data.error)||'append failed');
+    return true;
+  }catch(err){
+    console.error('API append error:', err);
+    throw err;
+  }
+}
+async function apiList(){
+  const url = API_URL + '?action=list&token=' + encodeURIComponent(API_TOKEN);
+  const res = await fetch(url, {method:'GET'});
+  const data = await res.json();
+  if(!res.ok || !data || data.status!=='ok') throw new Error((data&&data.error)||'list failed');
+  return Array.isArray(data.rows) ? data.rows : [];
+}
+
+// === Cola offline (si no hay red) ===
+const QUEUE_KEY = 'HK_INV_QUEUE';
+function qLoad(){ try{ return JSON.parse(localStorage.getItem(QUEUE_KEY) || '[]'); }catch(_){ return []; } }
+function qSave(a){ try{ localStorage.setItem(QUEUE_KEY, JSON.stringify(a)); }catch(_){ } }
+function qPush(x){ const a = qLoad(); a.push(x); qSave(a); }
+async function flushQueue(){
+  const a = qLoad(); if(!a.length) return 0;
+  let ok = 0, fail = 0, keep = [];
+  for(const item of a){
+    try{ await apiAppend(item); ok++; }catch(_){ fail++; keep.push(item); }
+  }
+  qSave(keep);
+  return ok;
+}
+
 (function(){
   if (window.__hk_roles_wired) return; window.__hk_roles_wired = true;
 
@@ -2677,8 +2721,9 @@ document.addEventListener('DOMContentLoaded', () => {
   if (typeof window.hkLogin === 'function'){
     const _hkLogin = window.hkLogin;
     window.hkLogin = function(next){
-      _hkLogin(function(){
+      _hkLogin(async function(){
         try{ updateRoleUI(); }catch(e){}
+        try{ await flushQueue(); }catch(_){}
         if(typeof next==='function') next();
       });
     };
@@ -2739,9 +2784,18 @@ document.addEventListener('DOMContentLoaded', () => {
         const saveBtn = document.getElementById('invp-guardar');
         if(saveBtn && !saveBtn.__hkwired){
           saveBtn.__hkwired = true;
-          saveBtn.addEventListener('click', function(){
+          saveBtn.addEventListener('click', async function(){
             try{
-              const arr = loadData(); arr.push(collectInventory(hnum)); saveData(arr);
+              const entry = collectInventory(hnum);
+              try{
+                await apiAppend(entry);
+              }catch(e){
+                // Guarda en cola local y también en localStorage como respaldo
+                qPush(entry);
+                const arr = loadData(); arr.push(entry); saveData(arr);
+              }
+              // intenta drenar cola por si había pendientes
+              try{ await flushQueue(); }catch(_){}
             }catch(e){ console.error('No se pudo guardar el concentrado:', e); }
           }, {capture:true});
         }
@@ -2778,7 +2832,7 @@ document.addEventListener('DOMContentLoaded', () => {
     w.document.close(); w.focus(); w.print();
   }
 
-  function openConcentrado(){
+  async function openConcentrado(){
     if(hkGetRole()!=='admin'){ alert('Solo administradores pueden ver el concentrado.'); return; }
     let ov = document.getElementById('concentradoOverlay');
     if(!ov){
@@ -2789,7 +2843,9 @@ document.addEventListener('DOMContentLoaded', () => {
       document.body.appendChild(ov);
     }
     const body = ov.querySelector('#conc-body');
-    const data = loadData();
+    let data = [];
+    try{ data = await apiList(); }
+    catch(e){ console.error('API list falló, usando respaldo local.', e); data = loadData(); }
     body.innerHTML = renderTable(data);
     ov.classList.add('activo'); ov.setAttribute('aria-hidden','false');
     const close = ()=>{ ov.classList.remove('activo'); ov.setAttribute('aria-hidden','true'); };
@@ -2799,10 +2855,11 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Wire botón de Concentrado
-  document.addEventListener('DOMContentLoaded', function(){
+  document.addEventListener('DOMContentLoaded', async function(){
     const btn = document.getElementById('btn-concentrado');
     if(btn && !btn.__wired){ btn.__wired = true; btn.addEventListener('click', openConcentrado); }
     updateRoleUI();
+    try{ await flushQueue(); }catch(_){}
   });
 
   // Delegación defensiva para el botón Inventario: asegura login previo
