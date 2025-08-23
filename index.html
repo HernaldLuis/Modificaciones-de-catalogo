@@ -706,7 +706,6 @@ border-bottom: none;
 
 /* --- Video en detalle de habitación (handicap) --- */
 .video-habitacion{ position:absolute; top:16px; right:16px; width:520px; max-width:44%; background:#fff; border-radius:12px; box-shadow:0 12px 30px rgba(0,0,0,.18); overflow:hidden; }
-07.77%); background:#000; } /* 16:9 */
 .video-ratio iframe, .video-ratio video{ position:absolute; inset:0; width:100%; height:100%; border:0; object-fit:contain; }
 .video-ratio video{ object-fit: contain; background:#000; }
 .contenido-inferior{ position:relative; }
@@ -1071,6 +1070,17 @@ border-bottom: none;
 <style>
 /* ===== HK Inventario (aislado y seguro para index) ===== */
 .hk-inv-btn {
+  position: absolute; top: .5rem; right: .5rem; z-index: 10010;
+  display: inline-flex; align-items: center; gap: .35rem;
+  padding: .35rem .65rem; border-radius: 999px;
+  background: #17a2ff; color: #fff; font-weight: 700; font-size: .9rem;
+  border: none; cursor: pointer; box-shadow: 0 6px 18px rgba(0,0,0,.25);
+}
+.hk-start-btn {
+  right: auto; left: .5rem;
+  background: linear-gradient(135deg,#c9a14a,#8a5a2b); 
+  box-shadow: 0 10px 24px rgba(138,90,43,.35), inset 0 0 0 1px rgba(255,255,255,.18);
+}
   position: absolute; top: .5rem; right: .5rem; z-index: 10010;
   display: inline-flex; align-items: center; gap: .35rem;
   padding: .35rem .65rem; border-radius: 999px;
@@ -1793,300 +1803,7 @@ border-bottom: none;
   <img loading="lazy" id="zoom-img" src="" alt="Zoom" />
 </div>
 
-  <script>
-
-async function mostrarInfo(num) {
-  const panel = document.getElementById("panelInferior");
-  const mensaje = document.getElementById("mensajeSeleccion");
-  if (mensaje) mensaje.style.display = "none";
-
-  try {
-    const response = await fetch("habitaciones.json");
-    const data = await response.json();
-
-    if (data[num]) {
-      const habitacion = data[num];
-
-      let galeriaHTML = '<div class="galeria-habitacion">';
-      habitacion.imagenes.forEach((imagen) => {
-        galeriaHTML += `
-          <div class="bloque-imagen">
-            <img loading="lazy" src="${imagen.src}" alt="${imagen.etiqueta}" onclick="hacerZoom(this.src)" />
-            <p><strong>${imagen.etiqueta}</strong></p>
-          </div>
-        `;
-      });
-      galeriaHTML += '</div>';
-
-panel.innerHTML = `
-  <div class="contenido-inferior">\n<aside id="video-habitacion" class="video-habitacion" hidden>\n  <div class="video-ratio">\n    <iframe id="video-embed" src="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen hidden></iframe>\n    <video id="video-mp4" controls playsinline hidden></video>\n  </div>\n</aside>\n
-    <h3>${habitacion.titulo}</h3>
-    <div class="modal-toolbar">
-      <button class="boton-inventario btn hk" id="btn-inventario" onclick="handleInventarioClick('${num}')" >Inventario</button>
-    </div>
-    <p><strong>Categoría:</strong> ${habitacion.categoria} · ${habitacion.vista}</p>
-    <p><strong>Habitación conectada:</strong> ${habitacion.habitacion_conectada ? habitacion.habitacion_conectada : 'No aplica'}</p>
-    <p><strong>Piso:</strong> ${habitacion.piso}</p>
-    <p><strong>Capacidad:</strong> ${habitacion.capacidad} · ${habitacion.fumadores ? '' : 'No fumadores'}</p>
-    <p><strong>Tipo de cama:</strong> ${habitacion.tipo_cama}</p>
-    <p><strong>Sofá cama:</strong> ${habitacion.sofa ? 'Incluido' : 'No disponible'}</p>
-    <p><strong>Accesibilidad:</strong> ${habitacion.discapacidad ? 'Adaptada' : 'No adaptada'}</p>
-    <p><strong>Características:</strong> ${habitacion.caracteristicas.join(', ')}</p>
-    ${galeriaHTML}
-    <button class="btn-volver" onclick="cerrarPanelInferior()">Cerrar</button>
-  </div>
-`;
-    
-    // --- Video handicap (arriba-derecha) ---
-    try {
-  if (habitacion && (habitacion.discapacidad === true)) {
-    const v = (window.VIDEOS_HAB && window.VIDEOS_HAB[num]) || window.HANDICAP_VIDEO_URL || "";
-    setVideoHabitacion(v);
-
-    // 🟢 Autoplay + mute aquí
-    const video = document.querySelector("#video-mp4");
-    if(video){
-      video.muted = true;        // 🔇 requerido en móviles
-      video.setAttribute("muted","");
-      video.playsInline = true;  // evita fullscreen en iOS
-      video.autoplay = true;     // autoplay
-      video.loop = true;         // 🔁 se repite al terminar
-      video.currentTime = 0;
-
-      const p = video.play();
-      if(p && typeof p.catch === "function") p.catch(()=>{});
-    }
-
-  } else {
-    stopVideoHabitacion();
-    setVideoHabitacion(""); // oculta
-  }
-}catch(e){}
-} else {
-      panel.innerHTML = `
-        <div class="contenido-inferior">
-          <p>🔍 Información no disponible para la habitación ${num}.</p>
-          <button class="btn-volver" onclick="cerrarPanelInferior()">Cerrar</button>
-        </div>
-      `;
-    }
-
-    panel.style.display = "block";
-    document.body.style.overflow = "hidden";
-  } catch (error) {
-    panel.innerHTML = `
-      <div class="contenido-inferior">
-        <p>⚠️ Error al cargar la información. Intenta de nuevo.</p>
-        <button class="btn-volver" onclick="cerrarPanelInferior()">Cerrar</button>
-      </div>
-    `;
-    panel.style.display = "block";
-    document.body.style.overflow = "hidden";
-  }
-}
-
-function cerrarPanelInferior() {
-  const panel = document.getElementById("panelInferior");
-  const mensaje = document.getElementById("mensajeSeleccion");
-
-  panel.style.display = "none";
-  document.body.style.overflow = "auto";
-
-  if (mensaje) mensaje.style.display = "block";
-}
-
-async function marcarHabitacionesDisponibles() {
-  try {
-    const response = await fetch("habitaciones.json");
-    const data = await response.json();
-    const botones = document.querySelectorAll(".habitacion-btn");
-
-    botones.forEach(boton => {
-const num = boton.dataset.num || boton.textContent.trim();
-      const habitacion = data[num];
-
-      if (habitacion) {
-        boton.classList.add("disponible");
-
-        // Determinar tipo de cama
-        const tipoCama = habitacion.tipo_cama === "K" ? "K" : "D";
-
-        if (habitacion.tipo_cama === "K") {
-  boton.classList.add("tipo-k");
-} else if (habitacion.tipo_cama === "D") {
-  boton.classList.add("tipo-d");
-
-
-}
-
-
-        // Verificar si tiene sofá cama
-const sofaIcon = `
-  ${habitacion.sofa ? '<img loading="lazy" src="https://res.cloudinary.com/dor6za85u/image/upload/v1753173371/sof%C3%A0_pzyjdc.png" style="height: 18px; vertical-align: middle;" />' : ''}
-  ${habitacion.discapacidad ? '<span style="font-size: 1.2em;">♿</span>' : ''}
-`;
-
-        // Crear nuevo contenido
-        boton.innerHTML = `
-          <div style="display: flex; flex-direction: column; align-items: center;">
-            <div>${num}</div>
-            <div style="font-size: 0.9em;">${tipoCama}${sofaIcon}</div>
-          </div>
-        `;
-      }
-    });
-  } catch (error) {
-    console.error("Error al cargar habitaciones disponibles:", error);
-  }
-}
-
-// Ejecutar al cargar
-window.addEventListener("DOMContentLoaded", marcarHabitacionesDisponibles);
-
-    let datosActuales = {}; // Aquí guardaremos los datos iniciales para comparar más adelante
-
-document.addEventListener("DOMContentLoaded", () => {
-  const botones = document.querySelectorAll(".habitacion-btn");
-  botones.forEach(boton => {
-    boton.addEventListener("click", () => {
-      const num = boton.dataset.num;
-      mostrarInfo(num);
-    });
-  });
-});
-
-// Drag-scroll solo una vez
-const zona = document.querySelector('.zona-desplazable');
-let isDown = false, startX, scrollLeft;
-
-zona.addEventListener('mousedown', (e) => {
-  isDown = true;
-  zona.classList.add('arrastrando');
-  startX = e.pageX - zona.offsetLeft;
-  scrollLeft = zona.scrollLeft;
-});
-zona.addEventListener('mouseleave', () => { isDown = false; zona.classList.remove('arrastrando'); });
-zona.addEventListener('mouseup', () => { isDown = false; zona.classList.remove('arrastrando'); });
-zona.addEventListener('mousemove', (e) => {
-  if (!isDown) return;
-  e.preventDefault();
-  const x = e.pageX - zona.offsetLeft;
-  zona.scrollLeft = scrollLeft - (x - startX);
-});
-
-    async function actualizarHabitacionesSilenciosamente() {
-  try {
-    const response = await fetch("habitaciones.json");
-    const nuevosDatos = await response.json();
-    const botones = document.querySelectorAll(".habitacion-btn");
-
-    botones.forEach(boton => {
-      const num = boton.dataset.num || boton.textContent.trim();
-      const nuevaData = nuevosDatos[num];
-      const actualData = datosActuales[num];
-
-      if (nuevaData && JSON.stringify(nuevaData) !== JSON.stringify(actualData)) {
-        const tipoCama = nuevaData.tipo_cama === "K" ? "K" : "D";
-
-if (nuevaData.tipo_cama === "K") {
-  boton.classList.add("tipo-k");
-} else if (nuevaData.tipo_cama === "D") {
-  boton.classList.add("tipo-d");
-}
-
-        const sofaIcon = `
-          ${nuevaData.sofa ? '<img loading="lazy" src="https://res.cloudinary.com/dor6za85u/image/upload/v1753173371/sof%C3%A0_pzyjdc.png" style="height: 18px; vertical-align: middle;" />' : ''}
-          ${nuevaData.discapacidad ? '<span style="font-size: 1.2em;">♿</span>' : ''}
-        `;
-
-        boton.innerHTML = `
-          <div style="display: flex; flex-direction: column; align-items: center;">
-            <div>${num}</div>
-            <div style="font-size: 0.9em;">${tipoCama}${sofaIcon}</div>
-          </div>
-        `;
-
-        boton.classList.add("disponible");
-      }
-    });
-
-    datosActuales = nuevosDatos;
-
-  } catch (error) {
-    console.warn("No se pudo actualizar habitaciones en segundo plano:", error);
-  }
-}
-setInterval(actualizarHabitacionesSilenciosamente, 5000); // Se actualiza cada 5 segundos
-
-document.addEventListener('DOMContentLoaded', async () => {
-  const sel = document.getElementById('filtro-categoria');
-  const btnClear = document.getElementById('btn-limpiar-filtro');
-  const totalEl = document.getElementById('total-coincidencias-categoria');
-
-  let habitacionesData = null;
-
-  // Cargar JSON de habitaciones
-  async function cargarHabitaciones() {
-    if (!habitacionesData) {
-      const resp = await fetch('habitaciones.json');
-      habitacionesData = await resp.json();
-    }
-    return habitacionesData;
-  }
-
-  // Llenar select con categorías
-  async function initCategorias() {
-    const data = await cargarHabitaciones();
-    const categorias = new Set(Object.values(data).map(h => h.categoria).filter(Boolean));
-    [...categorias].sort().forEach(cat => {
-      const opt = document.createElement('option');
-      opt.value = cat;
-      opt.textContent = cat;
-      sel.appendChild(opt);
-    });
-  }
-
-  // Aplicar filtro visual
-  async function aplicarFiltro(categoria) {
-  const data = await cargarHabitaciones();
-  let count = 0;
-
-  // Quitamos espacios y normalizamos
-  const catSel = (categoria || '').trim();
-
-  document.querySelectorAll('.habitacion-btn').forEach(btn => {
-    const num = btn.dataset.num || btn.textContent.trim();
-    const habitacion = data[num];
-    const catHab = ((habitacion && habitacion.categoria) || '').trim();
-
-    if (catSel) {
-      // Si hay una categoría seleccionada, comparar
-      const coincide = catHab.toLowerCase() === catSel.toLowerCase();
-      btn.classList.toggle('filtro-activo', coincide);
-      btn.classList.toggle('filtro-inactivo', !coincide);
-      if (coincide) count++;
-    } else {
-      // Si está en "Todas", limpiar clases
-      btn.classList.remove('filtro-activo', 'filtro-inactivo');
-      count++;
-    }
-  });
-
-  totalEl.textContent = count;
-}
-
-  // Eventos
-  sel.addEventListener('change', e => aplicarFiltro(e.target.value));
-  btnClear.addEventListener('click', () => {
-    sel.value = '';
-    aplicarFiltro('');
-  });
-
-  // Inicializar
-  await initCategorias();
-  aplicarFiltro('');
-});
-    </script>  <!-- ✅ Cierra aquí tu script principal -->
+    <!-- ✅ Cierra aquí tu script principal -->
 
 <div id="modal-mejoras" class="modal-mejoras" role="dialog" aria-modal="true" aria-labelledby="titulo-novedades">
   <div class="modal-contenido">
@@ -2489,20 +2206,49 @@ document.addEventListener('DOMContentLoaded', () => {
 (function(){
   const HK_PIN = '246810';                // Acceso Housekeeping (temporal)
   const SESSION_KEY = 'hk_inv_session';
-  const TTL = 8*60*60*1000;               // 8h
+  const TTL = 5*60*60*1000;               // 5h
 
   let HAB_ACTUAL = null;                  // Número de habitación activa
 
   function now(){ return Date.now(); }
-  function hasSession(){ const t = +sessionStorage.getItem(SESSION_KEY)||0; return (now()-t) < TTL; }
-  function setSession(){ sessionStorage.setItem(SESSION_KEY, String(now())); }
-  function pedirPIN(ok){
-    if(hasSession()) return ok && ok();
-    const p = prompt('Acceso Housekeeping — PIN:');
-    if(p === HK_PIN){ setSession(); ok && ok(); }
+  function hasSession(){
+    const t = +sessionStorage.getItem(SESSION_KEY) || 0;
+    return (now() - t) < TTL;
+  }
+  function setSession(){
+    sessionStorage.setItem(SESSION_KEY, String(now()));
+  }
+  function pedirPIN(next){
+    if(hasSession()){ if(typeof next==='function') next(); return; }
+    // Usa modal si existe; de lo contrario, prompt de emergencia
+    if (typeof window.pedirPINModal === 'function'){
+      pedirPINModal().then(pin=>{
+        if(String(pin).trim() === HK_PIN){
+          setSession();
+          if(typeof next==='function') next();
+          // Revelar botón Comenzar si existe
+          try{
+            document.querySelectorAll('.hk-start-btn').forEach(b=> b.style.display='inline-flex');
+          }catch(e){}
+        } else {
+          alert('PIN incorrecto');
+        }
+      });
+    } else {
+      const pin = prompt('Acceso Housekeeping — PIN:');
+      if(String(pin).trim() === HK_PIN){
+        setSession();
+        if(typeof next==='function') next();
+        try{
+          document.querySelectorAll('.hk-start-btn').forEach(b=> b.style.display='inline-flex');
+        }catch(e){}
+      } else {
+        alert('PIN incorrecto');
+      }
+    }
   }
 
-  // Detectamos cuando se abre el modal de VISTAS (no tocamos otros modales)
+Detectamos cuando se abre el modal de VISTAS (no tocamos otros modales)
   // Criterios: presencia de tarjetas .bloque-imagen dentro de un contenedor tipo modal.
   const MODAL_SEL = '.modal-contenido, .modal, .modal-content, .lightbox, .galeria-modal, .modal-vistas, [role="dialog"]';
 
@@ -2574,6 +2320,33 @@ document.addEventListener('DOMContentLoaded', () => {
       pedirPIN(abrir);
     });
     card.appendChild(btn);
+    // --- Botón "Comenzar" (solo visible con sesión activa) ---
+    (function(){
+      try{
+        // usar 'root' del cierre de injectButton
+        const start = document.createElement('button');
+        start.className = 'hk-inv-btn hk-start-btn';
+        start.type = 'button';
+        start.textContent = 'Comenzar';
+        start.style.marginLeft = '.5rem';
+        start.style.display = (sessionStorage.getItem('hk_inv_session') && (Date.now()-(+sessionStorage.getItem('hk_inv_session'))) < (5*60*60*1000)) ? 'inline-flex' : 'none';
+        start.addEventListener('click', function(){
+          const datos = obtenerDatosHabitacion(HAB_ACTUAL);
+          const abrir = ()=>{
+            const side = ensureSidePanel(root);
+            side.classList.add('hk-open');
+            mountInventario(side, datos);
+          };
+          // Si no hay sesión válida, pedir PIN y luego abrir:
+          if((Date.now()-(+sessionStorage.getItem('hk_inv_session')||0)) < (5*60*60*1000)){
+            abrir();
+          }else{
+            pedirPIN(abrir);
+          }
+        });
+        card.appendChild(start);
+      }catch(e){}
+    })();
   }
 
   // Mutación del DOM: cuando aparezca un modal de vistas, inyectamos
