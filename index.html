@@ -655,40 +655,21 @@ border-bottom: none;
 .totales-tabla thead th{ background: linear-gradient(135deg, #00aaff22, #0077cc22); font-weight: 700; }
 .totales-tabla tbody tr:last-child td{ border-bottom: 0; }
 
-/* --- Video en detalle de habitación (handicap) --- */
-.video-habitacion{ position:absolute; top:16px; right:16px; width:520px; max-width:44%; background:#fff; border-radius:12px; box-shadow:0 12px 30px rgba(0,0,0,.18); overflow:hidden; }
-.video-ratio iframe, .video-ratio video{ position:absolute; inset:0; width:100%; height:100%; border:0; object-fit:contain; }
-.video-ratio video{ object-fit: contain; background:#000; }
-.contenido-inferior{ position:relative; }
-.contenido-inferior.con-video{ padding-right: calc(var(--video-width, 360px) + 24px); transition: padding-right .2s ease; } /* tarjeta blanca del detalle */
+/* (video handicap legacy CSS removed) */
+/* tarjeta blanca del detalle */
 @media (max-width: 900px){
-  .contenido-inferior.con-video{ padding-right:0; }
-  .video-habitacion{ position:static; width:100%; max-width:100%; margin-bottom:12px; }
+  .contenido-inferior.con-video{ padding-right:0; }/* (legacy video style removed) */
 }
 
 
-/* === Zoom de video === */
-.video-zoom-overlay{
-  display:none; position:fixed; inset:0; z-index:10000;
-  background:rgba(0,0,0,.85); align-items:center; justify-content:center;
-}
-.video-zoom-overlay.activo{ display:flex; }
-#zoom-video{ max-width:96vw; max-height:92vh; border-radius:12px; background:#000; outline:0; }
-
-
+/* (video zoom legacy CSS removed) */
 /* Botón de reporte PDF */
 .btn-reporte{
   display:inline-block; padding:.45rem .8rem; border-radius:10px;
   background:#0ea5e9; color:#fff; text-decoration:none; font-weight:600;
   box-shadow:0 2px 8px rgba(0,0,0,.12); margin-left:.5rem;
 }
-.btn-reporte:hover{ filter:brightness(.95); }
-
-/* === Ajuste puntual: reducir 25% el video Handicap anclado arriba-derecha === */
-#video-habitacion, .video-habitacion{
-  transform: scale(0.65);
-  transform-origin: top right;
-}
+.btn-reporte:hover{ filter:brightness(.95); }/* (legacy video style removed) */
 /* (Opcional) Si se necesita diferente escala por viewport, ajustar aquí con media queries */
 
 
@@ -884,6 +865,30 @@ body.hk-modal-open{ overflow: hidden; }
 .hk-btn-primary:hover{ filter:brightness(.97); }
 @keyframes hkPop{ from{ transform:scale(.98); opacity:0 } to{ transform:scale(1); opacity:1 } }
 /* --- fin éxito --- */
+
+
+/* === Video Handicap (nuevo) === */
+.hk-vid-mini{
+  width: min(520px, 44%);
+  max-width: 100%;
+  border-radius: 12px;
+  box-shadow: 0 12px 30px rgba(0,0,0,.18);
+  background:#000;
+  display:block;
+  margin: 8px 0 12px auto; /* alineado a la derecha del texto */
+  cursor: zoom-in;
+}
+@media (max-width: 900px){
+  .hk-vid-mini{ width: 100%; margin-left: 0; }
+}
+/* Overlay tipo imágenes pero para video */
+#hk-video-overlay{
+  display:none; position:fixed; inset:0; z-index:10000;
+  background:rgba(0,0,0,.85); align-items:center; justify-content:center;
+}
+#hk-video-overlay.activo{ display:flex; }
+#hk-video-zoom{ max-width:96vw; max-height:92vh; border-radius:12px; background:#000; outline:0; }
+#hk-video-close{ position:absolute; top:24px; right:34px; font-size:2rem; color:#fff; cursor:pointer; user-select:none; }
 
 </style>
 
@@ -1666,7 +1671,7 @@ async function mostrarInfo(num) {
       galeriaHTML += '</div>';
 
 panel.innerHTML = `
-  <div class="contenido-inferior">\n<aside id="video-habitacion" class="video-habitacion" hidden>\n  <div class="video-ratio">\n    <iframe id="video-embed" src="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen hidden></iframe>\n    <video id="video-mp4" controls playsinline hidden></video>\n  </div>\n</aside>\n
+  <div class="contenido-inferior">\n<!-- (legacy video container removed) -->\n
     <h3>${habitacion.titulo}</h3>
     <button class="btn-inventario" onclick="(hkHasSession()? abrirInventarioPrincipal(${num}) : hkLogin(()=>abrirInventarioPrincipal(${num})))">📋 Inventario</button>
 
@@ -1683,11 +1688,45 @@ panel.innerHTML = `
   </div>
 `;
     
+    
+    // --- Video Handicap (nuevo) ---
+    try{
+      var esHandicap = !!(habitacion && (
+        habitacion.discapacidad === true ||
+        habitacion.handicap === true ||
+        habitacion.discapacidad === 'Adaptada' ||
+        habitacion.discapacidad === 'Sí' ||
+        (habitacion.categoria && /handicap|adaptad/i.test(habitacion.categoria)) ||
+        (Array.isArray(habitacion.tags) && habitacion.tags.some(function(t){ return /handicap/i.test(t); }))
+      ));
+      if(esHandicap){
+        var vsrc = (habitacion && (habitacion.video || habitacion.video_url)) || (window.HANDICAP_VIDEO_URL || '');
+        if(vsrc){
+          var cont = document.getElementById('contenidoHabitacion') || panel;
+          // crear video mini
+          var v = document.createElement('video');
+          v.className = 'hk-vid-mini';
+          v.setAttribute('muted',''); v.muted = true;
+          v.setAttribute('playsinline',''); v.playsInline = true;
+          v.setAttribute('autoplay',''); v.autoplay = true;
+          v.setAttribute('loop',''); v.loop = true;
+          var sr = document.createElement('source'); sr.src = vsrc; sr.type='video/mp4'; v.appendChild(sr);
+          // Insertar al inicio del panel, arriba de la info (como el bloque del video)
+          cont.prepend(v);
+          // reproducir
+          try{ v.load(); }catch(e){}
+          try{ var prom = v.play(); if(prom && prom.then) prom.catch(function(){}); }catch(e){}
+          // click -> abrir overlay
+          v.addEventListener('click', function(){ openVideoOverlay(vsrc); });
+        }
+      }
+    }catch(e){}
+    // --- fin Video Handicap (nuevo) ---
     // --- Video handicap (arriba-derecha) ---
     try {
   if (habitacion && (habitacion.discapacidad === true)) {
     const v = (window.VIDEOS_HAB && window.VIDEOS_HAB[num]) || window.HANDICAP_VIDEO_URL || "";
-    setVideoHabitacion(v);
+    // (legacy setVideoHabitacion call removed);
 
     // 🟢 Autoplay + mute aquí
     const video = document.querySelector("#video-mp4");
@@ -1705,7 +1744,7 @@ panel.innerHTML = `
 
   } else {
     stopVideoHabitacion();
-    setVideoHabitacion(""); // oculta
+    // (legacy setVideoHabitacion call removed); // oculta
   }
 }catch(e){}
 } else {
@@ -2159,26 +2198,7 @@ function normalizarEmbed(u){
   return u;
 }
 
-function setVideoHabitacion(url){
-  const box = document.getElementById('video-habitacion');
-  const iframe = document.getElementById('video-embed');
-  const mp4 = document.getElementById('video-mp4');
-  if(!box || !iframe || !mp4) return;
-
-  // Reset
-  box.hidden = true;
-  iframe.hidden = true; iframe.src = "";
-  mp4.hidden = true; mp4.removeAttribute('src'); mp4.load?.();
-
-  if(!url) return;
-
-  const u = String(url).trim();
-  if(/youtu\.be|youtube\.com|vimeo\.com/i.test(u)){
-    iframe.src = normalizarEmbed(u);
-    iframe.hidden = false;
-    box.hidden = false;
-    return;
-  }
+// (legacy setVideoHabitacion removed)
   if(/\.(mp4)(\?|#|$)/i.test(u)){
     mp4.src = u;
     mp4.hidden = false;
@@ -2571,6 +2591,44 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('keydown', onkey);
   };
 })();
+</script>
+
+
+<script>
+// === Helper: abrir/cerrar overlay de video ===
+function openVideoOverlay(src){
+  try{
+    var ov = document.getElementById('hk-video-overlay');
+    var vz = document.getElementById('hk-video-zoom');
+    if(!ov || !vz) return;
+    // Reset
+    try{ vz.pause(); }catch(e){}
+    while(vz.firstChild){ vz.removeChild(vz.firstChild); }
+    // Source
+    var s = document.createElement('source');
+    s.src = src; s.type = 'video/mp4';
+    vz.appendChild(s);
+    vz.load();
+    ov.classList.add('activo'); ov.setAttribute('aria-hidden','false');
+    // Play
+    try{ var p = vz.play(); if(p && p.then) p.catch(()=>{}); }catch(e){}
+  }catch(e){}
+}
+function closeVideoOverlay(){
+  var ov = document.getElementById('hk-video-overlay');
+  var vz = document.getElementById('hk-video-zoom');
+  if(!ov || !vz) return;
+  try{ vz.pause(); }catch(e){}
+  while(vz.firstChild){ vz.removeChild(vz.firstChild); }
+  ov.classList.remove('activo'); ov.setAttribute('aria-hidden','true');
+}
+document.addEventListener('DOMContentLoaded', function(){
+  var c = document.getElementById('hk-video-close');
+  var ov = document.getElementById('hk-video-overlay');
+  if(c) c.addEventListener('click', closeVideoOverlay);
+  if(ov) ov.addEventListener('click', function(e){ if(e.target === ov) closeVideoOverlay(); });
+  document.addEventListener('keydown', function(e){ if(e.key === 'Escape') closeVideoOverlay(); });
+});
 </script>
 
 </body>
