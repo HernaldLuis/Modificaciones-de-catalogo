@@ -928,7 +928,6 @@ body.hk-modal-open{ overflow: hidden; }
 #inventarioOverlay .invp-actions{ position:sticky; bottom:0; background:#fff; padding-top:8px; z-index:1; }
 @media (max-height:700px){ #inventarioOverlay .modal-contenido{ max-height:calc(100vh - 16px); } }
 
-
 /* === CONC-FS-002: Pantalla completa robusta === */
 #concentradoOverlay.fullscreen{ z-index: 9999; }
 #concentradoOverlay.fullscreen .modal-contenido{
@@ -2901,6 +2900,36 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <script>
 (()=>{
+  if(window.__hkRestoreGuardWired) return; window.__hkRestoreGuardWired = true;
+  const DEPURACION_MAT = "3072167";
+  const DEPURACION_PASS = "JRPNLS96050220H500";
+
+  window.__hkRestoreWithConfirm = function(num, applyFn){
+    try{
+      if(!confirm("¿Restaurar valores sugeridos para esta habitación?")) return;
+      if(!confirm("Esta acción sobrescribirá los campos visibles. ¿Confirmas?")) return;
+
+      const mat = (sessionStorage.getItem('matricula')||'').trim();
+      if(mat !== DEPURACION_MAT){
+        alert("Matrícula no autorizada para esta acción.");
+        return;
+      }
+      const pass = prompt("Clave de depuración:");
+      if(pass !== DEPURACION_PASS){
+        alert("Clave incorrecta.");
+        return;
+      }
+      if(typeof applyFn === 'function') applyFn(num);
+    }catch(e){
+      console.error(e);
+      alert("No se pudo restaurar los sugeridos.");
+    }
+  };
+})();
+</script>
+
+<script>
+(()=>{
   if (window.__hkSugeridosWired) return;
   window.__hkSugeridosWired = true;
   const MASTERS = [3014, 3114, 3214, 4111, 4211, 4311, 4411, 4511];
@@ -2964,7 +2993,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setVal('ban-bano',sug.ban.bano); setVal('ban-mano',sug.ban.mano); setVal('ban-facial',sug.ban.facial); setVal('ban-tapete',sug.ban.tapete); setVal('ban-verdes',sug.ban.verdes); setSel('ban-color',sug.ban.color,sug.ban.lockColor); setSel('ban-categoria',cat,true);
     setSel('tipo-cama',sug.cama.tipo,sug.cama.lockTipo); setVal('cama-protector',sug.cama.protector); setVal('cama-sabanas',sug.cama.sabanas); setVal('cama-almohadas',sug.cama.almohadas); setVal('cama-fundas',sug.cama.fundas); setVal('cama-prot-alm',sug.cama.protAlm); setVal('cama-inserto',sug.cama.inserto); setVal('cama-cubre',sug.cama.cubre); setSel('cama-color',sug.cama.color,sug.cama.lockColor);
     pintarChip(cat,(cat==='Normal'?tipo:'K'));
-    const btn=document.getElementById('hk-sugeridos-restore'); if(btn){ btn.onclick=()=>aplicarSugeridos(num); }
+    const btn=document.getElementById('hk-sugeridos-restore'); if(btn){ btn.onclick=()=> window.__hkRestoreWithConfirm(num, aplicarSugeridos); }
   }
   function tryWire(){
     if(typeof window.abrirInventarioPrincipal!=='function') return;
@@ -3023,13 +3052,11 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   }
 
-  // MutationObserver por si el overlay se crea dinámicamente
   const mo = new MutationObserver(()=> ensureFsButton());
   mo.observe(document.documentElement, { childList:true, subtree:true });
 
   hookOpen();
   document.addEventListener('DOMContentLoaded', hookOpen);
-  // Si ya estaba abierto
   ensureFsButton();
 })();
 </script>
