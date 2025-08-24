@@ -2551,7 +2551,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   window.hkLogin = async function(next){
-    if(hasSession()){ if(typeof next==='function') next(); try{var b=document.getElementById('btn-concentrado'); if(b){ b.style.display=(typeof getRole==='function' && getRole()==='admin')?'inline-block':'none'; }}catch(_e){} return; }
+    if(hasSession()){ if(typeof next==='function') next(); try{ var b=document.getElementById('btn-concentrado'); if(b){ b.style.display = document.body.classList.contains('hk-admin') ? 'inline-block' : 'none'; } }catch(_e){} try{var b=document.getElementById('btn-concentrado'); if(b){ b.style.display=(typeof getRole==='function' && getRole()==='admin')?'inline-block':'none'; }}catch(_e){} return; }
     const pin = await pedirPINModal();
     if(!pin) return;
     const id = String(pin).trim();
@@ -2559,7 +2559,18 @@ document.addEventListener('DOMContentLoaded', () => {
     if(name){
       try{ sessionStorage.setItem('HK_MAT', id); sessionStorage.setItem('HK_NAME', name); }catch(e){}
       setSession();
-      try{var b=document.getElementById('btn-concentrado'); if(b){ b.style.display=(typeof getRole==='function' && getRole()==='admin')?'inline-block':'none'; } var lg=document.getElementById('btn-logout'); if(lg){ lg.style.display='inline-block'; }}catch(_e){} if(typeof next==='function') next(); try{var b=document.getElementById('btn-concentrado'); if(b){ b.style.display=(typeof getRole==='function' && getRole()==='admin')?'inline-block':'none'; }}catch(_e){}
+      
+      try{
+        var id = sessionStorage.getItem('HK_MAT')||'';
+        if(id==='3072167' || id==='3067888'){
+          document.body.classList.add('hk-admin');
+        }else{
+          document.body.classList.remove('hk-admin');
+        }
+        var b=document.getElementById('btn-concentrado');
+        if(b){ b.style.display = document.body.classList.contains('hk-admin') ? 'inline-block' : 'none'; }
+      }catch(_e){} 
+try{var b=document.getElementById('btn-concentrado'); if(b){ b.style.display=(typeof getRole==='function' && getRole()==='admin')?'inline-block':'none'; } var lg=document.getElementById('btn-logout'); if(lg){ lg.style.display='inline-block'; }}catch(_e){} if(typeof next==='function') next(); try{ var b=document.getElementById('btn-concentrado'); if(b){ b.style.display = document.body.classList.contains('hk-admin') ? 'inline-block' : 'none'; } }catch(_e){} try{var b=document.getElementById('btn-concentrado'); if(b){ b.style.display=(typeof getRole==='function' && getRole()==='admin')?'inline-block':'none'; }}catch(_e){}
     }else{
       const ERR = document.getElementById('hkpin2-error'); if(ERR){ ERR.style.display='block'; }
     }
