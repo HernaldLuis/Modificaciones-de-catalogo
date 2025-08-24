@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Catálogo de Habitaciones</title>
   <style>
+/* HK admin: ensure Concentrado button visible */
+body.hk-admin #btn-concentrado{ display:inline-block !important; }
+
 body {
   margin: 0;
   font-family: Arial, sans-serif;
@@ -2505,7 +2508,11 @@ document.addEventListener('DOMContentLoaded', () => {
   function setSession(){ sessionStorage.setItem(SESSION_KEY, String(now())); updateSessionUI(); 
     try{
       var b=document.getElementById('btn-concentrado');
-      if(b){ b.style.display=(typeof getRole==='function' && getRole()==='admin')?'inline-block':'none'; }
+      if(b){ b.style.display=(typeof getRole==='function' && getRole()==='admin')?'inline-block':'none'; 
+    try{
+      if(typeof getRole==='function' && getRole()==='admin'){ document.body.classList.add('hk-admin'); }
+      else { document.body.classList.remove('hk-admin'); }
+    }catch(_e){}}
       var lg=document.getElementById('btn-logout');
       if(lg){ lg.style.display='inline-block'; }
     }catch(_e){}
@@ -2562,7 +2569,9 @@ document.addEventListener('DOMContentLoaded', () => {
     clearSession();
     try{ sessionStorage.removeItem('HK_MAT'); sessionStorage.removeItem('HK_NAME'); }catch(e){}
     const inv = document.getElementById('inventarioOverlay'); if(inv) inv.classList.remove('activo');
-  };
+  
+    try{ document.body.classList.remove('hk-admin'); }catch(_e){}
+};
 
   // Inventario principal (overlay)
   window.abrirInventarioPrincipal = function(habitacionNum){
