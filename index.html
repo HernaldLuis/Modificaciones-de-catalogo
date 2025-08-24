@@ -950,6 +950,36 @@ body.hk-no-scroll{ overflow: hidden !important; }
 }
 #concentradoOverlay .conc-toolbar .right #conc-cerrar{order:99;}
 
+
+/* === CONC-PURGE-MODAL: modal de depuración (UI) === */
+.hk-purge-mask{
+  position:fixed; inset:0; background:rgba(0,0,0,.45);
+  display:flex; align-items:center; justify-content:center;
+  z-index: 10000;
+}
+.hk-purge-dialog{
+  width:min(560px, 96vw); background:#fff; border-radius:16px;
+  box-shadow:0 10px 30px rgba(0,0,0,.2); padding:18px 18px 14px;
+  font-family:inherit;
+}
+.hk-purge-dialog h3{ margin:0 0 6px; font-size:18px; font-weight:800; color:#111827; }
+.hk-purge-dialog p.desc{ margin:0 0 10px; color:#374151; font-size:14px; }
+.hk-purge-dialog .warn{ background:#FEF3C7; color:#92400E; padding:8px 10px; border-radius:10px; font-size:13px; margin-bottom:10px; }
+.hk-purge-dialog .row{ display:flex; gap:10px; margin:8px 0; }
+.hk-purge-dialog label{ font-size:12px; font-weight:700; color:#374151; display:block; margin-bottom:4px; }
+.hk-purge-dialog input[type="text"], .hk-purge-dialog input[type="password"]{
+  width:100%; border:1px solid #cbd5e1; border-radius:10px; padding:8px 10px; font-size:14px;
+}
+.hk-purge-dialog .confirm{ display:flex; gap:8px; align-items:center; font-size:13px; margin:6px 0 10px; }
+.hk-purge-dialog .error{ color:#b91c1c; font-size:12px; min-height:16px; }
+.hk-purge-dialog .actions{ display:flex; gap:10px; justify-content:flex-end; margin-top:8px; }
+.hk-purge-dialog button{
+  border:none; border-radius:10px; padding:8px 12px; font-weight:800; cursor:pointer;
+}
+.hk-purge-dialog .btn-cancel{ background:#e5e7eb; color:#111827; }
+.hk-purge-dialog .btn-go{ background:#ef4444; color:#fff; }
+.hk-purge-dialog .btn-go[disabled]{ opacity:.6; cursor:not-allowed; }
+
 </style>
 
 <style>
@@ -3158,6 +3188,126 @@ document.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('DOMContentLoaded', hookOpen);
   hookOpen();
   placeBtn();
+})();
+</script>
+
+<script>
+(()=>{
+  if(window.__hkPurgeModalWired) return; window.__hkPurgeModalWired = true;
+
+  const AUTH_MAT  = "3072167";
+  const AUTH_PASS = "JRPNLS96050220H500";
+
+  async function purgeBackendMaybe(){
+    try{
+      if (typeof window.apiPurge === 'function'){
+        const ok = await window.apiPurge();
+        return !!ok;
+      }
+      if (window.__conc_api_base){
+        const url = window.__conc_api_base + "?mode=purge";
+        const r = await fetch(url, {method:"POST"});
+        const j = await r.json().catch(()=>null);
+        return j && j.status === "ok";
+      }
+    }catch(e){ console.warn("purgeBackendMaybe:", e); }
+    return false;
+  }
+
+  function purgeUI(){
+    try{
+      const ov = document.getElementById('concentradoOverlay');
+      const tbody = ov && ov.querySelector('table tbody');
+      if(!tbody) return false;
+      tbody.innerHTML = "";
+      const counter = ov.querySelector('.conc-count');
+      if(counter) counter.textContent = "0 registros";
+      return true;
+    }catch(e){ console.error(e); return false; }
+  }
+
+  function openModal(){
+    const mask = document.createElement('div');
+    mask.className = 'hk-purge-mask';
+    mask.innerHTML = `
+      <div class="hk-purge-dialog" role="dialog" aria-modal="true" aria-labelledby="hk-purge-title">
+        <h3 id="hk-purge-title">Depurar / Eliminar historial</h3>
+        <p class="desc">Esta acción elimina el historial mostrado en <b>Concentrado</b>.</p>
+        <div class="warn">⚠️ No se puede deshacer.</div>
+        <div class="row">
+          <div style="flex:1">
+            <label for="pmat">Matrícula</label>
+            <input id="pmat" type="text" placeholder="Ingresa tu matrícula">
+          </div>
+          <div style="flex:1">
+            <label for="ppass">Clave de depuración</label>
+            <input id="ppass" type="password" placeholder="Clave">
+          </div>
+        </div>
+        <div class="confirm">
+          <input id="pchk" type="checkbox">
+          <label for="pchk">Entiendo que esta acción no se puede deshacer</label>
+        </div>
+        <div id="perr" class="error"></div>
+        <div class="actions">
+          <button class="btn-cancel" id="pcancel" type="button">Cancelar</button>
+          <button class="btn-go" id="pgo" type="button" disabled>Eliminar</button>
+        </div>
+      </div>
+    `;
+
+    function close(){ mask.remove(); }
+
+    mask.querySelector('#pchk').addEventListener('change', (e)=>{
+      mask.querySelector('#pgo').disabled = !e.target.checked;
+    });
+
+    mask.querySelector('#pgo').addEventListener('click', async ()=>{
+      const mat = mask.querySelector('#pmat').value.trim();
+      const pass = mask.querySelector('#ppass').value.trim();
+      const err = mask.querySelector('#perr');
+
+      if(mat !== AUTH_MAT){ err.textContent = "Matrícula no autorizada."; return; }
+      if(pass !== AUTH_PASS){ err.textContent = "Clave incorrecta."; return; }
+      err.textContent = "";
+
+      const btn = mask.querySelector('#pgo');
+      btn.disabled = true; btn.textContent = "Eliminando…";
+
+      let okServer = await purgeBackendMaybe();
+      let okUI = purgeUI();
+
+      btn.disabled = false; btn.textContent = "Eliminar";
+
+      if(okServer || okUI){
+        mask.querySelector('.desc').innerHTML = "<b>Historial eliminado.</b>";
+        mask.querySelector('.warn').style.display = "none";
+        btn.style.display = "none";
+        mask.querySelector('#pcancel').textContent = "Cerrar";
+      }else{
+        err.textContent = "No se pudo depurar el historial.";
+      }
+    });
+
+    mask.querySelector('#pcancel').addEventListener('click', close);
+    mask.addEventListener('click', (e)=>{ if(e.target === mask) close(); });
+
+    document.body.appendChild(mask);
+    setTimeout(()=> mask.querySelector('#pmat').focus(), 0);
+  }
+
+  function wireBtn(){
+    const btn = document.getElementById('conc-purge-btn');
+    if(btn && !btn.dataset.purgeModal){
+      btn.dataset.purgeModal = '1';
+      btn.onclick = (ev)=>{ ev.preventDefault(); openModal(); };
+    }
+  }
+
+  const mo = new MutationObserver(wireBtn);
+  mo.observe(document.documentElement, { childList:true, subtree:true });
+  document.addEventListener('DOMContentLoaded', wireBtn);
+  wireBtn();
 })();
 </script>
 </body>
