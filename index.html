@@ -2876,7 +2876,7 @@ document.addEventListener('DOMContentLoaded', () => {
       mask.querySelector('#den-ok').addEventListener('click', function(){ try{ mask.remove(); }catch(e){} });
     }catch(_){ alert('Acceso denegado'); }
   }
-  function openConcentrado(){
+  function openConcentrado_guardShim(){
     // Llama a la lógica existente de abrir overlay sin alterar tu flujo
     try{
       // Muchos builds crean el overlay bajo el id "concentradoOverlay" con ensureOverlay()+show.
@@ -2918,8 +2918,7 @@ document.addEventListener('DOMContentLoaded', () => {
       try{
         if(!isAllowed()){ e.preventDefault(); e.stopPropagation(); showDenied(); return false; }
       }catch(_){}
-      // permitido
-      openConcentrado();
+      // permitido: dejar que el manejador de la app lo abra
     }, {capture:true});
   }
 
@@ -3460,8 +3459,7 @@ document.addEventListener('DOMContentLoaded', () => {
       try{
         if(!isAllowed()){ e.preventDefault(); e.stopPropagation(); showDenied(); return false; }
       }catch(_){}
-      // permitido
-      openConcentrado();
+      // permitido: dejar que el manejador de la app lo abra
     }, {capture:true});
   }
 
