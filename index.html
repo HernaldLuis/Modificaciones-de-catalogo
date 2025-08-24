@@ -2165,7 +2165,7 @@ function getTipoCama(h){
   const v = (h.tipo_cama || '').toString().toUpperCase();
   if (v === 'K' || v === 'D') return v;
   // Fallback por si un día viene texto
-  const txt = [h.titulo||'', h.descripcion||'', ..(h.caracteristicas||[]).join(' ')].join(' ').toUpperCase();
+  const txt = [h.titulo||'', h.descripcion||'', ...(h.caracteristicas||[])].join(' ').toUpperCase();
   if (/\bKING\b|KING SIZE|\bKS\b/.test(txt)) return 'K';
   if (/\bDOUBLE\b|\bDOBLE\b|\bMATRIMONIAL\b|\bMATRI\b|2\s*DBL/.test(txt)) return 'D';
   return '';
@@ -2502,7 +2502,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const t = +sessionStorage.getItem(SESSION_KEY) || 0;
     return (now() - t) < TTL;
   }
-  function setSession(){ sessionStorage.setItem(SESSION_KEY, String(now())); updateSessionUI(); }
+  function setSession(){ sessionStorage.setItem(SESSION_KEY, String(now())); updateSessionUI(); 
+    try{
+      var b=document.getElementById('btn-concentrado');
+      if(b){ b.style.display=(typeof getRole==='function' && getRole()==='admin')?'inline-block':'none'; }
+      var lg=document.getElementById('btn-logout');
+      if(lg){ lg.style.display='inline-block'; }
+    }catch(_e){}
+    }
   function clearSession(){ sessionStorage.removeItem(SESSION_KEY); updateSessionUI(); }
 
   window.hkHasSession = hasSession;
@@ -2660,6 +2667,55 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
       </div>
     `;
+    // === BLOQUEO POR CATEGORÍA / JSON ===
+    (function lockInventoryByCategory(hnum){
+      function $(id){ return document.getElementById(id); }
+      // Detect category from known lists or JSON (if available)
+      var cat = 'Normal';
+      try{
+        if (typeof categoriaDe === 'function') { cat = categoriaDe(hnum); }
+        if (typeof window.getHabitacion === 'function'){
+          // optional JSON override if explicit
+        }
+      }catch(_){}
+      // Set & disable category select
+      try{
+        var selCat = $('ban-categoria');
+        if(selCat){ selCat.value = cat; selCat.disabled = true; }
+      }catch(_){}
+      // Bed type: Master & Swim Up => KING; Normal => from JSON if available, else current
+      try{
+        var selBed = $('tipo-cama');
+        if(selBed){
+          var bed = 'K';
+          if(cat==='Normal'){
+            try{
+              if (typeof window.ensureHabitacionesData==='function' && window.__habitaciones){
+                var h = window.__habitaciones[String(hnum)] || window.__habitaciones[Number(hnum)];
+                if(h && h.tipo_cama){ bed = String(h.tipo_cama).toUpperCase().includes('D') ? 'D' : 'K'; }
+              }
+            }catch(__){}
+          }
+          selBed.value = bed;
+          selBed.disabled = true; // siempre bloqueado (evitar errores manuales)
+        }
+      }catch(_){}
+      // Colors: for Master & Swing Up => Café (duvet, toallas/tapetes), lock
+      try{
+        var selDuv = $('cama-color');
+        var selBan = $('ban-color');
+        var forceCafe = (cat==='Master Suite' || cat==='Swing Up');
+        if(selDuv){
+          if(forceCafe){ selDuv.value = 'Café'; selDuv.disabled = true; }
+          else { selDuv.disabled = false; } // Normal: editable
+        }
+        if(selBan){
+          if(forceCafe){ selBan.value = 'Café'; selBan.disabled = true; }
+          else { selBan.disabled = false; }
+        }
+      }catch(_){}
+    })(habitacionNum);
+
 
     // Inicializar controles
     (function invpInit(hnum){
@@ -2945,13 +3001,17 @@ document.addEventListener('DOMContentLoaded', () => {
   const DEPURACION_MAT = "3072167";                    // matrícula autorizada
   const DEPURACION_PASS = "JRPNLS96050220H500";        // clave de depuración
 
-  window.__hkRestoreWithConfirm = function(num, applyFn) {
+  window.__hkRestoreWithConfirm = function(num, applyFn){
     try{
       if(!confirm("¿Restaurar valores sugeridos para esta habitación?")) return;
       if(!confirm("Esta acción sobrescribirá los campos visibles. ¿Confirmas?")) return;
+      const mat = (sessionStorage.getItem('matricula')||'').trim();
+      if(mat !== DEPURACION_MAT){ alert("Matrícula no autorizada."); return; }
+      const pass = prompt("Clave de depuración:");
+      if(pass !== DEPURACION_PASS){ alert("Clave incorrecta."); return; }
       if(typeof applyFn === 'function') applyFn(num);
     }catch(e){ console.error(e); alert("No se pudo restaurar los sugeridos."); }
-    };
+  };
 })();
 </script>
 
@@ -2980,7 +3040,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (typeof window.getTipoCama === 'function') return window.getTipoCama(h);
     const v = (h.tipo_cama||'').toString().toUpperCase();
     if (v==='K' || v==='D') return v;
-    const txt = [h.titulo||'', h.descripcion||'', ..(h.caracteristicas||[]).join(' ')].join(' ').toUpperCase();
+    const txt = [h.titulo||'', h.descripcion||'', ...(h.caracteristicas||[])].join(' ').toUpperCase();
     if (/\bKING\b|KING SIZE|\bKS\b/.test(txt)) return 'K';
     if (/\bDOUBLE\b|\bDOBLE\b|\bMATRIMONIAL\b|\bMATRI\b|2\s*DBL/.test(txt)) return 'D';
     return '';
@@ -3098,14 +3158,13 @@ document.addEventListener('DOMContentLoaded', () => {
   const DEPURACION_MAT = "3072167";
   const DEPURACION_PASS = "JRPNLS96050220H500";
 
-  function purgeUI(){try{ localStorage.removeItem('HK_INV_DATA'); }catch(_e){}
-      
+  function purgeUI(){
     try{
       const ov = document.getElementById('concentradoOverlay');
       const tbody = ov && ov.querySelector('table tbody');
       if(!tbody) return false;
       tbody.innerHTML = "";
-      const counter = ov.querySelector('#conc-stats') || ov.querySelector('.conc-count');
+      const counter = ov.querySelector('.conc-count');
       if(counter) counter.textContent = "0 registros";
       return true;
     }catch(e){ console.error(e); return false; }
