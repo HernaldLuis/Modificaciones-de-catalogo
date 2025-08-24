@@ -939,10 +939,16 @@ body.hk-modal-open{ overflow: hidden; }
 #concentradoOverlay.fullscreen .table-wrap{ height: calc(94vh - 120px) !important; }
 body.hk-no-scroll{ overflow: hidden !important; }
 
-
-/* === CONC-PURGE-001 (UI only) === */
-#conc-purge-btn{ background:#ef4444!important;color:#fff!important;border:none;border-radius:10px;padding:8px 12px;font-weight:700;cursor:pointer; }
-#conc-purge-btn:hover{ filter:brightness(0.95); }
+/* === CONC-TOOLBAR-FIX: centrar y evitar desbordes === */
+#concentradoOverlay .conc-toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;}
+#concentradoOverlay .conc-toolbar .right{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end;margin-left:auto;}
+#concentradoOverlay .conc-toolbar .right .btn{white-space:nowrap;}
+#concentradoOverlay .conc-toolbar .btn{padding:6px 10px;border-radius:10px;font-weight:700;font-size:13px;}
+@media (max-width:1100px){
+  #concentradoOverlay .conc-toolbar{flex-direction:column;align-items:stretch;}
+  #concentradoOverlay .conc-toolbar .right{justify-content:center;width:100%;}
+}
+#concentradoOverlay .conc-toolbar .right #conc-cerrar{order:99;}
 
 </style>
 
@@ -2906,29 +2912,19 @@ document.addEventListener('DOMContentLoaded', () => {
 <script>
 (()=>{
   if(window.__hkRestoreGuardWired) return; window.__hkRestoreGuardWired = true;
-  const DEPURACION_MAT = "3072167";
-  const DEPURACION_PASS = "JRPNLS96050220H500";
+  const DEPURACION_MAT = "3072167";                    // matrícula autorizada
+  const DEPURACION_PASS = "JRPNLS96050220H500";        // clave de depuración
 
   window.__hkRestoreWithConfirm = function(num, applyFn){
     try{
       if(!confirm("¿Restaurar valores sugeridos para esta habitación?")) return;
       if(!confirm("Esta acción sobrescribirá los campos visibles. ¿Confirmas?")) return;
-
       const mat = (sessionStorage.getItem('matricula')||'').trim();
-      if(mat !== DEPURACION_MAT){
-        alert("Matrícula no autorizada para esta acción.");
-        return;
-      }
+      if(mat !== DEPURACION_MAT){ alert("Matrícula no autorizada."); return; }
       const pass = prompt("Clave de depuración:");
-      if(pass !== DEPURACION_PASS){
-        alert("Clave incorrecta.");
-        return;
-      }
+      if(pass !== DEPURACION_PASS){ alert("Clave incorrecta."); return; }
       if(typeof applyFn === 'function') applyFn(num);
-    }catch(e){
-      console.error(e);
-      alert("No se pudo restaurar los sugeridos.");
-    }
+    }catch(e){ console.error(e); alert("No se pudo restaurar los sugeridos."); }
   };
 })();
 </script>
@@ -2942,6 +2938,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const esMaster = n => MASTERS.includes(Number(n));
   const esSwingUp = n => SWING_UP.includes(Number(n)) && !esMaster(n);
   const categoriaDe = n => esMaster(n) ? 'Master Suite' : (esSwingUp(n) ? 'Swing Up' : 'Normal');
+
   async function getHabitacion(num){
     try{
       if (typeof window.ensureHabitacionesData === 'function'){
@@ -2966,13 +2963,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const camaK = { protector:1, sabanas:2, almohadas:4, fundas:4, protAlm:4, inserto:1, cubre:1 };
     const camaD = { protector:camaK.protector*2, sabanas:camaK.sabanas*2, almohadas:camaK.almohadas*2, fundas:camaK.fundas*2, protAlm:camaK.protAlm*2, inserto:camaK.inserto*2, cubre:camaK.cubre*2 };
     if (categoria==='Swing Up'){
-      return { ban:{bano:6,mano:6,facial:2,tapete:2,verdes:2,color:'Café',lockColor:true}, cama:{...camaK,color:'Café',tipo:'K',lockTipo:true,lockColor:true} };
+      return { ban:{bano:6,mano:6,facial:2,tapete:2,verdes:2,color:'Café',lockColor:true},
+               cama:{...camaK,color:'Café',tipo:'K',lockTipo:true,lockColor:true} };
     }
     if (categoria==='Master Suite'){
-      return { ban:{bano:6,mano:7,facial:2,tapete:4,verdes:2,color:'Café',lockColor:true}, cama:{...camaK,color:'Café',tipo:'K',lockTipo:true,lockColor:true} };
+      return { ban:{bano:6,mano:7,facial:2,tapete:4,verdes:2,color:'Café',lockColor:true},
+               cama:{...camaK,color:'Café',tipo:'K',lockTipo:true,lockColor:true} };
     }
     const isD = (tipoCamaNorm==='D');
-    return { ban:{bano:4,mano:4,facial:2,tapete:1,verdes:0,color:'Blanco',lockColor:false}, cama:{...(isD?camaD:camaK),color:'Blanco',tipo:(isD?'D':'K'),lockTipo:true,lockColor:false} };
+    return { ban:{bano:4,mano:4,facial:2,tapete:1,verdes:0,color:'Blanco',lockColor:false},
+             cama:{...(isD?camaD:camaK),color:'Blanco',tipo:(isD?'D':'K'),lockTipo:true,lockColor:false} };
   }
   function setVal(id,v){ const el=document.getElementById(id); if(el) el.value=String(v); }
   function setSel(id,v,lock=false){ const el=document.getElementById(id); if(!el) return; const has=[...el.options].some(o=>o.value==v); el.value=has?v:(el.options[0]?.value||''); lock?el.setAttribute('disabled','disabled'):el.removeAttribute('disabled'); }
@@ -3077,9 +3077,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const ov = document.getElementById('concentradoOverlay');
       const tbody = ov && ov.querySelector('table tbody');
       if(!tbody) return false;
-      // deja el header, limpia filas
       tbody.innerHTML = "";
-      // contador
       const counter = ov.querySelector('.conc-count');
       if(counter) counter.textContent = "0 registros";
       return true;
@@ -3087,13 +3085,11 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   async function purgeBackendMaybe(){
-    // opcional: si en el index existe window.apiPurge, úsalo
     try{
       if (typeof window.apiPurge === 'function'){
         const ok = await window.apiPurge();
         return !!ok;
       }
-      // fallback: intenta derivar base de apiList (si deja pista)
       if (window.__conc_api_base){
         const url = window.__conc_api_base + "?mode=purge";
         const r = await fetch(url, {method:"POST"});
@@ -3108,19 +3104,10 @@ document.addEventListener('DOMContentLoaded', () => {
     try{
       if(!confirm("¿Eliminar/depurar el historial mostrado en Concentrado?")) return;
       if(!confirm("Esta acción no se puede deshacer. ¿Confirmas?")) return;
-
       const mat = (sessionStorage.getItem('matricula')||'').trim();
-      if(mat !== DEPURACION_MAT){
-        alert("Matrícula no autorizada para depuración.");
-        return;
-      }
+      if(mat !== DEPURACION_MAT){ alert("Matrícula no autorizada."); return; }
       const pass = prompt("Clave de depuración:");
-      if(pass !== DEPURACION_PASS){
-        alert("Clave incorrecta.");
-        return;
-      }
-
-      // Primero backend (si existe), luego UI
+      if(pass !== DEPURACION_PASS){ alert("Clave incorrecta."); return; }
       let done = await purgeBackendMaybe();
       const uiDone = purgeUI();
       if(done || uiDone){
@@ -3128,9 +3115,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }else{
         alert("No se pudo depurar el historial.");
       }
-    }catch(e){
-      console.error(e); alert("No se pudo depurar el historial.");
-    }
+    }catch(e){ console.error(e); alert("No se pudo depurar el historial."); }
   };
 
   function placeBtn(){
@@ -3144,9 +3129,10 @@ document.addEventListener('DOMContentLoaded', () => {
     btn.id = 'conc-purge-btn';
     btn.type = 'button';
     btn.textContent = 'Depurar';
+    btn.className = 'btn danger';
+    btn.style.cssText = 'background:#ef4444;color:#fff;border:none;border-radius:10px;padding:8px 12px;font-weight:700;cursor:pointer;';
     btn.onclick = ()=> window.__hkPurgeWithConfirm();
 
-    // Inserta antes de "Cerrar" si existe, sino al final
     const closeBtn = toolbar.querySelector('#conc-cerrar');
     if (closeBtn && closeBtn.parentNode === toolbar){
       toolbar.insertBefore(btn, closeBtn);
@@ -3155,7 +3141,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Hook robusto
   function hookOpen(){
     if(typeof window.openConcentrado!=='function') return;
     if(window.__hkConcPurgeHooked) return; window.__hkConcPurgeHooked = true;
