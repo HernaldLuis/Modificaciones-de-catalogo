@@ -2165,7 +2165,7 @@ function getTipoCama(h){
   const v = (h.tipo_cama || '').toString().toUpperCase();
   if (v === 'K' || v === 'D') return v;
   // Fallback por si un día viene texto
-  const txt = [h.titulo||'', h.descripcion||'', ...(h.caracteristicas||[])].join(' ').toUpperCase();
+  const txt = [h.titulo||'', h.descripcion||'', ..(h.caracteristicas||[]).join(' ')].join(' ').toUpperCase();
   if (/\bKING\b|KING SIZE|\bKS\b/.test(txt)) return 'K';
   if (/\bDOUBLE\b|\bDOBLE\b|\bMATRIMONIAL\b|\bMATRI\b|2\s*DBL/.test(txt)) return 'D';
   return '';
@@ -2537,15 +2537,14 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   window.hkLogin = async function(next){
-    if(hasSession()){ if(typeof next==='function') next(); return; }
+    if(hasSession()){ if(typeof next==='function') next(); try{ if(typeof updateUIByRole==='function') updateUIByRole(); }catch(_e){} return; }
     const pin = await pedirPINModal();
     if(!pin) return;
     const id = String(pin).trim();
     const name = MATRICULAS[id] || null;
     if(name){
-      try{ sessionStorage.setItem('HK_MAT', id); sessionStorage.setItem('HK_NAME', name); }catch(e){}
-      setSession();
-      if(typeof next==='function') next();
+      try{ \1      try{ if(typeof updateUIByRole==='function') updateUIByRole(); }catch(_e){}
+      if(typeof next==='function') next(); try{ if(typeof updateUIByRole==='function') updateUIByRole(); }catch(_e){}
     }else{
       const ERR = document.getElementById('hkpin2-error'); if(ERR){ ERR.style.display='block'; }
     }
@@ -2848,7 +2847,31 @@ document.addEventListener('DOMContentLoaded', () => {
     const ov=el('#concentradoOverlay'); const wrap=el('.table-wrap', ov); const html=wrap?wrap.innerHTML:'<p>Sin datos</p>';
     const w=window.open('', '_blank'); if(!w) return alert('Permite ventanas emergentes para exportar a PDF.');
     const css='<style>body{font-family:Arial,sans-serif;padding:16px}h1{font-size:18px;margin:0 0 10px}table{width:100%;border-collapse:collapse}th,td{border:1px solid #ddd;padding:6px;font-size:12px;white-space:nowrap}th{background:#f3f4f6;position:sticky;top:0}tr:nth-child(even) td{background:#fcfdff}</style>';
-    w.document.write('<html><head><meta charset="utf-8"><title>Concentrado</title>'+css+'</head><body><h1>Concentrado de Inventarios</h1>'+html+'</body></html>');
+    w.document.write('<html><head><meta charset="utf-8"><title>Concentrado</title>'+css+'</head><body><h1>Concentrado de Inventarios</h1>'+html+'
+<script>
+// === Ensure role-based UI updates (Concentrado immediately after login) ===
+(function(){
+  if(window.__hkRoleUIWired) return; window.__hkRoleUIWired = true;
+  function updateUIByRole(){
+    try{
+      var btn = document.getElementById('btn-concentrado');
+      if(btn){
+        btn.style.display = (typeof getRole==='function' && getRole()==='admin') ? 'inline-block' : 'none';
+      }
+      var lg = document.getElementById('btn-logout');
+      if(lg){
+        lg.style.display = (sessionStorage.getItem('HK_MAT') ? 'inline-block' : 'none');
+      }
+    }catch(e){}
+  }
+  window.updateUIByRole = updateUIByRole;
+  document.addEventListener('DOMContentLoaded', updateUIByRole);
+  const mo = new MutationObserver(updateUIByRole);
+  mo.observe(document.documentElement, {childList:true, subtree:true});
+})();
+</script>
+
+</body></html>');
     w.document.close(); w.focus(); w.print();
   }
 
@@ -2946,15 +2969,13 @@ document.addEventListener('DOMContentLoaded', () => {
   const DEPURACION_PASS = "JRPNLS96050220H500";        // clave de depuración
 
   window.__hkRestoreWithConfirm = function(num, applyFn){
+    
     try{
       if(!confirm("¿Restaurar valores sugeridos para esta habitación?")) return;
       if(!confirm("Esta acción sobrescribirá los campos visibles. ¿Confirmas?")) return;
-      const mat = (sessionStorage.getItem('matricula')||'').trim();
-      if(mat !== DEPURACION_MAT){ alert("Matrícula no autorizada."); return; }
-      const pass = prompt("Clave de depuración:");
-      if(pass !== DEPURACION_PASS){ alert("Clave incorrecta."); return; }
       if(typeof applyFn === 'function') applyFn(num);
     }catch(e){ console.error(e); alert("No se pudo restaurar los sugeridos."); }
+    
   };
 })();
 </script>
@@ -2984,7 +3005,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (typeof window.getTipoCama === 'function') return window.getTipoCama(h);
     const v = (h.tipo_cama||'').toString().toUpperCase();
     if (v==='K' || v==='D') return v;
-    const txt = [h.titulo||'', h.descripcion||'', ...(h.caracteristicas||[])].join(' ').toUpperCase();
+    const txt = [h.titulo||'', h.descripcion||'', ..(h.caracteristicas||[]).join(' ')].join(' ').toUpperCase();
     if (/\bKING\b|KING SIZE|\bKS\b/.test(txt)) return 'K';
     if (/\bDOUBLE\b|\bDOBLE\b|\bMATRIMONIAL\b|\bMATRI\b|2\s*DBL/.test(txt)) return 'D';
     return '';
@@ -3102,16 +3123,30 @@ document.addEventListener('DOMContentLoaded', () => {
   const DEPURACION_MAT = "3072167";
   const DEPURACION_PASS = "JRPNLS96050220H500";
 
-  function purgeUI(){
-    try{
-      const ov = document.getElementById('concentradoOverlay');
-      const tbody = ov && ov.querySelector('table tbody');
-      if(!tbody) return false;
-      tbody.innerHTML = "";
-      const counter = ov.querySelector('.conc-count');
-      if(counter) counter.textContent = "0 registros";
-      return true;
-    }catch(e){ console.error(e); return false; }
+  
+function purgeUI(){
+  try{
+    // Clear local storage data
+    try{ localStorage.removeItem('HK_INV_DATA'); }catch(_){}
+    const ov = document.getElementById('concentradoOverlay');
+    if(ov){
+      // reset internal dataset if present
+      try{ ov.__data = []; ov.__data_all = []; }catch(_){}
+      // clear table/body
+      const tbody = ov.querySelector('table tbody');
+      const body = ov.querySelector('#conc-body');
+      if(tbody) tbody.innerHTML = "";
+      if(body) body.innerHTML = '<p>No hay registros todavia.</p>';
+      // update counters
+      const counterNew = ov.querySelector('#conc-stats');
+      const counterOld = ov.querySelector('.conc-count');
+      if(counterNew) counterNew.textContent = "0 registros";
+      if(counterOld) counterOld.textContent = "0 registros";
+    }
+    return true;
+  }catch(e){ console.error(e); return false; }
+}
+catch(e){ console.error(e); return false; }
   }
 
   async function purgeBackendMaybe(){
@@ -3310,5 +3345,29 @@ document.addEventListener('DOMContentLoaded', () => {
   wireBtn();
 })();
 </script>
+
+<script>
+// === Ensure role-based UI updates (Concentrado immediately after login) ===
+(function(){
+  if(window.__hkRoleUIWired) return; window.__hkRoleUIWired = true;
+  function updateUIByRole(){
+    try{
+      var btn = document.getElementById('btn-concentrado');
+      if(btn){
+        btn.style.display = (typeof getRole==='function' && getRole()==='admin') ? 'inline-block' : 'none';
+      }
+      var lg = document.getElementById('btn-logout');
+      if(lg){
+        lg.style.display = (sessionStorage.getItem('HK_MAT') ? 'inline-block' : 'none');
+      }
+    }catch(e){}
+  }
+  window.updateUIByRole = updateUIByRole;
+  document.addEventListener('DOMContentLoaded', updateUIByRole);
+  const mo = new MutationObserver(updateUIByRole);
+  mo.observe(document.documentElement, {childList:true, subtree:true});
+})();
+</script>
+
 </body>
 </html>
