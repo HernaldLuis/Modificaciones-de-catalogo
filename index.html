@@ -5,9 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Catálogo de Habitaciones</title>
   <style>
-/* Habilitar botón Concentrado fijo en UI (visible siempre) */
-#btn-concentrado{ display:inline-block !important; }
-
 body {
   margin: 0;
   font-family: Arial, sans-serif;
@@ -2851,86 +2848,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const ov=el('#concentradoOverlay'); const wrap=el('.table-wrap', ov); const html=wrap?wrap.innerHTML:'<p>Sin datos</p>';
     const w=window.open('', '_blank'); if(!w) return alert('Permite ventanas emergentes para exportar a PDF.');
     const css='<style>body{font-family:Arial,sans-serif;padding:16px}h1{font-size:18px;margin:0 0 10px}table{width:100%;border-collapse:collapse}th,td{border:1px solid #ddd;padding:6px;font-size:12px;white-space:nowrap}th{background:#f3f4f6;position:sticky;top:0}tr:nth-child(even) td{background:#fcfdff}</style>';
-    w.document.write('<html><head><meta charset="utf-8"><title>Concentrado</title>'+css+'</head><body><h1>Concentrado de Inventarios</h1>'+html+'
-<script>
-// Guard estricto para Concentrado: solo Luis (3072167) y Manuel (3067888)
-(function(){
-  function isAllowed(){
-    try{
-      var id = (sessionStorage.getItem('HK_MAT')||'').trim();
-      return id==='3072167' || id==='3067888';
-    }catch(e){ return false; }
-  }
-  function showDenied(){
-    try{
-      // Modal ligero reutilizando estilos existentes
-      var mask = document.createElement('div');
-      mask.className = 'hk-purge-mask'; // usa overlay oscuro existente si lo tienes
-      mask.style.zIndex = '10080';
-      mask.innerHTML = '<div class="hk-purge-dialog" role="dialog" aria-modal="true" aria-labelledby="den-title">\
-        <h3 id="den-title">Acceso restringido</h3>\
-        <p class="desc">Tu cuenta no tiene permisos para consultar el concentrado. Si requiere acceso, por favor contacte al Dpto de Ama de Llaves.</p>\
-        <div class="actions"><button class="btn-go" id="den-ok" type="button">Entendido</button></div>\
-      </div>';
-      document.body.appendChild(mask);
-      mask.querySelector('#den-ok').addEventListener('click', function(){ try{ mask.remove(); }catch(e){} });
-    }catch(_){ alert('Acceso denegado'); }
-  }
-  function openConcentrado_guardShim(){
-    // Llama a la lógica existente de abrir overlay sin alterar tu flujo
-    try{
-      // Muchos builds crean el overlay bajo el id "concentradoOverlay" con ensureOverlay()+show.
-      // Activamos el mismo gesto que usas en el botón original:
-      var btn = document.getElementById('btn-concentrado');
-      if(btn){
-        // Simular click original si ya trae handler
-        var ev = new MouseEvent('click', {bubbles:true, cancelable:true});
-        if(btn.dispatchEvent(ev)) return;
-      }
-    }catch(e){}
-    // Fallback mínimo: crear el overlay si tu wiring no responde (no interfiere si ya existe)
-    try{
-      var ov = document.getElementById('concentradoOverlay');
-      if(!ov){
-        // intenta invocar ensureOverlay si existe
-        if(typeof ensureOverlay==='function'){ ov = ensureOverlay(); }
-      }
-      ov = document.getElementById('concentradoOverlay');
-      if(ov){
-        ov.style.display = 'block';
-        ov.classList.add('activo');
-      }else{
-        alert('No se pudo abrir el Concentrado (overlay no disponible).');
-      }
-    }catch(err){
-      console.error(err);
-      alert('No se pudo abrir el Concentrado.');
-    }
-  }
-
-  function wire(){
-    var btn = document.getElementById('btn-concentrado');
-    if(!btn) return;
-    if(btn.__guardWired) return; btn.__guardWired = true;
-    // Asegurar visible (pero el acceso se valida al click)
-    btn.style.display = 'inline-block';
-    btn.addEventListener('click', function(e){
-      try{
-        if(!isAllowed()){ e.preventDefault(); e.stopPropagation(); showDenied(); return false; }
-      }catch(_){}
-      try{ if(typeof window.openConcentrado==='function'){ e.preventDefault(); e.stopPropagation(); window.openConcentrado(); return false; } }catch(_e){}
-    }, {capture:true});
-  }
-
-  // Observa por si el botón se re-renderiza
-  var mo = new MutationObserver(function(){ try{ wire(); }catch(e){} });
-  mo.observe(document.documentElement, {childList:true, subtree:true});
-  document.addEventListener('DOMContentLoaded', wire);
-  wire();
-})();
-</script>
-
-</body></html>');
+    w.document.write('<html><head><meta charset="utf-8"><title>Concentrado</title>'+css+'</head><body><h1>Concentrado de Inventarios</h1>'+html+'</body></html>');
     w.document.close(); w.focus(); w.print();
   }
 
@@ -3392,84 +3310,5 @@ document.addEventListener('DOMContentLoaded', () => {
   wireBtn();
 })();
 </script>
-
-<script>
-// Guard estricto para Concentrado: solo Luis (3072167) y Manuel (3067888)
-(function(){
-  function isAllowed(){
-    try{
-      var id = (sessionStorage.getItem('HK_MAT')||'').trim();
-      return id==='3072167' || id==='3067888';
-    }catch(e){ return false; }
-  }
-  function showDenied(){
-    try{
-      // Modal ligero reutilizando estilos existentes
-      var mask = document.createElement('div');
-      mask.className = 'hk-purge-mask'; // usa overlay oscuro existente si lo tienes
-      mask.style.zIndex = '10080';
-      mask.innerHTML = '<div class="hk-purge-dialog" role="dialog" aria-modal="true" aria-labelledby="den-title">\
-        <h3 id="den-title">Acceso restringido</h3>\
-        <p class="desc">Tu cuenta no tiene permisos para consultar el concentrado. Si requiere acceso, por favor contacte al Dpto de Ama de Llaves.</p>\
-        <div class="actions"><button class="btn-go" id="den-ok" type="button">Entendido</button></div>\
-      </div>';
-      document.body.appendChild(mask);
-      mask.querySelector('#den-ok').addEventListener('click', function(){ try{ mask.remove(); }catch(e){} });
-    }catch(_){ alert('Acceso denegado'); }
-  }
-  function openConcentrado(){
-    // Llama a la lógica existente de abrir overlay sin alterar tu flujo
-    try{
-      // Muchos builds crean el overlay bajo el id "concentradoOverlay" con ensureOverlay()+show.
-      // Activamos el mismo gesto que usas en el botón original:
-      var btn = document.getElementById('btn-concentrado');
-      if(btn){
-        // Simular click original si ya trae handler
-        var ev = new MouseEvent('click', {bubbles:true, cancelable:true});
-        if(btn.dispatchEvent(ev)) return;
-      }
-    }catch(e){}
-    // Fallback mínimo: crear el overlay si tu wiring no responde (no interfiere si ya existe)
-    try{
-      var ov = document.getElementById('concentradoOverlay');
-      if(!ov){
-        // intenta invocar ensureOverlay si existe
-        if(typeof ensureOverlay==='function'){ ov = ensureOverlay(); }
-      }
-      ov = document.getElementById('concentradoOverlay');
-      if(ov){
-        ov.style.display = 'block';
-        ov.classList.add('activo');
-      }else{
-        alert('No se pudo abrir el Concentrado (overlay no disponible).');
-      }
-    }catch(err){
-      console.error(err);
-      alert('No se pudo abrir el Concentrado.');
-    }
-  }
-
-  function wire(){
-    var btn = document.getElementById('btn-concentrado');
-    if(!btn) return;
-    if(btn.__guardWired) return; btn.__guardWired = true;
-    // Asegurar visible (pero el acceso se valida al click)
-    btn.style.display = 'inline-block';
-    btn.addEventListener('click', function(e){
-      try{
-        if(!isAllowed()){ e.preventDefault(); e.stopPropagation(); showDenied(); return false; }
-      }catch(_){}
-      try{ if(typeof window.openConcentrado==='function'){ e.preventDefault(); e.stopPropagation(); window.openConcentrado(); return false; } }catch(_e){}
-    }, {capture:true});
-  }
-
-  // Observa por si el botón se re-renderiza
-  var mo = new MutationObserver(function(){ try{ wire(); }catch(e){} });
-  mo.observe(document.documentElement, {childList:true, subtree:true});
-  document.addEventListener('DOMContentLoaded', wire);
-  wire();
-})();
-</script>
-
 </body>
 </html>
