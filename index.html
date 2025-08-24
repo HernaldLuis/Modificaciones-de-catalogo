@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Catálogo de Habitaciones</title>
   <style>
-/* HK admin: ensure Concentrado button visible */
+/* HK admin: show Concentrado button */
 body.hk-admin #btn-concentrado{ display:inline-block !important; }
 
 body {
@@ -2505,18 +2505,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const t = +sessionStorage.getItem(SESSION_KEY) || 0;
     return (now() - t) < TTL;
   }
-  function setSession(){ sessionStorage.setItem(SESSION_KEY, String(now())); updateSessionUI(); 
-    try{
-      var b=document.getElementById('btn-concentrado');
-      if(b){ b.style.display=(typeof getRole==='function' && getRole()==='admin')?'inline-block':'none'; 
-    try{
-      if(typeof getRole==='function' && getRole()==='admin'){ document.body.classList.add('hk-admin'); }
-      else { document.body.classList.remove('hk-admin'); }
-    }catch(_e){}}
-      var lg=document.getElementById('btn-logout');
-      if(lg){ lg.style.display='inline-block'; }
-    }catch(_e){}
-    }
+  function setSession(){ sessionStorage.setItem(SESSION_KEY, String(now())); updateSessionUI(); }
   function clearSession(){ sessionStorage.removeItem(SESSION_KEY); updateSessionUI(); }
 
   window.hkHasSession = hasSession;
@@ -2551,7 +2540,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   window.hkLogin = async function(next){
-    if(hasSession()){ if(typeof next==='function') next(); try{ var b=document.getElementById('btn-concentrado'); if(b){ b.style.display = document.body.classList.contains('hk-admin') ? 'inline-block' : 'none'; } }catch(_e){} try{var b=document.getElementById('btn-concentrado'); if(b){ b.style.display=(typeof getRole==='function' && getRole()==='admin')?'inline-block':'none'; }}catch(_e){} return; }
+    if(hasSession()){ if(typeof next==='function') next(); return; }
     const pin = await pedirPINModal();
     if(!pin) return;
     const id = String(pin).trim();
@@ -2559,18 +2548,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if(name){
       try{ sessionStorage.setItem('HK_MAT', id); sessionStorage.setItem('HK_NAME', name); }catch(e){}
       setSession();
-      
-      try{
-        var id = sessionStorage.getItem('HK_MAT')||'';
-        if(id==='3072167' || id==='3067888'){
-          document.body.classList.add('hk-admin');
-        }else{
-          document.body.classList.remove('hk-admin');
-        }
-        var b=document.getElementById('btn-concentrado');
-        if(b){ b.style.display = document.body.classList.contains('hk-admin') ? 'inline-block' : 'none'; }
-      }catch(_e){} 
-try{var b=document.getElementById('btn-concentrado'); if(b){ b.style.display=(typeof getRole==='function' && getRole()==='admin')?'inline-block':'none'; } var lg=document.getElementById('btn-logout'); if(lg){ lg.style.display='inline-block'; }}catch(_e){} if(typeof next==='function') next(); try{ var b=document.getElementById('btn-concentrado'); if(b){ b.style.display = document.body.classList.contains('hk-admin') ? 'inline-block' : 'none'; } }catch(_e){} try{var b=document.getElementById('btn-concentrado'); if(b){ b.style.display=(typeof getRole==='function' && getRole()==='admin')?'inline-block':'none'; }}catch(_e){}
+      if(typeof next==='function') next();
     }else{
       const ERR = document.getElementById('hkpin2-error'); if(ERR){ ERR.style.display='block'; }
     }
@@ -2580,9 +2558,7 @@ try{var b=document.getElementById('btn-concentrado'); if(b){ b.style.display=(ty
     clearSession();
     try{ sessionStorage.removeItem('HK_MAT'); sessionStorage.removeItem('HK_NAME'); }catch(e){}
     const inv = document.getElementById('inventarioOverlay'); if(inv) inv.classList.remove('activo');
-  
-    try{ document.body.classList.remove('hk-admin'); }catch(_e){}
-};
+  };
 
   // Inventario principal (overlay)
   window.abrirInventarioPrincipal = function(habitacionNum){
@@ -2687,55 +2663,6 @@ try{var b=document.getElementById('btn-concentrado'); if(b){ b.style.display=(ty
         </div>
       </div>
     `;
-    // === BLOQUEO POR CATEGORÍA / JSON ===
-    (function lockInventoryByCategory(hnum){
-      function $(id){ return document.getElementById(id); }
-      // Detect category from known lists or JSON (if available)
-      var cat = 'Normal';
-      try{
-        if (typeof categoriaDe === 'function') { cat = categoriaDe(hnum); }
-        if (typeof window.getHabitacion === 'function'){
-          // optional JSON override if explicit
-        }
-      }catch(_){}
-      // Set & disable category select
-      try{
-        var selCat = $('ban-categoria');
-        if(selCat){ selCat.value = cat; selCat.disabled = true; }
-      }catch(_){}
-      // Bed type: Master & Swim Up => KING; Normal => from JSON if available, else current
-      try{
-        var selBed = $('tipo-cama');
-        if(selBed){
-          var bed = 'K';
-          if(cat==='Normal'){
-            try{
-              if (typeof window.ensureHabitacionesData==='function' && window.__habitaciones){
-                var h = window.__habitaciones[String(hnum)] || window.__habitaciones[Number(hnum)];
-                if(h && h.tipo_cama){ bed = String(h.tipo_cama).toUpperCase().includes('D') ? 'D' : 'K'; }
-              }
-            }catch(__){}
-          }
-          selBed.value = bed;
-          selBed.disabled = true; // siempre bloqueado (evitar errores manuales)
-        }
-      }catch(_){}
-      // Colors: for Master & Swing Up => Café (duvet, toallas/tapetes), lock
-      try{
-        var selDuv = $('cama-color');
-        var selBan = $('ban-color');
-        var forceCafe = (cat==='Master Suite' || cat==='Swing Up');
-        if(selDuv){
-          if(forceCafe){ selDuv.value = 'Café'; selDuv.disabled = true; }
-          else { selDuv.disabled = false; } // Normal: editable
-        }
-        if(selBan){
-          if(forceCafe){ selBan.value = 'Café'; selBan.disabled = true; }
-          else { selBan.disabled = false; }
-        }
-      }catch(_){}
-    })(habitacionNum);
-
 
     // Inicializar controles
     (function invpInit(hnum){
@@ -2924,7 +2851,27 @@ try{var b=document.getElementById('btn-concentrado'); if(b){ b.style.display=(ty
     const ov=el('#concentradoOverlay'); const wrap=el('.table-wrap', ov); const html=wrap?wrap.innerHTML:'<p>Sin datos</p>';
     const w=window.open('', '_blank'); if(!w) return alert('Permite ventanas emergentes para exportar a PDF.');
     const css='<style>body{font-family:Arial,sans-serif;padding:16px}h1{font-size:18px;margin:0 0 10px}table{width:100%;border-collapse:collapse}th,td{border:1px solid #ddd;padding:6px;font-size:12px;white-space:nowrap}th{background:#f3f4f6;position:sticky;top:0}tr:nth-child(even) td{background:#fcfdff}</style>';
-    w.document.write('<html><head><meta charset="utf-8"><title>Concentrado</title>'+css+'</head><body><h1>Concentrado de Inventarios</h1>'+html+'</body></html>');
+    w.document.write('<html><head><meta charset="utf-8"><title>Concentrado</title>'+css+'</head><body><h1>Concentrado de Inventarios</h1>'+html+'
+<script>
+// Auto-toggle Concentrado visibility for Luis (3072167) and Manuel (3067888) without refresh
+(function(){
+  function toggleBtn(){
+    try{
+      var id = sessionStorage.getItem('HK_MAT')||'';
+      var isAdmin = (id==='3072167' || id==='3067888');
+      document.body.classList.toggle('hk-admin', isAdmin);
+      var b=document.getElementById('btn-concentrado');
+      if(b){ b.style.display = isAdmin ? 'inline-block' : 'none'; }
+    }catch(e){}
+  }
+  document.addEventListener('DOMContentLoaded', toggleBtn);
+  window.addEventListener('storage', function(e){ if(e.key==='HK_MAT') toggleBtn(); });
+  // Early aggressive check (covers async login modal flow)
+  var t0=Date.now(); var iv=setInterval(function(){ toggleBtn(); if(Date.now()-t0>3500) clearInterval(iv); }, 200);
+})();
+</script>
+
+</body></html>');
     w.document.close(); w.focus(); w.print();
   }
 
@@ -3386,5 +3333,25 @@ try{var b=document.getElementById('btn-concentrado'); if(b){ b.style.display=(ty
   wireBtn();
 })();
 </script>
+
+<script>
+// Auto-toggle Concentrado visibility for Luis (3072167) and Manuel (3067888) without refresh
+(function(){
+  function toggleBtn(){
+    try{
+      var id = sessionStorage.getItem('HK_MAT')||'';
+      var isAdmin = (id==='3072167' || id==='3067888');
+      document.body.classList.toggle('hk-admin', isAdmin);
+      var b=document.getElementById('btn-concentrado');
+      if(b){ b.style.display = isAdmin ? 'inline-block' : 'none'; }
+    }catch(e){}
+  }
+  document.addEventListener('DOMContentLoaded', toggleBtn);
+  window.addEventListener('storage', function(e){ if(e.key==='HK_MAT') toggleBtn(); });
+  // Early aggressive check (covers async login modal flow)
+  var t0=Date.now(); var iv=setInterval(function(){ toggleBtn(); if(Date.now()-t0>3500) clearInterval(iv); }, 200);
+})();
+</script>
+
 </body>
 </html>
