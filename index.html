@@ -2760,7 +2760,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function collect(hnum){
     function val(id){ const e=el('#'+id); return e?(e.type==='checkbox'? e.checked : e.value):''; }
     return {
-      fecha: fmtLocal(window.__TZ_MAZATLAN),
+      fecha: new Date().toISOString(),
       habitacion: String(hnum||''),
       usuario: sessionStorage.getItem('HK_NAME')||'',
       matricula: sessionStorage.getItem('HK_MAT')||'',
@@ -2848,39 +2848,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const ov=el('#concentradoOverlay'); const wrap=el('.table-wrap', ov); const html=wrap?wrap.innerHTML:'<p>Sin datos</p>';
     const w=window.open('', '_blank'); if(!w) return alert('Permite ventanas emergentes para exportar a PDF.');
     const css='<style>body{font-family:Arial,sans-serif;padding:16px}h1{font-size:18px;margin:0 0 10px}table{width:100%;border-collapse:collapse}th,td{border:1px solid #ddd;padding:6px;font-size:12px;white-space:nowrap}th{background:#f3f4f6;position:sticky;top:0}tr:nth-child(even) td{background:#fcfdff}</style>';
-    w.document.write('<html><head><meta charset="utf-8"><title>Concentrado</title>'+css+'</head><body><h1>Concentrado de Inventarios</h1>'+html+'<script>
-
-// === Hora local Los Cabos (America/Mazatlan) ===
-(function(){
-  if (window.__tzHelpersInjected) return; window.__tzHelpersInjected = true;
-  window.__TZ_MAZATLAN = 'America/Mazatlan';
-  window.fmtLocal = function fmtLocal(tz){
-    const parts = new Intl.DateTimeFormat('en-CA', {
-      timeZone: tz,
-      year:'numeric', month:'2-digit', day:'2-digit',
-      hour:'2-digit', minute:'2-digit', second:'2-digit',
-      hour12:false
-    }).formatToParts(new Date());
-    const get = t => (parts.find(p => p.type === t)||{value:''}).value;
-    return `${get('year')}-${get('month')}-${get('day')} ${get('hour')}:${get('minute')}:${get('second')}`;
-  };
-  window.toMazatlan = function toMazatlan(anyDateStrOrTs){
-    try{
-      const d = (typeof anyDateStrOrTs==='number') ? new Date(anyDateStrOrTs) : new Date(anyDateStrOrTs);
-      const parts = new Intl.DateTimeFormat('es-MX', {
-        timeZone: window.__TZ_MAZATLAN,
-        year:'numeric', month:'2-digit', day:'2-digit',
-        hour:'2-digit', minute:'2-digit', second:'2-digit',
-        hour12:false
-      }).formatToParts(d);
-      const get = t => (parts.find(p => p.type===t)||{value:''}).value;
-      return `${get('year')}-${get('month')}-${get('day')} ${get('hour')}:${get('minute')}:${get('second')}`;
-    }catch(e){ try{ return String(anyDateStrOrTs||''); }catch(_){ return ''; } }
-  };
-})();
-
-</script>
-</body></html>');
+    w.document.write('<html><head><meta charset="utf-8"><title>Concentrado</title>'+css+'</head><body><h1>Concentrado de Inventarios</h1>'+html+'</body></html>');
     w.document.close(); w.focus(); w.print();
   }
 
@@ -3341,38 +3309,6 @@ document.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('DOMContentLoaded', wireBtn);
   wireBtn();
 })();
-</script>
-<script>
-
-// === Hora local Los Cabos (America/Mazatlan) ===
-(function(){
-  if (window.__tzHelpersInjected) return; window.__tzHelpersInjected = true;
-  window.__TZ_MAZATLAN = 'America/Mazatlan';
-  window.fmtLocal = function fmtLocal(tz){
-    const parts = new Intl.DateTimeFormat('en-CA', {
-      timeZone: tz,
-      year:'numeric', month:'2-digit', day:'2-digit',
-      hour:'2-digit', minute:'2-digit', second:'2-digit',
-      hour12:false
-    }).formatToParts(new Date());
-    const get = t => (parts.find(p => p.type === t)||{value:''}).value;
-    return `${get('year')}-${get('month')}-${get('day')} ${get('hour')}:${get('minute')}:${get('second')}`;
-  };
-  window.toMazatlan = function toMazatlan(anyDateStrOrTs){
-    try{
-      const d = (typeof anyDateStrOrTs==='number') ? new Date(anyDateStrOrTs) : new Date(anyDateStrOrTs);
-      const parts = new Intl.DateTimeFormat('es-MX', {
-        timeZone: window.__TZ_MAZATLAN,
-        year:'numeric', month:'2-digit', day:'2-digit',
-        hour:'2-digit', minute:'2-digit', second:'2-digit',
-        hour12:false
-      }).formatToParts(d);
-      const get = t => (parts.find(p => p.type===t)||{value:''}).value;
-      return `${get('year')}-${get('month')}-${get('day')} ${get('hour')}:${get('minute')}:${get('second')}`;
-    }catch(e){ try{ return String(anyDateStrOrTs||''); }catch(_){ return ''; } }
-  };
-})();
-
 </script>
 </body>
 </html>
