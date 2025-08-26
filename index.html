@@ -2848,7 +2848,196 @@ document.addEventListener('DOMContentLoaded', () => {
     const ov=el('#concentradoOverlay'); const wrap=el('.table-wrap', ov); const html=wrap?wrap.innerHTML:'<p>Sin datos</p>';
     const w=window.open('', '_blank'); if(!w) return alert('Permite ventanas emergentes para exportar a PDF.');
     const css='<style>body{font-family:Arial,sans-serif;padding:16px}h1{font-size:18px;margin:0 0 10px}table{width:100%;border-collapse:collapse}th,td{border:1px solid #ddd;padding:6px;font-size:12px;white-space:nowrap}th{background:#f3f4f6;position:sticky;top:0}tr:nth-child(even) td{background:#fcfdff}</style>';
-    w.document.write('<html><head><meta charset="utf-8"><title>Concentrado</title>'+css+'</head><body><h1>Concentrado de Inventarios</h1>'+html+'</body></html>');
+    w.document.write('<html><head><meta charset="utf-8"><title>Concentrado</title>'+css+'</head><body><h1>Concentrado de Inventarios</h1>'+html+'
+<style>
+/* === Añadidos (V6.1): Torre + Sofá + Conectadas (soporta OBJETO o ARREGLO) === */
+.torre-oculta{ display:none !important; }
+.torre-filter{ display:inline-flex; align-items:center; gap:.35rem; margin-right:.5rem; }
+.torre-filter label{ font-weight:600; font-size:.9rem; }
+.torre-filter select{ padding:.35rem .6rem; border:1px solid #d1d5db; border-radius:8px; }
+</style>
+
+<script>
+(function(){
+  const DEBUG = false;
+  const log = (...a)=>{ if(DEBUG) console.log('[INV]', ...a); };
+
+  function visibleRoomButtons(){
+    return Array.from(document.querySelectorAll('.habitacion-btn'))
+      .filter(b => b.offsetParent !== null && !b.classList.contains('torre-oculta'));
+  }
+  function getRoomNumber(btn){
+    return (btn.dataset.room || btn.dataset.num || (btn.textContent||'')).trim();
+  }
+  function detectTorre(numStr){
+    const n = parseInt(numStr,10);
+    return isFinite(n) ? Math.floor(n/1000) : null;
+  }
+  function possibleGlobals(){
+    return [
+      'habitacionesCache','habitacionesData','habitaciones','roomsData','DATA_HABITACIONES',
+      'dataHabitaciones','catalogoHabitaciones','rooms','HABITACIONES','DATA'
+    ].map(k => [k, window[k]]).filter(([,v]) => Array.isArray(v) && v.length);
+  }
+  async function resolveHabitacionesData(){
+    const found = possibleGlobals();
+    if(found.length){ log('Usando global:', found[0][0]); return found[0][1]; }
+    if (typeof window.habitacionesDataURL === 'string' && window.habitacionesDataURL){
+      try{
+        const r = await fetch(window.habitacionesDataURL, {cache:'no-store'});
+        if(r.ok){
+          return await r.json(); // puede ser objeto o arreglo
+        }
+      }catch(e){ log('fetch URL directa falló', e); }
+    }
+    return null;
+  }
+  function extractRoomNumberFromRecord(r){
+    const t = String(r.titulo||'');
+    const m = t.match(/\b(\d{3,4})\b/);
+    return (m && m[1]) || String(r.numero||'').trim() || String(r.room||'').trim() || String(r.id||'').trim();
+  }
+  function hasSofa(rec){
+    if(rec==null) return false;
+    if(typeof rec.sofa !== 'undefined') return !!rec.sofa;
+    const car = rec.caracteristicas || rec.features || [];
+    const text = Array.isArray(car) ? car.join(' | ') : String(car||'');
+    return /sof[aá]\s*cama/i.test(text);
+  }
+  function hasConectada(rec){
+    if(rec==null) return false;
+    const key = rec.habitacion_conectada ?? rec.habitacionConectada ?? rec.conectada ?? rec.connected_room ?? rec.room_connected;
+    return !!key && String(key).trim() !== '';
+  }
+
+  async function mapAttributes(){
+    // 1) Índice manual
+    if (window.sofaConectadasIndex && typeof window.sofaConectadasIndex === 'object'){
+      document.querySelectorAll('.habitacion-btn').forEach(btn=>{
+        const num = getRoomNumber(btn);
+        const info = window.sofaConectadasIndex[num];
+        const torre = detectTorre(num);
+        if (torre) btn.dataset.torre = String(torre);
+        if (info){
+          btn.dataset.sofa = info.sofa ? '1' : '0';
+          btn.dataset.conectada = info.conectada ? '1' : '0';
+        }else{
+          if (!('sofa' in btn.dataset)) btn.dataset.sofa = '0';
+          if (!('conectada' in btn.dataset)) btn.dataset.conectada = '0';
+        }
+      });
+      return;
+    }
+    // 2) Data remota/Global (objeto o arreglo)
+    const data = await resolveHabitacionesData();
+    const byNum = Array.isArray(data)
+      ? data.reduce((acc,r)=>{ const num = extractRoomNumberFromRecord(r); if(num) acc[num]=r; return acc; }, {})
+      : (data && typeof data==='object' ? data : {});
+
+    document.querySelectorAll('.habitacion-btn').forEach(btn=>{
+      const num = getRoomNumber(btn);
+      const rec = byNum[num];
+      const torre = detectTorre(num);
+      if (torre) btn.dataset.torre = String(torre);
+      if (rec){
+        if (!('sofa' in btn.dataset)) btn.dataset.sofa = hasSofa(rec) ? '1' : '0';
+        if (!('conectada' in btn.dataset)) btn.dataset.conectada = hasConectada(rec) ? '1' : '0';
+      }else{
+        if (!('sofa' in btn.dataset)) btn.dataset.sofa = '0';
+        if (!('conectada' in btn.dataset)) btn.dataset.conectada = '0';
+      }
+    });
+  }
+
+  function ensureExtraCounters(){
+    const possibleHosts = [
+      document.querySelector('#countTotal')?.parentElement,
+      document.querySelector('.panel-filtro-categoria .stats'),
+      document.querySelector('.panel-filtro-categoria'),
+      document.querySelector('.stats'),
+    ].filter(Boolean);
+    const host = possibleHosts[0] || document.body;
+    if(!document.getElementById('countSofa')){
+      const span = document.createElement('span');
+      span.innerHTML = ' · 🛋 Sofá: <span id="countSofa">0</span>';
+      host.appendChild(span);
+    }
+    if(!document.getElementById('countConn')){
+      const span = document.createElement('span');
+      span.innerHTML = ' · 🔗 Conectadas: <span id="countConn">0</span>';
+      host.appendChild(span);
+    }
+  }
+  function recount(){
+    const visibles = visibleRoomButtons();
+    const sofa = visibles.filter(b => (b.dataset.sofa||'0') === '1').length;
+    const conn = visibles.filter(b => (b.dataset.conectada||'0') === '1').length;
+    const sEl = document.getElementById('countSofa');
+    const cEl = document.getElementById('countConn');
+    if(sEl) sEl.textContent = sofa;
+    if(cEl) cEl.textContent = conn;
+  }
+  function ensureTorreFilter(){
+    const host = document.querySelector('.panel-filtro-categoria') || document.body;
+    if(document.getElementById('torreFilter')) return;
+    const wrap = document.createElement('span');
+    wrap.className = 'torre-filter';
+    wrap.innerHTML = `
+      <label for="torreFilter">Torre:</label>
+      <select id="torreFilter">
+        <option value="">Todas</option>
+        <option value="1">Torre 1</option>
+        <option value="2">Torre 2</option>
+        <option value="3">Torre 3</option>
+        <option value="4">Torre 4</option>
+      </select>`;
+    if(host.firstElementChild){ host.insertBefore(wrap, host.firstElementChild); } else { host.appendChild(wrap); }
+    wrap.querySelector('#torreFilter').addEventListener('change', applyTorreFilter);
+  }
+  function applyTorreFilter(){
+    const val = (document.getElementById('torreFilter') || {}).value || '';
+    document.querySelectorAll('.habitacion-btn').forEach(btn=>{
+      const num = getRoomNumber(btn);
+      const torre = btn.dataset.torre || detectTorre(num) || '';
+      if(!val || String(torre) === String(val)) btn.classList.remove('torre-oculta');
+      else btn.classList.add('torre-oculta');
+    });
+    recount();
+  }
+  function hookToExistingFilters(){
+    const inputs = document.querySelectorAll('select, input[type="checkbox"], input[type="radio"], input[type="search"], input[type="text"]');
+    inputs.forEach(el=>{ el.addEventListener('change', recount); el.addEventListener('input', recount); });
+    const zona = document.querySelector('.zona-desplazable') || document.body;
+    const mo = new MutationObserver(()=> recount());
+    mo.observe(zona, { attributes:true, attributeFilter:['style','class'], subtree:true, childList:true });
+    const limpiarBtn = Array.from(document.querySelectorAll('button, a')).find(el=> /limpiar/i.test(el.textContent||'')) ||
+                       document.getElementById('btnLimpiar') || document.getElementById('limpiar');
+    if(limpiarBtn && !limpiarBtn._torreHooked){
+      limpiarBtn.addEventListener('click', ()=>{
+        const sel = document.getElementById('torreFilter');
+        if(sel){ sel.value=''; applyTorreFilter(); }
+      });
+      limpiarBtn._torreHooked = true;
+    }
+  }
+
+  // API
+  window.setHabitacionesDataURL = function(url){ window.habitacionesDataURL = url; mapAttributes().then(recount); };
+  window.setSofaConectadasIndex = function(map){ window.sofaConectadasIndex = map || {}; mapAttributes().then(recount); };
+  window.recontarSofaConectadas = recount;
+
+  document.addEventListener('DOMContentLoaded', async ()=>{
+    if(!window.habitacionesDataURL) window.habitacionesDataURL = 'habitaciones.json';
+    ensureTorreFilter();
+    ensureExtraCounters();
+    await mapAttributes();
+    hookToExistingFilters();
+    applyTorreFilter();
+  });
+})();
+</script>
+
+</body></html>');
     w.document.close(); w.focus(); w.print();
   }
 
@@ -3534,6 +3723,195 @@ document.addEventListener('DOMContentLoaded', () => {
   window.recontarSofaConectadas = recount;
 
   document.addEventListener('DOMContentLoaded', async ()=>{
+    ensureTorreFilter();
+    ensureExtraCounters();
+    await mapAttributes();
+    hookToExistingFilters();
+    applyTorreFilter();
+  });
+})();
+</script>
+
+
+<style>
+/* === Añadidos (V6.1): Torre + Sofá + Conectadas (soporta OBJETO o ARREGLO) === */
+.torre-oculta{ display:none !important; }
+.torre-filter{ display:inline-flex; align-items:center; gap:.35rem; margin-right:.5rem; }
+.torre-filter label{ font-weight:600; font-size:.9rem; }
+.torre-filter select{ padding:.35rem .6rem; border:1px solid #d1d5db; border-radius:8px; }
+</style>
+
+<script>
+(function(){
+  const DEBUG = false;
+  const log = (...a)=>{ if(DEBUG) console.log('[INV]', ...a); };
+
+  function visibleRoomButtons(){
+    return Array.from(document.querySelectorAll('.habitacion-btn'))
+      .filter(b => b.offsetParent !== null && !b.classList.contains('torre-oculta'));
+  }
+  function getRoomNumber(btn){
+    return (btn.dataset.room || btn.dataset.num || (btn.textContent||'')).trim();
+  }
+  function detectTorre(numStr){
+    const n = parseInt(numStr,10);
+    return isFinite(n) ? Math.floor(n/1000) : null;
+  }
+  function possibleGlobals(){
+    return [
+      'habitacionesCache','habitacionesData','habitaciones','roomsData','DATA_HABITACIONES',
+      'dataHabitaciones','catalogoHabitaciones','rooms','HABITACIONES','DATA'
+    ].map(k => [k, window[k]]).filter(([,v]) => Array.isArray(v) && v.length);
+  }
+  async function resolveHabitacionesData(){
+    const found = possibleGlobals();
+    if(found.length){ log('Usando global:', found[0][0]); return found[0][1]; }
+    if (typeof window.habitacionesDataURL === 'string' && window.habitacionesDataURL){
+      try{
+        const r = await fetch(window.habitacionesDataURL, {cache:'no-store'});
+        if(r.ok){
+          return await r.json(); // puede ser objeto o arreglo
+        }
+      }catch(e){ log('fetch URL directa falló', e); }
+    }
+    return null;
+  }
+  function extractRoomNumberFromRecord(r){
+    const t = String(r.titulo||'');
+    const m = t.match(/\b(\d{3,4})\b/);
+    return (m && m[1]) || String(r.numero||'').trim() || String(r.room||'').trim() || String(r.id||'').trim();
+  }
+  function hasSofa(rec){
+    if(rec==null) return false;
+    if(typeof rec.sofa !== 'undefined') return !!rec.sofa;
+    const car = rec.caracteristicas || rec.features || [];
+    const text = Array.isArray(car) ? car.join(' | ') : String(car||'');
+    return /sof[aá]\s*cama/i.test(text);
+  }
+  function hasConectada(rec){
+    if(rec==null) return false;
+    const key = rec.habitacion_conectada ?? rec.habitacionConectada ?? rec.conectada ?? rec.connected_room ?? rec.room_connected;
+    return !!key && String(key).trim() !== '';
+  }
+
+  async function mapAttributes(){
+    // 1) Índice manual
+    if (window.sofaConectadasIndex && typeof window.sofaConectadasIndex === 'object'){
+      document.querySelectorAll('.habitacion-btn').forEach(btn=>{
+        const num = getRoomNumber(btn);
+        const info = window.sofaConectadasIndex[num];
+        const torre = detectTorre(num);
+        if (torre) btn.dataset.torre = String(torre);
+        if (info){
+          btn.dataset.sofa = info.sofa ? '1' : '0';
+          btn.dataset.conectada = info.conectada ? '1' : '0';
+        }else{
+          if (!('sofa' in btn.dataset)) btn.dataset.sofa = '0';
+          if (!('conectada' in btn.dataset)) btn.dataset.conectada = '0';
+        }
+      });
+      return;
+    }
+    // 2) Data remota/Global (objeto o arreglo)
+    const data = await resolveHabitacionesData();
+    const byNum = Array.isArray(data)
+      ? data.reduce((acc,r)=>{ const num = extractRoomNumberFromRecord(r); if(num) acc[num]=r; return acc; }, {})
+      : (data && typeof data==='object' ? data : {});
+
+    document.querySelectorAll('.habitacion-btn').forEach(btn=>{
+      const num = getRoomNumber(btn);
+      const rec = byNum[num];
+      const torre = detectTorre(num);
+      if (torre) btn.dataset.torre = String(torre);
+      if (rec){
+        if (!('sofa' in btn.dataset)) btn.dataset.sofa = hasSofa(rec) ? '1' : '0';
+        if (!('conectada' in btn.dataset)) btn.dataset.conectada = hasConectada(rec) ? '1' : '0';
+      }else{
+        if (!('sofa' in btn.dataset)) btn.dataset.sofa = '0';
+        if (!('conectada' in btn.dataset)) btn.dataset.conectada = '0';
+      }
+    });
+  }
+
+  function ensureExtraCounters(){
+    const possibleHosts = [
+      document.querySelector('#countTotal')?.parentElement,
+      document.querySelector('.panel-filtro-categoria .stats'),
+      document.querySelector('.panel-filtro-categoria'),
+      document.querySelector('.stats'),
+    ].filter(Boolean);
+    const host = possibleHosts[0] || document.body;
+    if(!document.getElementById('countSofa')){
+      const span = document.createElement('span');
+      span.innerHTML = ' · 🛋 Sofá: <span id="countSofa">0</span>';
+      host.appendChild(span);
+    }
+    if(!document.getElementById('countConn')){
+      const span = document.createElement('span');
+      span.innerHTML = ' · 🔗 Conectadas: <span id="countConn">0</span>';
+      host.appendChild(span);
+    }
+  }
+  function recount(){
+    const visibles = visibleRoomButtons();
+    const sofa = visibles.filter(b => (b.dataset.sofa||'0') === '1').length;
+    const conn = visibles.filter(b => (b.dataset.conectada||'0') === '1').length;
+    const sEl = document.getElementById('countSofa');
+    const cEl = document.getElementById('countConn');
+    if(sEl) sEl.textContent = sofa;
+    if(cEl) cEl.textContent = conn;
+  }
+  function ensureTorreFilter(){
+    const host = document.querySelector('.panel-filtro-categoria') || document.body;
+    if(document.getElementById('torreFilter')) return;
+    const wrap = document.createElement('span');
+    wrap.className = 'torre-filter';
+    wrap.innerHTML = `
+      <label for="torreFilter">Torre:</label>
+      <select id="torreFilter">
+        <option value="">Todas</option>
+        <option value="1">Torre 1</option>
+        <option value="2">Torre 2</option>
+        <option value="3">Torre 3</option>
+        <option value="4">Torre 4</option>
+      </select>`;
+    if(host.firstElementChild){ host.insertBefore(wrap, host.firstElementChild); } else { host.appendChild(wrap); }
+    wrap.querySelector('#torreFilter').addEventListener('change', applyTorreFilter);
+  }
+  function applyTorreFilter(){
+    const val = (document.getElementById('torreFilter') || {}).value || '';
+    document.querySelectorAll('.habitacion-btn').forEach(btn=>{
+      const num = getRoomNumber(btn);
+      const torre = btn.dataset.torre || detectTorre(num) || '';
+      if(!val || String(torre) === String(val)) btn.classList.remove('torre-oculta');
+      else btn.classList.add('torre-oculta');
+    });
+    recount();
+  }
+  function hookToExistingFilters(){
+    const inputs = document.querySelectorAll('select, input[type="checkbox"], input[type="radio"], input[type="search"], input[type="text"]');
+    inputs.forEach(el=>{ el.addEventListener('change', recount); el.addEventListener('input', recount); });
+    const zona = document.querySelector('.zona-desplazable') || document.body;
+    const mo = new MutationObserver(()=> recount());
+    mo.observe(zona, { attributes:true, attributeFilter:['style','class'], subtree:true, childList:true });
+    const limpiarBtn = Array.from(document.querySelectorAll('button, a')).find(el=> /limpiar/i.test(el.textContent||'')) ||
+                       document.getElementById('btnLimpiar') || document.getElementById('limpiar');
+    if(limpiarBtn && !limpiarBtn._torreHooked){
+      limpiarBtn.addEventListener('click', ()=>{
+        const sel = document.getElementById('torreFilter');
+        if(sel){ sel.value=''; applyTorreFilter(); }
+      });
+      limpiarBtn._torreHooked = true;
+    }
+  }
+
+  // API
+  window.setHabitacionesDataURL = function(url){ window.habitacionesDataURL = url; mapAttributes().then(recount); };
+  window.setSofaConectadasIndex = function(map){ window.sofaConectadasIndex = map || {}; mapAttributes().then(recount); };
+  window.recontarSofaConectadas = recount;
+
+  document.addEventListener('DOMContentLoaded', async ()=>{
+    if(!window.habitacionesDataURL) window.habitacionesDataURL = 'habitaciones.json';
     ensureTorreFilter();
     ensureExtraCounters();
     await mapAttributes();
