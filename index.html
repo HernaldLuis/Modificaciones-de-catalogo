@@ -3310,5 +3310,187 @@ document.addEventListener('DOMContentLoaded', () => {
   wireBtn();
 })();
 </script>
+
+<style>
+/* === Añadidos: filtro por Torre y contadores Sofá/Conectadas === */
+.torre-oculta{ display:none !important; }
+.torre-filter{ display:inline-flex; align-items:center; gap:.35rem; margin-right:.5rem; }
+.torre-filter label{ font-weight:600; font-size:.9rem; }
+.torre-filter select{ padding:.35rem .6rem; border:1px solid #d1d5db; border-radius:8px; }
+</style>
+
+<script>
+(function(){
+  // ---------- Utils ----------
+  function visibleRoomButtons(){
+    // Botones visibles considerando filtros existentes + torre
+    return Array.from(document.querySelectorAll('.habitacion-btn'))
+      .filter(b => b.offsetParent !== null);
+  }
+  function getRoomNumber(btn){
+    return (btn.dataset.room || btn.dataset.num || btn.textContent || '').trim();
+  }
+  function detectTorre(numStr){
+    const n = parseInt(numStr,10);
+    if(!isFinite(n)) return null;
+    // Regla: miles = torre (1xxx -> T1, 2xxx -> T2, etc.)
+    return Math.floor(n/1000) || null;
+  }
+
+  // ---------- Mapeo de atributos desde JSON ----------
+  async function mapAttributesFromJSON(){
+    try{
+      let data = null;
+      if(window.habitacionesCache && Array.isArray(window.habitacionesCache)){
+        data = window.habitacionesCache;
+      }else if(typeof window.ensureHabitacionesData === 'function'){
+        data = await window.ensureHabitacionesData();
+      }
+      // Si no hay data, no pasa nada: solo podremos contar por torre usando el número
+      if(!data) return;
+
+      // Indexar por número
+      const byNum = {};
+      data.forEach(r => {
+        const num = (r.titulo && (String(r.titulo).match(/\b(\d{3,4})\b/)||[])[1]) || r.numero || r.id;
+        if(num) byNum[String(num)] = r;
+      });
+
+      document.querySelectorAll('.habitacion-btn').forEach(btn=>{
+        const num = getRoomNumber(btn);
+        const info = byNum[num];
+        // Marcar torre por número (fallback siempre disponible)
+        const torre = detectTorre(num);
+        if(torre) btn.dataset.torre = String(torre);
+        // Sofá y conectada desde JSON si existe
+        if(info){
+          btn.dataset.sofa = info.sofa ? '1' : '0';
+          btn.dataset.conectada = info.habitacion_conectada ? '1' : '0';
+        }else{
+          // Fallback si no encontramos el registro (conservador)
+          if(!btn.dataset.sofa) btn.dataset.sofa = '0';
+          if(!btn.dataset.conectada) btn.dataset.conectada = '0';
+        }
+      });
+    }catch(e){
+      // Silencioso
+    }
+  }
+
+  // ---------- Contadores extras ----------
+  function ensureExtraCounters(){
+    // Intentar colocar junto a los contadores existentes (K, D, Total...)
+    const candidates = [
+      document.querySelector('#countTotal')?.parentElement,
+      document.querySelector('.panel-filtro-categoria .stats'),
+      document.querySelector('.panel-filtro-categoria'),
+      document.querySelector('.stats'),
+    ].filter(Boolean);
+    const host = candidates[0] || document.body;
+
+    // Crear nodos si no existen
+    if(!document.getElementById('countSofa')){
+      const span = document.createElement('span');
+      span.innerHTML = ' · 🛋 Sofá: <span id="countSofa">0</span>';
+      host.appendChild(span);
+    }
+    if(!document.getElementById('countConn')){
+      const span = document.createElement('span');
+      span.innerHTML = ' · 🔗 Conectadas: <span id="countConn">0</span>';
+      host.appendChild(span);
+    }
+  }
+
+  function recountExtras(){
+    const visibles = visibleRoomButtons();
+    const sofa = visibles.filter(b => b.dataset.sofa === '1').length;
+    const conn = visibles.filter(b => b.dataset.conectada === '1').length;
+    const sEl = document.getElementById('countSofa');
+    const cEl = document.getElementById('countConn');
+    if(sEl) sEl.textContent = sofa;
+    if(cEl) cEl.textContent = conn;
+  }
+
+  // ---------- Filtro por Torre ----------
+  function ensureTorreFilter(){
+    // Buscar barra de filtros para insertar el select
+    const host = document.querySelector('.panel-filtro-categoria') || document.body;
+    if(document.getElementById('torreFilter')) return;
+
+    const wrap = document.createElement('span');
+    wrap.className = 'torre-filter';
+    wrap.innerHTML = `
+      <label for="torreFilter">Torre:</label>
+      <select id="torreFilter">
+        <option value="">Todas</option>
+        <option value="1">Torre 1</option>
+        <option value="2">Torre 2</option>
+        <option value="3">Torre 3</option>
+        <option value="4">Torre 4</option>
+      </select>
+    `;
+    // Insertar al principio de la barra para no desplazar tus otros filtros
+    if(host.firstElementChild){
+      host.insertBefore(wrap, host.firstElementChild);
+    }else{
+      host.appendChild(wrap);
+    }
+
+    // Listener
+    wrap.querySelector('#torreFilter').addEventListener('change', applyTorreFilter);
+  }
+
+  function applyTorreFilter(){
+    const val = (document.getElementById('torreFilter') || {}).value || '';
+    document.querySelectorAll('.habitacion-btn').forEach(btn=>{
+      const num = getRoomNumber(btn);
+      const torre = btn.dataset.torre || detectTorre(num) || '';
+      if(!val || String(torre) === String(val)){
+        btn.classList.remove('torre-oculta');
+      }else{
+        btn.classList.add('torre-oculta');
+      }
+    });
+    // Tras filtrar, recalcula los contadores adicionales
+    recountExtras();
+  }
+
+  // ---------- Hooks con tus filtros existentes ----------
+  function hookToExistingFilters(){
+    const inputs = document.querySelectorAll('select, input[type="checkbox"], input[type="radio"], input[type="search"], input[type="text"]');
+    inputs.forEach(el=>{
+      el.addEventListener('change', recountExtras);
+      el.addEventListener('input', recountExtras);
+    });
+
+    // Observar cambios de visibilidad en el área desplazable
+    const zona = document.querySelector('.zona-desplazable') || document.body;
+    const mo = new MutationObserver(()=> recountExtras());
+    mo.observe(zona, { attributes:true, attributeFilter:['style','class'], subtree:true, childList:true });
+  }
+
+  // ---------- Init ----------
+  document.addEventListener('DOMContentLoaded', async ()=>{
+    await mapAttributesFromJSON();
+    ensureExtraCounters();
+    ensureTorreFilter();
+    hookToExistingFilters();
+    // Pintar torre por número si no se mapeó antes
+    document.querySelectorAll('.habitacion-btn').forEach(btn=>{
+      if(!btn.dataset.torre){
+        const num = getRoomNumber(btn);
+        const t = detectTorre(num);
+        if(t) btn.dataset.torre = String(t);
+      }
+    });
+    // Primer recuento
+    applyTorreFilter(); // aplica (y llama recountExtras)
+  });
+
+  // Exponer helper manual por si lo necesitas
+  window.recontarExtras = recountExtras;
+})();
+</script>
+
 </body>
 </html>
