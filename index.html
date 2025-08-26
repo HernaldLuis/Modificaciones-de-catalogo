@@ -3312,7 +3312,7 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 
 <style>
-/* === Añadidos (V2): filtro por Torre + contadores Sofá/Conectadas === */
+/* === Añadidos (V5): filtro por Torre + contadores Sofá/Conectadas (robusto) === */
 .torre-oculta{ display:none !important; }
 .torre-filter{ display:inline-flex; align-items:center; gap:.35rem; margin-right:.5rem; }
 .torre-filter label{ font-weight:600; font-size:.9rem; }
@@ -3321,6 +3321,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <script>
 (function(){
+  // ---- Debug togglable ----
+  const DEBUG = false; // cambia a true si quieres ver logs en consola
+  const log = (...args)=> { if(DEBUG) console.log('[INV]', ...args); };
+
+  // ---- Helpers ----
   const sleep = (ms)=> new Promise(r=> setTimeout(r, ms));
 
   function visibleRoomButtons(){
@@ -3336,25 +3341,41 @@ document.addEventListener('DOMContentLoaded', () => {
     return Math.floor(n/1000) || null;
   }
 
+  // ---- Resolver data desde múltiples fuentes ----
+  function possibleGlobals(){
+    return [
+      'habitacionesCache','habitacionesData','habitaciones','roomsData','DATA_HABITACIONES',
+      'dataHabitaciones','catalogoHabitaciones','rooms','HABITACIONES','DATA'
+    ].map(k => [k, window[k]]).filter(([,v]) => Array.isArray(v) && v.length);
+  }
+
   async function resolveHabitacionesData(){
-    try{ if (Array.isArray(window.habitacionesCache)) return window.habitacionesCache; }catch(_){}
+    const found = possibleGlobals();
+    if(found.length){
+      log('Usando global:', found[0][0], 'len=', found[0][1].length);
+      return found[0][1];
+    }
     try{
       if (typeof window.ensureHabitacionesData === 'function'){
         const d = await window.ensureHabitacionesData();
-        if (Array.isArray(d)) return d;
+        if (Array.isArray(d) && d.length){ log('ensureHabitacionesData OK'); return d; }
       }
-    }catch(_){}
-    try{
-      const r = await fetch('habitaciones.json', {cache:'no-store'});
-      if (r.ok){
-        const d = await r.json();
-        if (Array.isArray(d)) return d;
-      }
-    }catch(_){}
+    }catch(e){ log('ensureHabitacionesData err', e); }
+    // Intentos de rutas comunes
+    const urls = ['habitaciones.json','./habitaciones.json','/habitaciones.json','data/habitaciones.json','./data/habitaciones.json'];
+    for (const u of urls){
+      try{
+        const r = await fetch(u, {cache:'no-store'});
+        if (r.ok){
+          const d = await r.json();
+          if (Array.isArray(d) && d.length){ log('fetch OK', u); return d; }
+        }
+      }catch(e){}
+    }
     return null;
   }
 
-  async function waitForHabitacionesData(maxTries=12, delay=300){
+  async function waitForHabitacionesData(maxTries=20, delay=250){
     for (let i=0;i<maxTries;i++){
       const d = await resolveHabitacionesData();
       if (d) return d;
@@ -3363,16 +3384,36 @@ document.addEventListener('DOMContentLoaded', () => {
     return null;
   }
 
-  async function mapAttributesFromJSON(){
+  function extractRoomNumberFromRecord(r){
+    const t = String(r.titulo||'');
+    const m = t.match(/\\b(\\d{3,4})\\b/);
+    return (m && m[1]) || String(r.numero||'').trim() || String(r.room||'').trim() || String(r.id||'').trim();
+  }
+  function hasSofa(rec){
+    if(rec==null) return false;
+    if(typeof rec.sofa !== 'undefined') return !!rec.sofa;
+    // Heurística desde características
+    const car = rec.caracteristicas || rec.features || [];
+    const text = Array.isArray(car) ? car.join(' | ') : String(car||'');
+    return /sof[aá]\s*cama/i.test(text);
+  }
+  function hasConectada(rec){
+    if(rec==null) return false;
+    const key = rec.habitacion_conectada ?? rec.habitacionConectada ?? rec.conectada ?? rec.connected_room ?? rec.room_connected;
+    return !!key && String(key).trim() !== '';
+  }
+
+  async function mapAttributesFromData(){
     const data = await waitForHabitacionesData();
     const byNum = {};
     if (Array.isArray(data)){
       data.forEach(r => {
-        const t = String(r.titulo||'');
-        const m = t.match(/\\b(\\d{3,4})\\b/);
-        const num = (m && m[1]) || String(r.numero||'').trim() || String(r.id||'').trim();
-        if (num) byNum[num] = r;
+        const num = extractRoomNumberFromRecord(r);
+        if(num) byNum[num] = r;
       });
+      log('Indexadas', Object.keys(byNum).length, 'habitaciones');
+    }else{
+      log('No hay data de habitaciones; contadores dependerán de atributos ya presentes');
     }
 
     document.querySelectorAll('.habitacion-btn').forEach(btn=>{
@@ -3382,10 +3423,8 @@ document.addEventListener('DOMContentLoaded', () => {
       if (torre) btn.dataset.torre = String(torre);
 
       if (rec){
-        const sofa = !!rec.sofa;
-        const conect = !!(rec.habitacion_conectada);
-        btn.dataset.sofa = sofa ? '1' : '0';
-        btn.dataset.conectada = conect ? '1' : '0';
+        if (!('sofa' in btn.dataset)) btn.dataset.sofa = hasSofa(rec) ? '1' : '0';
+        if (!('conectada' in btn.dataset)) btn.dataset.conectada = hasConectada(rec) ? '1' : '0';
       }else{
         if (!('sofa' in btn.dataset)) btn.dataset.sofa = '0';
         if (!('conectada' in btn.dataset)) btn.dataset.conectada = '0';
@@ -3393,6 +3432,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // ---- Contadores ----
   function ensureExtraCounters(){
     const possibleHosts = [
       document.querySelector('#countTotal')?.parentElement,
@@ -3413,7 +3453,6 @@ document.addEventListener('DOMContentLoaded', () => {
       host.appendChild(span);
     }
   }
-
   function recountExtras(){
     const visibles = visibleRoomButtons();
     const sofa = visibles.filter(b => (b.dataset.sofa||'0') === '1').length;
@@ -3424,6 +3463,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if(cEl) cEl.textContent = conn;
   }
 
+  // ---- Filtro Torre ----
   function ensureTorreFilter(){
     const host = document.querySelector('.panel-filtro-categoria') || document.body;
     if(document.getElementById('torreFilter')) return;
@@ -3440,37 +3480,27 @@ document.addEventListener('DOMContentLoaded', () => {
         <option value="4">Torre 4</option>
       </select>
     `;
-
-    if(host.firstElementChild){
-      host.insertBefore(wrap, host.firstElementChild);
-    }else{
-      host.appendChild(wrap);
-    }
-
+    if(host.firstElementChild){ host.insertBefore(wrap, host.firstElementChild); } else { host.appendChild(wrap); }
     wrap.querySelector('#torreFilter').addEventListener('change', applyTorreFilter);
   }
-
   function applyTorreFilter(){
     const val = (document.getElementById('torreFilter') || {}).value || '';
     document.querySelectorAll('.habitacion-btn').forEach(btn=>{
       const num = getRoomNumber(btn);
       const torre = btn.dataset.torre || detectTorre(num) || '';
-      if(!val || String(torre) === String(val)){
-        btn.classList.remove('torre-oculta');
-      }else{
-        btn.classList.add('torre-oculta');
-      }
+      if(!val || String(torre) === String(val)) btn.classList.remove('torre-oculta');
+      else btn.classList.add('torre-oculta');
     });
     recountExtras();
   }
 
+  // ---- Hook con filtros existentes y botón Limpiar ----
   function hookToExistingFilters(){
     const inputs = document.querySelectorAll('select, input[type="checkbox"], input[type="radio"], input[type="search"], input[type="text"]');
     inputs.forEach(el=>{
       el.addEventListener('change', recountExtras);
       el.addEventListener('input', recountExtras);
     });
-
     const zona = document.querySelector('.zona-desplazable') || document.body;
     const mo = new MutationObserver(()=> recountExtras());
     mo.observe(zona, { attributes:true, attributeFilter:['style','class'], subtree:true, childList:true });
@@ -3497,15 +3527,24 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  // ---- API para cablear manualmente desde tu código (por si tu JSON llega después) ----
+  window.setSofaConectada = function(num, info){
+    const btn = Array.from(document.querySelectorAll('.habitacion-btn')).find(b => getRoomNumber(b) === String(num));
+    if(!btn) return;
+    if('sofa' in info) btn.dataset.sofa = info.sofa ? '1' : '0';
+    if('conectada' in info) btn.dataset.conectada = info.conectada ? '1' : '0';
+    recountExtras();
+  };
+  window.recontarSofaConectadas = recountExtras;
+
+  // ---- Init ----
   document.addEventListener('DOMContentLoaded', async ()=>{
     ensureTorreFilter();
     ensureExtraCounters();
-    await mapAttributesFromJSON();
+    await mapAttributesFromData();   // mapea desde múltiples fuentes
     hookToExistingFilters();
     applyTorreFilter();
   });
-
-  window.recontarExtras = recountExtras;
 })();
 </script>
 
