@@ -3312,7 +3312,7 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 
 <style>
-/* === Añadidos: filtro por Torre y contadores Sofá/Conectadas === */
+/* === Añadidos (V2): filtro por Torre + contadores Sofá/Conectadas === */
 .torre-oculta{ display:none !important; }
 .torre-filter{ display:inline-flex; align-items:center; gap:.35rem; margin-right:.5rem; }
 .torre-filter label{ font-weight:600; font-size:.9rem; }
@@ -3321,74 +3321,87 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <script>
 (function(){
-  // ---------- Utils ----------
+  const sleep = (ms)=> new Promise(r=> setTimeout(r, ms));
+
   function visibleRoomButtons(){
-    // Botones visibles considerando filtros existentes + torre
     return Array.from(document.querySelectorAll('.habitacion-btn'))
-      .filter(b => b.offsetParent !== null);
+      .filter(b => b.offsetParent !== null && !b.classList.contains('torre-oculta'));
   }
   function getRoomNumber(btn){
-    return (btn.dataset.room || btn.dataset.num || btn.textContent || '').trim();
+    return (btn.dataset.room || btn.dataset.num || (btn.textContent||'')).trim();
   }
   function detectTorre(numStr){
     const n = parseInt(numStr,10);
     if(!isFinite(n)) return null;
-    // Regla: miles = torre (1xxx -> T1, 2xxx -> T2, etc.)
     return Math.floor(n/1000) || null;
   }
 
-  // ---------- Mapeo de atributos desde JSON ----------
-  async function mapAttributesFromJSON(){
+  async function resolveHabitacionesData(){
+    try{ if (Array.isArray(window.habitacionesCache)) return window.habitacionesCache; }catch(_){}
     try{
-      let data = null;
-      if(window.habitacionesCache && Array.isArray(window.habitacionesCache)){
-        data = window.habitacionesCache;
-      }else if(typeof window.ensureHabitacionesData === 'function'){
-        data = await window.ensureHabitacionesData();
+      if (typeof window.ensureHabitacionesData === 'function'){
+        const d = await window.ensureHabitacionesData();
+        if (Array.isArray(d)) return d;
       }
-      // Si no hay data, no pasa nada: solo podremos contar por torre usando el número
-      if(!data) return;
-
-      // Indexar por número
-      const byNum = {};
-      data.forEach(r => {
-        const num = (r.titulo && (String(r.titulo).match(/\b(\d{3,4})\b/)||[])[1]) || r.numero || r.id;
-        if(num) byNum[String(num)] = r;
-      });
-
-      document.querySelectorAll('.habitacion-btn').forEach(btn=>{
-        const num = getRoomNumber(btn);
-        const info = byNum[num];
-        // Marcar torre por número (fallback siempre disponible)
-        const torre = detectTorre(num);
-        if(torre) btn.dataset.torre = String(torre);
-        // Sofá y conectada desde JSON si existe
-        if(info){
-          btn.dataset.sofa = info.sofa ? '1' : '0';
-          btn.dataset.conectada = info.habitacion_conectada ? '1' : '0';
-        }else{
-          // Fallback si no encontramos el registro (conservador)
-          if(!btn.dataset.sofa) btn.dataset.sofa = '0';
-          if(!btn.dataset.conectada) btn.dataset.conectada = '0';
-        }
-      });
-    }catch(e){
-      // Silencioso
-    }
+    }catch(_){}
+    try{
+      const r = await fetch('habitaciones.json', {cache:'no-store'});
+      if (r.ok){
+        const d = await r.json();
+        if (Array.isArray(d)) return d;
+      }
+    }catch(_){}
+    return null;
   }
 
-  // ---------- Contadores extras ----------
+  async function waitForHabitacionesData(maxTries=12, delay=300){
+    for (let i=0;i<maxTries;i++){
+      const d = await resolveHabitacionesData();
+      if (d) return d;
+      await sleep(delay);
+    }
+    return null;
+  }
+
+  async function mapAttributesFromJSON(){
+    const data = await waitForHabitacionesData();
+    const byNum = {};
+    if (Array.isArray(data)){
+      data.forEach(r => {
+        const t = String(r.titulo||'');
+        const m = t.match(/\\b(\\d{3,4})\\b/);
+        const num = (m && m[1]) || String(r.numero||'').trim() || String(r.id||'').trim();
+        if (num) byNum[num] = r;
+      });
+    }
+
+    document.querySelectorAll('.habitacion-btn').forEach(btn=>{
+      const num = getRoomNumber(btn);
+      const rec = byNum[num];
+      const torre = detectTorre(num);
+      if (torre) btn.dataset.torre = String(torre);
+
+      if (rec){
+        const sofa = !!rec.sofa;
+        const conect = !!(rec.habitacion_conectada);
+        btn.dataset.sofa = sofa ? '1' : '0';
+        btn.dataset.conectada = conect ? '1' : '0';
+      }else{
+        if (!('sofa' in btn.dataset)) btn.dataset.sofa = '0';
+        if (!('conectada' in btn.dataset)) btn.dataset.conectada = '0';
+      }
+    });
+  }
+
   function ensureExtraCounters(){
-    // Intentar colocar junto a los contadores existentes (K, D, Total...)
-    const candidates = [
+    const possibleHosts = [
       document.querySelector('#countTotal')?.parentElement,
       document.querySelector('.panel-filtro-categoria .stats'),
       document.querySelector('.panel-filtro-categoria'),
       document.querySelector('.stats'),
     ].filter(Boolean);
-    const host = candidates[0] || document.body;
+    const host = possibleHosts[0] || document.body;
 
-    // Crear nodos si no existen
     if(!document.getElementById('countSofa')){
       const span = document.createElement('span');
       span.innerHTML = ' · 🛋 Sofá: <span id="countSofa">0</span>';
@@ -3403,17 +3416,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function recountExtras(){
     const visibles = visibleRoomButtons();
-    const sofa = visibles.filter(b => b.dataset.sofa === '1').length;
-    const conn = visibles.filter(b => b.dataset.conectada === '1').length;
+    const sofa = visibles.filter(b => (b.dataset.sofa||'0') === '1').length;
+    const conn = visibles.filter(b => (b.dataset.conectada||'0') === '1').length;
     const sEl = document.getElementById('countSofa');
     const cEl = document.getElementById('countConn');
     if(sEl) sEl.textContent = sofa;
     if(cEl) cEl.textContent = conn;
   }
 
-  // ---------- Filtro por Torre ----------
   function ensureTorreFilter(){
-    // Buscar barra de filtros para insertar el select
     const host = document.querySelector('.panel-filtro-categoria') || document.body;
     if(document.getElementById('torreFilter')) return;
 
@@ -3429,14 +3440,13 @@ document.addEventListener('DOMContentLoaded', () => {
         <option value="4">Torre 4</option>
       </select>
     `;
-    // Insertar al principio de la barra para no desplazar tus otros filtros
+
     if(host.firstElementChild){
       host.insertBefore(wrap, host.firstElementChild);
     }else{
       host.appendChild(wrap);
     }
 
-    // Listener
     wrap.querySelector('#torreFilter').addEventListener('change', applyTorreFilter);
   }
 
@@ -3451,11 +3461,9 @@ document.addEventListener('DOMContentLoaded', () => {
         btn.classList.add('torre-oculta');
       }
     });
-    // Tras filtrar, recalcula los contadores adicionales
     recountExtras();
   }
 
-  // ---------- Hooks con tus filtros existentes ----------
   function hookToExistingFilters(){
     const inputs = document.querySelectorAll('select, input[type="checkbox"], input[type="radio"], input[type="search"], input[type="text"]');
     inputs.forEach(el=>{
@@ -3463,31 +3471,40 @@ document.addEventListener('DOMContentLoaded', () => {
       el.addEventListener('input', recountExtras);
     });
 
-    // Observar cambios de visibilidad en el área desplazable
     const zona = document.querySelector('.zona-desplazable') || document.body;
     const mo = new MutationObserver(()=> recountExtras());
     mo.observe(zona, { attributes:true, attributeFilter:['style','class'], subtree:true, childList:true });
+
+    const limpiarBtn = Array.from(document.querySelectorAll('button, a')).find(el=> /limpiar/i.test(el.textContent||'')) ||
+                       document.getElementById('btnLimpiar') || document.getElementById('limpiar');
+    if(limpiarBtn && !limpiarBtn._torreHooked){
+      limpiarBtn.addEventListener('click', ()=>{
+        const sel = document.getElementById('torreFilter');
+        if(sel){ sel.value=''; applyTorreFilter(); }
+      });
+      limpiarBtn._torreHooked = true;
+    }
+
+    if(typeof window.limpiarFiltros === 'function' && !window._wrapLimpiarTorre){
+      const orig = window.limpiarFiltros;
+      window.limpiarFiltros = function(...args){
+        const res = orig.apply(this, args);
+        const sel = document.getElementById('torreFilter');
+        if(sel){ sel.value=''; applyTorreFilter(); }
+        return res;
+      };
+      window._wrapLimpiarTorre = true;
+    }
   }
 
-  // ---------- Init ----------
   document.addEventListener('DOMContentLoaded', async ()=>{
-    await mapAttributesFromJSON();
-    ensureExtraCounters();
     ensureTorreFilter();
+    ensureExtraCounters();
+    await mapAttributesFromJSON();
     hookToExistingFilters();
-    // Pintar torre por número si no se mapeó antes
-    document.querySelectorAll('.habitacion-btn').forEach(btn=>{
-      if(!btn.dataset.torre){
-        const num = getRoomNumber(btn);
-        const t = detectTorre(num);
-        if(t) btn.dataset.torre = String(t);
-      }
-    });
-    // Primer recuento
-    applyTorreFilter(); // aplica (y llama recountExtras)
+    applyTorreFilter();
   });
 
-  // Exponer helper manual por si lo necesitas
   window.recontarExtras = recountExtras;
 })();
 </script>
