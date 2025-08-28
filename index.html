@@ -1021,16 +1021,40 @@ body.hk-no-scroll{ overflow:hidden !important; }
 .mk-primary{ background:#06b6d4; color:#06202a; }
 .mk-primary:hover{ filter:brightness(1.08); }
 </style><style>
-.bienvenida{
-  display:flex; align-items:center; gap:10px;
-  margin:8px 0 10px; padding:10px 12px;
-  background:linear-gradient(90deg, rgba(34,197,94,.15), rgba(59,130,246,.12));
-  border:1px solid rgba(34,197,94,.35);
-  border-radius:10px; color:#0b132b; font-weight:800;
+/* ===== Modal Bienvenida (una sola vez por sesión) ===== */
+.mk-backdrop{position:fixed; inset:0; display:none; align-items:center; justify-content:center; z-index:10000; padding:16px; background:rgba(15,23,42,.55); backdrop-filter: blur(2px);}
+.mk-welcome{
+  width:min(520px,100%); background:#0b132b; color:#e5e7eb; border-radius:18px;
+  border:1px solid rgba(255,255,255,.08); box-shadow:0 30px 90px rgba(0,0,0,.4);
+  overflow:hidden; transform: translateY(8px) scale(.98); opacity:0; animation: mkPop .22s ease-out forwards;
 }
-#bienvenida-msg{ font-size:0.95rem; }
-#btn-inventario{ padding:8px 12px; border-radius:10px; border:0; font-weight:800; cursor:pointer; }
-#btn-inventario:hover{ filter:brightness(1.05); }
+@keyframes mkPop{ to{ transform: translateY(0) scale(1); opacity:1; } }
+.mk-w-header{
+  display:flex; align-items:center; gap:12px; padding:16px 18px;
+  background:linear-gradient(90deg,#22c55e 0,#0ea5e9 100%); color:#06202a;
+}
+.mk-w-icon{ font-size:22px; filter: drop-shadow(0 1px 0 rgba(0,0,0,.15)); }
+.mk-w-title{ margin:0; font-size:1.05rem; font-weight:900; letter-spacing:.2px; }
+.mk-w-body{ padding:18px; display:grid; gap:12px; font-size:0.98rem; }
+.mk-w-name{ font-weight:900; }
+.mk-w-actions{ display:flex; justify-content:flex-end; gap:10px; padding:12px 18px; background:#0a0f24; }
+.mk-btn{ border:0; padding:10px 14px; border-radius:12px; font-weight:800; cursor:pointer; background:#1f2937; color:#e5e7eb; }
+.mk-btn:hover{ filter:brightness(1.1); }
+.mk-primary{ background:#06b6d4; color:#06202a; }
+.mk-primary:hover{ filter:brightness(1.08); }
+</style><style>
+.toast-msg{
+  background:#ef4444;
+  color:white;
+  padding:10px 16px;
+  border-radius:8px;
+  font-weight:700;
+  box-shadow:0 4px 10px rgba(0,0,0,.3);
+  animation: fadein .4s, fadeout .4s 3.6s forwards;
+}
+.toast-ok{ background:#16a34a; }
+@keyframes fadein{from{opacity:0; transform:translateY(-6px);}to{opacity:1; transform:translateY(0);}}
+@keyframes fadeout{to{opacity:0; transform:translateY(-6px);}}
 </style></head>
 <body>
 <!-- Modal de Éxito Inventario -->
@@ -1099,7 +1123,7 @@ body.hk-no-scroll{ overflow:hidden !important; }
 <span class="contador-categoria">
     Coincidencias: <strong id="total-coincidencias-categoria">0</strong>
 </span>
-</div><div class="bienvenida" id="bienvenida" style="display:none"><span id="bienvenida-msg">Bienvenido, —</span><button id="btn-inventario" type="button">📦 Inventario</button></div>
+</div>
 <div class="totales-tabla" id="totales-tabla" style="padding: 10px 16px;"></div>
 <div class="zona-desplazable">
 <!-- Torre 1 -->
@@ -3003,88 +3027,7 @@ document.addEventListener('DOMContentLoaded', () => {
   wireBtn();
 })();
 </script>
-</div></div><script>
-function haySesionValida(){
-  // 1) Si existe getRole(), permitir admin o supervisor
-  try { if (typeof getRole==='function') { const r = getRole(); if (r!=='admin' && r!=='supervisor') return false; } } catch(_) {}
-  // 2) Usa hasSession() si existe
-  try { if (typeof hasSession==='function') return hasSession()===true; } catch(_) {}
-  // 3) Claves conocidas
-  try { if (sessionStorage.getItem('hk_inv_session')) return true; } catch(_) {}
-  try { if (localStorage.getItem('concentrado_auth_v1')) return true; } catch(_) {}
-  return false;
-} }catch(e){}
-  try{ if(typeof window.hkHasSession==='function'){ return !!window.hkHasSession(); } }catch(e){}
-  try{
-    const s = JSON.parse(localStorage.getItem('concentrado_auth_v1') || 'null');
-    return !!s && (typeof s==='object' ? Object.keys(s).length>0 : true);
-  }catch(_){ return false; }
-} }catch(e){}
-  try{
-    const s = JSON.parse(localStorage.getItem('concentrado_auth_v1') || 'null');
-    return !!s && (typeof s==='object' ? Object.keys(s).length>0 : true);
-  }catch(_){ return false; }
-}
-function mostrarSoloAdminModal(){
-  const back = document.getElementById('modal-solo-admin');
-  if (!back) return;
-  back.style.display = 'flex';
-  const ok = document.getElementById('mkOk');
-  const login = document.getElementById('mkLogin');
-  if (ok) ok.onclick = () => back.style.display='none';
-  if (login) login.onclick = () => {
-    back.style.display='none';
-    if (typeof window.hkLogin === 'function'){
-      window.hkLogin(() => {
-        actualizarBienvenida(); try { openConcentrado(); } catch(e) {
-          const again = document.getElementById('btn-concentrado');
-          if (again) setTimeout(() => again.dispatchEvent(new Event('click')), 60);
-        }
-      });
-    } else {
-      document.querySelector('#btn-login,#btnLogin')?.click();
-    }
-  };
-}
-  back.style.display = 'flex';
-  const ok = document.getElementById('mkOk');
-  const login = document.getElementById('mkLogin');
-  if(ok){ ok.onclick = ()=> back.style.display='none'; }
-  if(login){
-    login.onclick = ()=>{
-      back.style.display='none';
-      if(typeof window.hkLogin === 'function'){
-        // Después de login exitoso, reintenta el click del botón Concentrado
-        window.hkLogin(()=>{
-          const again = document.getElementById('btn-concentrado');
-          if(again){ setTimeout(()=> again.dispatchEvent(new Event('click')), 60); }
-        });
-      }else{
-        // Fallback: dispara tu botón de login existente si no está hkLogin
-        document.querySelector('#btn-login,#btnLogin')?.click();
-      }
-    };
-  }
-}
-  back.style.display = 'flex';
-  const ok = document.getElementById('mkOk');
-  const login = document.getElementById('mkLogin');
-  if(ok){ ok.onclick = ()=> back.style.display='none'; }
-  if(login){ login.onclick = ()=>{ back.style.display='none'; document.querySelector('#btn-login,#btnLogin')?.click(); }; }
-}
-document.addEventListener('DOMContentLoaded', function(){
-  const btn = document.getElementById('btn-concentrado');
-  if(!btn) return;
-  btn.addEventListener('click', function(ev){
-    if(!haySesionValida()){
-      ev.preventDefault();
-      mostrarSoloAdminModal();
-      return;
-    }
-    // Con sesión válida: continúa tu flujo normal sin alerts
-  });
-});
-</script><div class="mk-backdrop" id="modal-solo-admin" style="display:none">
+</div></div><div class="mk-backdrop" id="modal-solo-admin" style="display:none">
 <div aria-labelledby="mkTitle" aria-modal="true" class="mk-modal" role="dialog">
 <div class="mk-header">
 <div class="mk-icon">🔒</div>
@@ -3142,35 +3085,174 @@ document.addEventListener('DOMContentLoaded', () => {
     // Con sesión válida: sigue tu flujo normal
   });
 });
+</script><div class="mk-backdrop" id="modal-bienvenida" style="display:none">
+<div aria-labelledby="mkWTitle" aria-modal="true" class="mk-welcome" role="dialog">
+<div class="mk-w-header">
+<div class="mk-w-icon">✅</div>
+<h3 class="mk-w-title" id="mkWTitle">Bienvenido</h3>
+</div>
+<div class="mk-w-body">
+<p>Sesión iniciada correctamente. ¡Bienvenido, <span class="mk-w-name" id="mkWName">—</span>!</p>
+<p>Puedes abrir el concentrado para ver todo lo recolectado hasta el momento.</p>
+</div>
+<div class="mk-w-actions">
+<button class="mk-btn mk-primary" id="mkWInv">📦 Ver Inventario</button>
+<button class="mk-btn" id="mkWOk">Cerrar</button>
+</div>
+</div>
+</div><script>
+(function(){
+  const WELCOME_KEY = 'welcome_shown';
+  function getNombreSesion(){
+    try{ if(typeof getSession==='function'){ const s=getSession(); if(s && s.name) return s.name; } }catch(_){}
+    try{ const v = sessionStorage.getItem('HK_NAME'); if(v) return v; }catch(_){}
+    try{ const obj = JSON.parse(localStorage.getItem('concentrado_auth_v1')||'null'); if(obj && obj.display) return obj.display; }catch(_){}
+    return null;
+  }
+  function showWelcomeOnce(){
+    try{
+      if(sessionStorage.getItem(WELCOME_KEY)==='1') return; // ya mostrado esta sesión
+      const back = document.getElementById('modal-bienvenida');
+      if(!back) return;
+      const name = getNombreSesion();
+      const nameEl = document.getElementById('mkWName');
+      if(nameEl){ nameEl.textContent = name || 'Usuario'; }
+      back.style.display = 'flex';
+      const ok = document.getElementById('mkWOk');
+      const inv = document.getElementById('mkWInv');
+      if(ok){ ok.onclick = () => { back.style.display='none'; sessionStorage.setItem(WELCOME_KEY,'1'); }; }
+      if(inv){ inv.onclick = () => { sessionStorage.setItem(WELCOME_KEY,'1'); try{ openConcentrado(); }catch(_){ } back.style.display='none'; }; }
+    }catch(_){}
+  }
+
+  // Integrar con hkLogin: al terminar login, mostrar bienvenida (solo 1 vez)
+  if(typeof window.hkLogin==='function'){
+    const old = window.hkLogin;
+    window.hkLogin = function(cb){
+      return old(function(){
+        showWelcomeOnce();
+        if(cb) cb();
+      });
+    };
+  }
+
+  // Si ya hay sesión al cargar (ej. recordar sesión), NO mostramos bienvenida aquí.
+  // El mensaje es solo cuando inicia sesión desde el flujo de Concentrado.
+  // Si necesitas activarlo manualmente después de otra ruta, puedes llamar a showWelcomeOnce().
+})();
+</script><div id="toast-container" style="position:fixed;top:20px;right:20px;z-index:99999;display:flex;flex-direction:column;gap:10px;"></div><script>
+function showToast(msg, ok){
+  const cont = document.getElementById('toast-container');
+  if(!cont) return;
+  const el = document.createElement('div');
+  el.className = 'toast-msg' + (ok ? ' toast-ok' : '');
+  el.textContent = msg;
+  cont.appendChild(el);
+  setTimeout(()=>{ el.remove(); }, 4000);
+}
 </script><script>
-function getNombreSesion(){
-  try{ if(typeof getSession==='function'){ const s=getSession(); if(s && s.name) return s.name; } }catch(_){}
-  try{ const v = sessionStorage.getItem('HK_NAME'); if(v) return v; }catch(_){}
-  try{ const obj = JSON.parse(localStorage.getItem('concentrado_auth_v1')||'null'); if(obj && obj.display) return obj.display; }catch(_){}
-  return null;
-}
-function actualizarBienvenida(){
-  const wrap = document.getElementById('bienvenida'); if(!wrap) return;
-  if(haySesionValida()){
-    const nombre = getNombreSesion();
-    const msg = document.getElementById('bienvenida-msg');
-    if(nombre){ msg.textContent = 'Bienvenido, ' + nombre; } else { msg.textContent = 'Bienvenido'; }
-    wrap.style.display = 'flex';
-  }else{
-    wrap.style.display = 'none';
+(function(){
+  const WELCOME_KEY = 'welcome_shown';
+
+  // If logout exists, clear session welcome flag so it shows next login
+  if(typeof window.hkLogout === 'function'){
+    const _oldLogout = window.hkLogout;
+    window.hkLogout = function(){
+      try{ sessionStorage.removeItem(WELCOME_KEY); }catch(_){}
+      return _oldLogout.apply(this, arguments);
+    };
   }
-}
-document.addEventListener('DOMContentLoaded', () => {
-  actualizarBienvenida();
-  const inv = document.getElementById('btn-inventario');
-  if(inv){
-    inv.addEventListener('click', (e)=>{
-      e.preventDefault();
-      if(!haySesionValida()){ if(typeof mostrarSoloAdminModal==='function') mostrarSoloAdminModal(); return; }
-      try{ openConcentrado(); }catch(_){}
-    });
+  // Also clear on "Cerrar sesión" button if exists
+  document.addEventListener('DOMContentLoaded', function(){
+    const btnOut = document.querySelector('#btn-logout,#btnLogout');
+    if(btnOut && !btnOut.__mkHook){
+      btnOut.__mkHook = true;
+      btnOut.addEventListener('click', function(){
+        try{ sessionStorage.removeItem(WELCOME_KEY); }catch(_){}
+      });
+    }
+  });
+
+  // Hook Enter/OK on matricula to detect wrong entry and toast
+  document.addEventListener('DOMContentLoaded', function(){
+    var pinInput = document.getElementById('hkpin2-input');
+    var okBtn = document.getElementById('hkpin2-ok');
+    if(pinInput && okBtn){
+      pinInput.addEventListener('keydown', function(ev){
+        if(ev.key === 'Enter'){
+          setTimeout(function(){
+            try{
+              if(typeof haySesionValida==='function' && !haySesionValida()){
+                showToast('Ingresa la matrícula correcta');
+              } else if (typeof hasSession==='function' && !hasSession()){
+                showToast('Ingresa la matrícula correcta');
+              }
+            }catch(_){}
+          }, 250);
+        }
+      });
+      okBtn.addEventListener('click', function(){
+        setTimeout(function(){
+          try{
+            if(typeof haySesionValida==='function' && !haySesionValida()){
+              showToast('Ingresa la matrícula correcta');
+            } else if (typeof hasSession==='function' && !hasSession()){
+              showToast('Ingresa la matrícula correcta');
+            }
+          }catch(_){}
+        }, 250);
+      });
+    }
+  });
+
+  // Show Welcome Once on successful hkLogin
+  if(typeof window.hkLogin==='function'){
+    const old = window.hkLogin;
+    window.hkLogin = function(cb){
+      return old(function(){
+        try{
+          // Only show once per session; it resets on page/tab close
+          if(sessionStorage.getItem(WELCOME_KEY) !== '1'){
+            // Populate name
+            const nameEl = document.getElementById('mkWName');
+            if(nameEl){
+              try{
+                if(typeof getSession==='function'){ const s=getSession(); if(s && s.name) nameEl.textContent = s.name; }
+                else {
+                  const v = sessionStorage.getItem('HK_NAME');
+                  if(v) nameEl.textContent = v;
+                }
+              }catch(_){}
+            }
+            const back = document.getElementById('modal-bienvenida');
+            if(back){ back.style.display='flex'; }
+          }
+        }catch(_){}
+        if(cb) cb();
+      });
+    };
   }
-});
+
+  // Wire Welcome modal actions (set flag so it won't show again in this session)
+  document.addEventListener('DOMContentLoaded', function(){
+    const back = document.getElementById('modal-bienvenida');
+    const ok = document.getElementById('mkWOk');
+    const inv = document.getElementById('mkWInv');
+    if(ok){
+      ok.addEventListener('click', function(){
+        try{ sessionStorage.setItem(WELCOME_KEY, '1'); }catch(_){}
+        if(back) back.style.display='none';
+      });
+    }
+    if(inv){
+      inv.addEventListener('click', function(){
+        try{ sessionStorage.setItem(WELCOME_KEY, '1'); }catch(_){}
+        try{ openConcentrado(); }catch(_){}
+        if(back) back.style.display='none';
+      });
+    }
+  });
+})();
 </script></body>
 </html>
 <script>
