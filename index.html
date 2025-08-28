@@ -184,7 +184,12 @@ border-bottom: none;
   max-width: 98vw;
   width: 1000px; /* antes 600px, luego 800px */
   color: black;
-}
+
+  max-height: calc(100vh - 60px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;}
 
 
   .contenido-panel {
