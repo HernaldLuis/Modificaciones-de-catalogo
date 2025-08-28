@@ -1,24 +1,16 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Portal de Concentrado · Inventario</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Portal de Concentrado · API</title>
 <style>
-:root{
-  --bg:#0b132b; --card:#0f172a; --muted:#94a3b8; --prim:#22c55e; --sec:#0ea5e9; --txt:#e5e7eb; --warn:#f59e0b; --err:#ef4444;
-}
+:root{--bg:#0b132b;--card:#0f172a;--muted:#94a3b8;--prim:#22c55e;--sec:#0ea5e9;--txt:#e5e7eb;}
 *{box-sizing:border-box;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto}
 body{margin:0;background:linear-gradient(180deg,#0b132b,#0b132b 60%,#0a0f24);color:var(--txt);}
-.header{
-  position:sticky; top:0; z-index:5; padding:14px 16px;
-  background:linear-gradient(90deg,rgba(34,197,94,.15),rgba(14,165,233,.15));
-  border-bottom:1px solid rgba(255,255,255,.06);
-  display:flex; align-items:center; justify-content:space-between; gap:10px;
-}
+.header{position:sticky;top:0;z-index:5;padding:14px 16px;background:linear-gradient(90deg,rgba(34,197,94,.15),rgba(14,165,233,.15));border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;justify-content:space-between;gap:10px}
 h1{margin:0;font-size:clamp(18px,2.6vw,24px);}
-.badge{display:inline-flex;gap:8px;align-items:center;background:#0a0f24;border:1px solid rgba(255,255,255,.08);
-  padding:8px 12px;border-radius:999px;font-weight:800;color:#cbd5e1}
+.badge{display:inline-flex;gap:8px;align-items:center;background:#0a0f24;border:1px solid rgba(255,255,255,.08);padding:8px 12px;border-radius:999px;font-weight:800;color:#cbd5e1}
 .wrap{max-width:1200px;margin:0 auto;padding:16px}
 .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:12px}
 .card{background:var(--card);border:1px solid rgba(255,255,255,.08);border-radius:14px;box-shadow:0 14px 40px rgba(0,0,0,.25);padding:14px}
@@ -27,7 +19,7 @@ h1{margin:0;font-size:clamp(18px,2.6vw,24px);}
 .kpi .num{font-size:1.6rem;font-weight:900}
 .kpi .tag{font-size:.85rem;color:var(--muted)}
 .controls{display:flex;gap:8px;flex-wrap:wrap}
-button, .btn{border:0;border-radius:10px;padding:9px 14px;font-weight:800;cursor:pointer;background:#1f2937;color:#e5e7eb}
+button,.btn{border:0;border-radius:10px;padding:9px 14px;font-weight:800;cursor:pointer;background:#1f2937;color:#e5e7eb}
 button:hover,.btn:hover{filter:brightness(1.1)}
 .btn-prim{background:var(--prim);color:#06202a} .btn-sec{background:var(--sec);color:#06202a}
 select,input[type="text"]{background:#0a0f24;border:1px solid #1f2937;color:#e5e7eb;border-radius:10px;padding:9px 12px}
@@ -45,11 +37,10 @@ tfoot td{padding:10px;border-top:2px solid #1f2937;font-weight:900}
 </head>
 <body>
   <div class="header">
-    <h1>Portal de Concentrado · Inventario</h1>
+    <h1>Portal de Concentrado · Conectado a Apps Script</h1>
     <div class="controls">
-      <span class="badge">👤 <b id="userName">—</b></span>
+      <span class="badge">API</span>
       <button id="btnRefrescar" class="btn">🔄 Refrescar</button>
-      <label class="btn"><input id="fileInput" type="file" accept=".json" style="display:none">📥 Cargar JSON</label>
       <button id="btnCSV" class="btn">⬇️ Exportar CSV</button>
       <button id="btnPDF" class="btn">🖨️ Imprimir</button>
     </div>
@@ -58,57 +49,37 @@ tfoot td{padding:10px;border-top:2px solid #1f2937;font-weight:900}
   <div class="wrap">
     <div class="grid">
       <div class="card kpi col" style="grid-column:span 3;">
-        <div>
-          <div class="tag">Habitaciones inventariadas</div>
-          <div id="kpiInventariadas" class="num">0</div>
-        </div>
-        <div>✅</div>
+        <div><div class="tag">Habitaciones registradas</div><div id="kpiTotal" class="num">0</div></div><div>🏨</div>
       </div>
       <div class="card kpi col" style="grid-column:span 3;">
-        <div>
-          <div class="tag">Pendientes</div>
-          <div id="kpiPendientes" class="num">0</div>
-        </div>
-        <div>⏳</div>
+        <div><div class="tag">OK</div><div id="kpiOK" class="num">0</div></div><div>✅</div>
       </div>
       <div class="card kpi col" style="grid-column:span 3;">
-        <div>
-          <div class="tag">Supervisores activos</div>
-          <div id="kpiSupervisores" class="num">0</div>
-        </div>
-        <div>🧑‍💼</div>
+        <div><div class="tag">Pendientes</div><div id="kpiPend" class="num">0</div></div><div>⏳</div>
       </div>
       <div class="card kpi col" style="grid-column:span 3;">
-        <div>
-          <div class="tag">Última actualización</div>
-          <div id="kpiUltima" class="num">—</div>
-        </div>
-        <div>🕒</div>
+        <div><div class="tag">Última actualización</div><div id="kpiUltima" class="num">—</div></div><div>🕒</div>
       </div>
 
       <div class="card" style="grid-column:span 12;">
-        <h3>Filtros rápidos</h3>
-        <div class="controls">
-          <select id="filtroSupervisor"><option value="">Todos los supervisores</option></select>
-          <select id="filtroTorre"><option value="">Todas las torres</option></select>
-          <select id="filtroCama"><option value="">Cualquier cama</option><option value="K">K</option><option value="D">D</option></select>
-          <select id="filtroSofa"><option value="">Sofá (cualquiera)</option><option value="si">Con sofá</option><option value="no">Sin sofá</option></select>
-          <button id="btnLimpiar" class="btn">Limpiar</button>
-        </div>
-      </div>
-
-      <div class="card" style="grid-column:span 12;">
-        <h3>Concentrado por habitación</h3>
+        <h3>Concentrado</h3>
         <div class="table">
           <table id="tabla">
-            <thead><tr>
-              <th>Habitación</th><th>Torre</th><th>Piso</th><th>Cama</th><th>Sofá</th>
-              <th>Inventariada</th><th>Supervisor</th><th>Fecha</th>
-            </tr></thead>
-            <tbody id="tbody"><tr><td colspan="8" class="empty">Sin datos aún. Carga un JSON o usa la data del sistema.</td></tr></tbody>
-            <tfoot><tr>
-              <td colspan="8" id="resumen">K: 0 · D: 0 · Sofá: 0 · Total: 0</td>
-            </tr></tfoot>
+            <thead>
+              <tr>
+                <th>Habitación</th>
+                <th>Usuario</th>
+                <th>Estado</th>
+                <th>Anomalías</th>
+                <th>Cama</th>
+                <th>Baño</th>
+                <th>Fecha</th>
+              </tr>
+            </thead>
+            <tbody id="tbody">
+              <tr><td colspan="7" class="empty">Cargando desde la API…</td></tr>
+            </tbody>
+            <tfoot><tr><td colspan="7" id="resumen">K: 0 · D: 0 · Pendientes: 0 · Total: 0</td></tr></tfoot>
           </table>
         </div>
       </div>
@@ -116,168 +87,86 @@ tfoot td{padding:10px;border-top:2px solid #1f2937;font-weight:900}
   </div>
 
   <div id="toast" class="toast"></div>
-  <div class="footer">Paradisus · Concentrado en vivo</div>
+  <div class="footer">Paradisus · API centralizada</div>
 
 <script>
-(function(){
-  const $ = (s)=>document.querySelector(s);
-  const toast=(t)=>{const el=$("#toast"); el.textContent=t; el.style.display="block"; setTimeout(()=>el.style.display="none",2400);};
+/** CONFIG **/
+const API_URL = "https://script.google.com/macros/s/AKfycbz-jh6y0UwfLtiQgOuPP3Wubm7SIlQich_T0iSigy7l8at04Zq4wGo2hsXZu_ZaW6sftw/exec";
+const TOKEN   = "PARADISUS_INV_2025_xX7$K9"; // la app codifica %24 en GET automáticamente
 
-  // === Sesión (lee nombre desde tu sistema) ===
-  function getNombreSesion(){
-    try{ if(typeof getSession==='function'){ const s=getSession(); if(s && s.name) return s.name; } }catch(_){}
-    try{ const v = sessionStorage.getItem('HK_NAME'); if(v) return v; }catch(_){}
-    try{ const obj = JSON.parse(localStorage.getItem('concentrado_auth_v1')||'null'); if(obj && obj.display) return obj.display; }catch(_){}
-    return "Usuario";
-  }
-  $("#userName").textContent = getNombreSesion();
+/** UTILS **/
+const $ = (s)=>document.querySelector(s);
+const toast=(t)=>{const el=$("#toast"); el.textContent=t; el.style.display="block"; setTimeout(()=>el.style.display="none",2400);};
+const fmt = d => d ? new Intl.DateTimeFormat('es-MX',{dateStyle:'medium', timeStyle:'short'}).format(new Date(d)) : '';
 
-  // === Fuente de datos ===
-  // Intentamos leer desde varias claves típicas donde tu app podría guardar el inventario.
-  function leerDatosSistema(){
-    try{
-      // Opciones conocidas: ajusta a tu clave real si ya existe
-      const claves = ['HK_INVENTARIO','inventarioData','recabado_supervisores','INVENTARIO_ACTUAL'];
-      for(const k of claves){
-        const raw = localStorage.getItem(k) || sessionStorage.getItem(k);
-        if(raw){
-          const data = JSON.parse(raw);
-          if(Array.isArray(data) && data.length){ return data; }
-          if(data && Array.isArray(data.items)) return data.items;
-        }
-      }
-    }catch(_){}
-    return [];
-  }
+function mapRow(it){
+  return {
+    habitacion: it.habitacion || '',
+    usuario: it.usuario || '',
+    estado: it.estado || '',
+    anomalias: it.anomalias || '',
+    cama: it['cama.tipo'] || '',
+    bano: `${it['bano.categoria']||''}${it['bano.verdes']!=null?` (verdes: ${it['bano.verdes']})`:''}`,
+    fecha: it.fecha || it.created_at || it.fecha_servidor || ''
+  };
+}
 
-  // Normalización: aceptar diversos formatos de campos
-  function normItem(it){
-    const h = {};
-    h.id = it.id || it.habitacion || it.hab || it.numero || "";
-    h.torre = it.torre || it.tower || it.block || "";
-    h.piso = it.piso || it.floor || "";
-    const cama = it.cama || it.bed || it.tipo_cama || "";
-    h.cama = (cama||"").toString().toUpperCase().includes("D") ? "D" : ((cama||"").toString().toUpperCase().includes("K") ? "K" : cama||"");
-    let sofa = it.sofa || it.sofaCama || it.sofacama || it.sofa_cama || it.sofa_cam || it.sofaBed;
-    sofa = (typeof sofa==='boolean') ? (sofa?'si':'no') : ((""+sofa).match(/si|true|1/i) ? 'si' : 'no');
-    h.sofa = sofa;
-    const inv = it.inventariada || it.inventario || it.done || it.checked || false;
-    h.inventariada = !!inv;
-    h.supervisor = it.supervisor || it.user || it.capturo || "";
-    h.fecha = it.fecha || it.updated_at || it.fh || "";
-    return h;
-  }
+function pintar(arr){
+  const tb = $("#tbody");
+  if(!arr.length){ tb.innerHTML='<tr><td colspan="7" class="empty">Sin datos.</td></tr>'; return; }
+  tb.innerHTML = arr.map(r => `
+    <tr>
+      <td>${r.habitacion}</td>
+      <td>${r.usuario}</td>
+      <td>${r.estado}</td>
+      <td>${r.anomalias}</td>
+      <td>${r.cama}</td>
+      <td>${r.bano}</td>
+      <td>${fmt(r.fecha)}</td>
+    </tr>
+  `).join('');
+}
 
-  let DATA = []; // normalizada
+function kpis(arr){
+  const total = arr.length;
+  const ok = arr.filter(x=>String(x.estado).toUpperCase()==='OK').length;
+  const pend = total - ok;
+  $("#kpiTotal").textContent = total;
+  $("#kpiOK").textContent = ok;
+  $("#kpiPend").textContent = pend;
+  const fechas = arr.map(x=>x.fecha).filter(Boolean).sort();
+  $("#kpiUltima").textContent = fechas.length ? fmt(fechas[fechas.length-1]) : "—";
+  const cont = arr.reduce((a,x)=>{ if(x.cama==='K') a.K++; else if(x.cama==='D') a.D++; a.T++; return a; }, {K:0,D:0,T:0});
+  $("#resumen").textContent = `K: ${cont.K} · D: ${cont.D} · Pendientes: ${pend} · Total: ${cont.T}`;
+}
 
-  function aplicarFiltros(arr){
-    const fSup = $("#filtroSupervisor").value;
-    const fTor = $("#filtroTorre").value;
-    const fCam = $("#filtroCama").value;
-    const fSofa = $("#filtroSofa").value;
-    return arr.filter(r=>(!fSup || r.supervisor===fSup)
-                      &&(!fTor || (r.torre+""===fTor+""))
-                      &&(!fCam || r.cama===fCam)
-                      &&(!fSofa || r.sofa===fSofa));
-  }
+async function cargar(){
+  try{
+    const url = `${API_URL}?token=${encodeURIComponent(TOKEN)}`;
+    const res = await fetch(url);
+    const json = await res.json();
+    if (json.status !== 'ok') throw new Error(json.error || 'Error de API');
+    const items = (json.rows || []).map(mapRow);
+    pintar(items); kpis(items);
+    toast("Datos desde API cargados");
+  }catch(e){ console.error(e); toast("Error al leer API"); }
+}
 
-  function pintarTabla(arr){
-    const tb = $("#tbody");
-    tb.innerHTML = "";
-    if(!arr.length){ tb.innerHTML = '<tr><td colspan="8" class="empty">No hay coincidencias.</td></tr>'; return; }
-    for(const r of arr){
-      const tr = document.createElement('tr');
-      tr.innerHTML = `<td>${r.id||""}</td><td>${r.torre||""}</td><td>${r.piso||""}</td>
-                      <td>${r.cama||""}</td><td>${r.sofa}</td><td>${r.inventariada?'Sí':'No'}</td>
-                      <td>${r.supervisor||""}</td><td>${r.fecha||""}</td>`;
-      tb.appendChild(tr);
-    }
-  }
+function exportCSV(){
+  const rows = [...document.querySelectorAll('#tbody tr')].map(tr=>[...tr.children].map(td=>td.textContent));
+  if(!rows.length || rows[0].length!==7){ toast('Nada para exportar'); return; }
+  const headers = ["habitacion","usuario","estado","anomalias","cama","bano","fecha"];
+  const csv = [headers.join(","), ...rows.map(r=>r.map(x=>`"${x.replace(/"/g,'""')}"`).join(","))].join("\n");
+  const blob = new Blob([csv], {type:"text/csv;charset=utf-8"});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = "concentrado.csv"; a.click(); URL.revokeObjectURL(a.href);
+}
 
-  function actualizarKPI(arr){
-    const total = arr.length;
-    const inv = arr.filter(x=>x.inventariada).length;
-    const pend = total - inv;
-    const sup = new Set(arr.map(x=>x.supervisor).filter(Boolean)).size;
-    $("#kpiInventariadas").textContent = inv;
-    $("#kpiPendientes").textContent = pend;
-    $("#kpiSupervisores").textContent = sup;
-    const fechas = arr.map(x=>x.fecha).filter(Boolean).sort();
-    $("#kpiUltima").textContent = fechas.length ? fechas[fechas.length-1] : "—";
-    const k = arr.reduce((a,x)=>{ if(x.cama==='K') a.K++; else if(x.cama==='D') a.D++; if(x.sofa==='si') a.S++; a.T++; return a; }, {K:0,D:0,S:0,T:0});
-    $("#resumen").textContent = `K: ${k.K} · D: ${k.D} · Sofá: ${k.S} · Total: ${k.T}`;
-  }
+document.getElementById('btnRefrescar').addEventListener('click', cargar);
+document.getElementById('btnCSV').addEventListener('click', exportCSV);
+document.getElementById('btnPDF').addEventListener('click', ()=> window.print());
 
-  function poblarFiltros(arr){
-    const sSup = $("#filtroSupervisor"); const sTor = $("#filtroTorre");
-    const sups = [...new Set(arr.map(x=>x.supervisor).filter(Boolean))].sort();
-    const tors = [...new Set(arr.map(x=>x.torre).filter(x=>x!=="" && x!==undefined))].sort((a,b)=> (a+"").localeCompare(b+""));
-    sSup.innerHTML = '<option value="">Todos los supervisores</option>' + sups.map(v=>`<option>${v}</option>`).join("");
-    sTor.innerHTML = '<option value="">Todas las torres</option>' + tors.map(v=>`<option>${v}</option>`).join("");
-  }
-
-  function render(){
-    const arr = aplicarFiltros(DATA);
-    pintarTabla(arr);
-    actualizarKPI(arr);
-  }
-
-  // Export CSV
-  function exportCSV(arr){
-    if(!arr.length){ toast("Nada para exportar"); return; }
-    const headers = ["habitacion","torre","piso","cama","sofa","inventariada","supervisor","fecha"];
-    const rows = arr.map(r=>[r.id||"",r.torre||"",r.piso||"",r.cama||"",r.sofa,(r.inventariada?'si':'no'),r.supervisor||"",r.fecha||""]);
-    const csv = [headers.join(","), ...rows.map(r=>r.map(x=>`"${(x+"").replace(/"/g,'""')}"`).join(","))].join("\n");
-    const blob = new Blob([csv], {type:"text/csv;charset=utf-8"});
-    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = "concentrado.csv"; a.click(); URL.revokeObjectURL(a.href);
-  }
-
-  // ==== Bootstrap ====
-  function cargarSistema(){
-    const raw = leerDatosSistema();
-    DATA = raw.map(normItem);
-    if(DATA.length){
-      poblarFiltros(DATA); render();
-      toast("Datos del sistema cargados");
-    }else{
-      toast("Sin datos del sistema. Carga un JSON.");
-    }
-  }
-  $("#btnRefrescar").addEventListener('click', cargarSistema);
-  $("#btnCSV").addEventListener('click', ()=> exportCSV(aplicarFiltros(DATA)));
-  $("#btnPDF").addEventListener('click', ()=> window.print());
-  $("#btnLimpiar").addEventListener('click', ()=>{
-    $("#filtroSupervisor").value="";
-    $("#filtroTorre").value="";
-    $("#filtroCama").value="";
-    $("#filtroSofa").value="";
-    render();
-  });
-  ["#filtroSupervisor","#filtroTorre","#filtroCama","#filtroSofa"].forEach(sel=>{
-    document.querySelector(sel).addEventListener('change', render);
-  });
-
-  // Carga por archivo
-  $("#fileInput").addEventListener('change', (ev)=>{
-    const f = ev.target.files[0]; if(!f) return;
-    const reader = new FileReader();
-    reader.onload = (e)=>{
-      try{
-        const json = JSON.parse(e.target.result);
-        const arr = Array.isArray(json)? json : (json.items || json.habitaciones || json.data || []);
-        DATA = arr.map(normItem);
-        poblarFiltros(DATA); render();
-        toast("JSON cargado");
-      }catch(err){
-        console.error(err); toast("JSON inválido");
-      }
-    };
-    reader.readAsText(f, "utf-8");
-  });
-
-  // Auto cargar del sistema al abrir
-  cargarSistema();
-
-})();</script>
+// bootstrap
+cargar();
+</script>
 </body>
 </html>
