@@ -3246,9 +3246,13 @@ document.addEventListener('DOMContentLoaded', () => {
 <script>
   function haySesionValida(){
     try{
+      if(typeof window.hkHasSession === 'function'){ return !!window.hkHasSession(); }
+    }catch(e){}
+    try{
       const s = JSON.parse(localStorage.getItem('concentrado_auth_v1') || 'null');
-      return !!s;
-    }catch(e){ return false; }
+      return !!s && (typeof s === 'object' ? Object.keys(s).length>0 : true);
+    }catch(_){ return false; }
+  }catch(e){ return false; }
   }
   function mostrarSoloAdminModal(){
     const back = document.getElementById('modal-solo-admin');
