@@ -2373,7 +2373,6 @@ document.addEventListener('DOMContentLoaded', () => {
     '3068694':'Dolores',
     '3071925':'Itzel',
     '3075393':'Marisela',
-    '3077512':'Ximena',
     '3072167':'Luis',
     '3062148':'Silvia',
     '3067888':'Manuel'
@@ -2995,7 +2994,15 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 </div></div><script>
 function haySesionValida(){
-  try{ if(typeof window.hasSession==='function'){ return !!window.hasSession(); } }catch(e){}
+  // 1) Si existe getRole(), permitir admin o supervisor
+  try { if (typeof getRole==='function') { const r = getRole(); if (r!=='admin' && r!=='supervisor') return false; } } catch(_) {}
+  // 2) Usa hasSession() si existe
+  try { if (typeof hasSession==='function') return hasSession()===true; } catch(_) {}
+  // 3) Claves conocidas
+  try { if (sessionStorage.getItem('hk_inv_session')) return true; } catch(_) {}
+  try { if (localStorage.getItem('concentrado_auth_v1')) return true; } catch(_) {}
+  return false;
+} }catch(e){}
   try{ if(typeof window.hkHasSession==='function'){ return !!window.hkHasSession(); } }catch(e){}
   try{
     const s = JSON.parse(localStorage.getItem('concentrado_auth_v1') || 'null');
@@ -3009,7 +3016,25 @@ function haySesionValida(){
 }
 function mostrarSoloAdminModal(){
   const back = document.getElementById('modal-solo-admin');
-  if(!back){ return; }
+  if (!back) return;
+  back.style.display = 'flex';
+  const ok = document.getElementById('mkOk');
+  const login = document.getElementById('mkLogin');
+  if (ok) ok.onclick = () => back.style.display='none';
+  if (login) login.onclick = () => {
+    back.style.display='none';
+    if (typeof window.hkLogin === 'function'){
+      window.hkLogin(() => {
+        try { openConcentrado(); } catch(e) {
+          const again = document.getElementById('btn-concentrado');
+          if (again) setTimeout(() => again.dispatchEvent(new Event('click')), 60);
+        }
+      });
+    } else {
+      document.querySelector('#btn-login,#btnLogin')?.click();
+    }
+  };
+}
   back.style.display = 'flex';
   const ok = document.getElementById('mkOk');
   const login = document.getElementById('mkLogin');
@@ -3108,3 +3133,23 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script></body>
 </html>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const btn = document.getElementById('btn-concentrado');
+  if (!btn) return;
+  btn.style.display = 'inline-flex';
+  // Evita duplicar listeners: marca
+  if (!btn.__mkHooked) {
+    btn.__mkHooked = true;
+    btn.addEventListener('click', (ev) => {
+      if (!haySesionValida()){
+        ev.preventDefault();
+        if (typeof mostrarSoloAdminModal==='function') mostrarSoloAdminModal();
+        return;
+      }
+      try { openConcentrado(); } catch(e) {}
+    });
+  }
+});
+</script>
