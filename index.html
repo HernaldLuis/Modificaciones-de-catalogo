@@ -3253,24 +3253,25 @@ function showToast(msg, ok){
     }
   });
 })();
+</script><script>
+function openConcentrado(){
+  // Abre el portal en una nueva pestaña:
+  window.open('portal_concentrado.html', '_blank');
+  // 👉 Si prefieres en la misma pestaña, cambia por esta línea:
+  // location.href = 'portal_concentrado.html';
+}
+</script><script>
+document.addEventListener('DOMContentLoaded', ()=>{
+  const btn = document.getElementById('btn-concentrado');
+  if(!btn) return;
+  btn.addEventListener('click', (ev)=>{
+    if(!haySesionValida()){
+      ev.preventDefault();
+      if(typeof mostrarSoloAdminModal==='function') mostrarSoloAdminModal();
+      return;
+    }
+    openConcentrado();
+  });
+});
 </script></body>
 </html>
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-  const btn = document.getElementById('btn-concentrado');
-  if (!btn) return;
-  btn.style.display = 'inline-flex';
-  // Evita duplicar listeners: marca
-  if (!btn.__mkHooked) {
-    btn.__mkHooked = true;
-    btn.addEventListener('click', (ev) => {
-      if (!haySesionValida()){
-        ev.preventDefault();
-        if (typeof mostrarSoloAdminModal==='function') mostrarSoloAdminModal();
-        return;
-      }
-      try { openConcentrado(); } catch(e) {}
-    });
-  }
-});
-</script>
