@@ -1020,6 +1020,17 @@ body.hk-no-scroll{ overflow:hidden !important; }
 .mk-btn:hover{ filter:brightness(1.1); }
 .mk-primary{ background:#06b6d4; color:#06202a; }
 .mk-primary:hover{ filter:brightness(1.08); }
+</style><style>
+.bienvenida{
+  display:flex; align-items:center; gap:10px;
+  margin:8px 0 10px; padding:10px 12px;
+  background:linear-gradient(90deg, rgba(34,197,94,.15), rgba(59,130,246,.12));
+  border:1px solid rgba(34,197,94,.35);
+  border-radius:10px; color:#0b132b; font-weight:800;
+}
+#bienvenida-msg{ font-size:0.95rem; }
+#btn-inventario{ padding:8px 12px; border-radius:10px; border:0; font-weight:800; cursor:pointer; }
+#btn-inventario:hover{ filter:brightness(1.05); }
 </style></head>
 <body>
 <!-- Modal de Éxito Inventario -->
@@ -1088,7 +1099,7 @@ body.hk-no-scroll{ overflow:hidden !important; }
 <span class="contador-categoria">
     Coincidencias: <strong id="total-coincidencias-categoria">0</strong>
 </span>
-</div>
+</div><div class="bienvenida" id="bienvenida" style="display:none"><span id="bienvenida-msg">Bienvenido, —</span><button id="btn-inventario" type="button">📦 Inventario</button></div>
 <div class="totales-tabla" id="totales-tabla" style="padding: 10px 16px;"></div>
 <div class="zona-desplazable">
 <!-- Torre 1 -->
@@ -3025,7 +3036,7 @@ function mostrarSoloAdminModal(){
     back.style.display='none';
     if (typeof window.hkLogin === 'function'){
       window.hkLogin(() => {
-        try { openConcentrado(); } catch(e) {
+        actualizarBienvenida(); try { openConcentrado(); } catch(e) {
           const again = document.getElementById('btn-concentrado');
           if (again) setTimeout(() => again.dispatchEvent(new Event('click')), 60);
         }
@@ -3131,9 +3142,37 @@ document.addEventListener('DOMContentLoaded', () => {
     // Con sesión válida: sigue tu flujo normal
   });
 });
+</script><script>
+function getNombreSesion(){
+  try{ if(typeof getSession==='function'){ const s=getSession(); if(s && s.name) return s.name; } }catch(_){}
+  try{ const v = sessionStorage.getItem('HK_NAME'); if(v) return v; }catch(_){}
+  try{ const obj = JSON.parse(localStorage.getItem('concentrado_auth_v1')||'null'); if(obj && obj.display) return obj.display; }catch(_){}
+  return null;
+}
+function actualizarBienvenida(){
+  const wrap = document.getElementById('bienvenida'); if(!wrap) return;
+  if(haySesionValida()){
+    const nombre = getNombreSesion();
+    const msg = document.getElementById('bienvenida-msg');
+    if(nombre){ msg.textContent = 'Bienvenido, ' + nombre; } else { msg.textContent = 'Bienvenido'; }
+    wrap.style.display = 'flex';
+  }else{
+    wrap.style.display = 'none';
+  }
+}
+document.addEventListener('DOMContentLoaded', () => {
+  actualizarBienvenida();
+  const inv = document.getElementById('btn-inventario');
+  if(inv){
+    inv.addEventListener('click', (e)=>{
+      e.preventDefault();
+      if(!haySesionValida()){ if(typeof mostrarSoloAdminModal==='function') mostrarSoloAdminModal(); return; }
+      try{ openConcentrado(); }catch(_){}
+    });
+  }
+});
 </script></body>
 </html>
-
 <script>
 document.addEventListener('DOMContentLoaded', () => {
   const btn = document.getElementById('btn-concentrado');
