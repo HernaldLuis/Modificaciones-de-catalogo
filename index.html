@@ -1006,33 +1006,14 @@ body.hk-no-scroll{ overflow:hidden !important; }
 }
 </style>
 <style>
-/* ===== Modal Solo Admin (non-invasive) ===== */
-.mk-backdrop{
-  position:fixed; inset:0; display:none;
-  background:rgba(15,23,42,.55); backdrop-filter: blur(2px);
-  align-items:center; justify-content:center; z-index:9999; padding:16px;
-}
-.mk-modal{
-  width:min(480px,100%); background:#0b132b; color:#e5e7eb;
-  border-radius:16px; box-shadow:0 25px 80px rgba(0,0,0,.35);
-  overflow:hidden; transform: translateY(8px) scale(.98); opacity:0;
-  animation: mkPop .22s ease-out forwards;
-  border:1px solid rgba(255,255,255,.08);
-}
+/* ===== Modal Solo Admin ===== */
+.mk-backdrop{position:fixed; inset:0; display:none; background:rgba(15,23,42,.55); backdrop-filter: blur(2px); align-items:center; justify-content:center; z-index:9999; padding:16px;}
+.mk-modal{width:min(480px,100%); background:#0b132b; color:#e5e7eb; border-radius:16px; box-shadow:0 25px 80px rgba(0,0,0,.35); overflow:hidden; transform: translateY(8px) scale(.98); opacity:0; animation: mkPop .22s ease-out forwards; border:1px solid rgba(255,255,255,.08);}
 @keyframes mkPop{ to{ transform: translateY(0) scale(1); opacity:1; } }
-.mk-header{
-  display:flex; align-items:center; gap:10px;
-  padding:16px 18px; background:linear-gradient(90deg,#0ea5e9 0,#22c55e 100%);
-  color:#0b132b;
-}
+.mk-header{display:flex; align-items:center; gap:10px; padding:16px 18px; background:linear-gradient(90deg,#0ea5e9 0,#22c55e 100%); color:#0b132b;}
 .mk-icon{ font-size:22px; filter: drop-shadow(0 1px 0 rgba(0,0,0,.15)); }
 .mk-header h3{ margin:0; font-size:1.05rem; font-weight:900; letter-spacing:.2px; }
 .mk-body{ padding:16px 18px; display:grid; gap:10px; }
-.mk-badges{ display:flex; gap:8px; flex-wrap:wrap; }
-.mk-badge{
-  background:#111827; color:#cbd5e1; border:1px solid #1f2937;
-  padding:6px 10px; border-radius:999px; font-size:.85rem; font-weight:700;
-}
 .mk-hint{ margin:0; color:#9ca3af; font-size:.9rem; }
 .mk-actions{ display:flex; justify-content:flex-end; gap:10px; padding:12px 18px; background:#0a0f24; }
 .mk-btn{ border:0; padding:9px 14px; border-radius:10px; font-weight:800; cursor:pointer; background:#1f2937; color:#e5e7eb; }
@@ -1070,7 +1051,6 @@ body.hk-no-scroll{ overflow:hidden !important; }
 </div>
 </div>
 <button class="btn-logout" id="btn-logout" onclick="hkLogout()" style="display:none">Cerrar sesión</button>
-
 <span id="hk-badge" style="display:none"></span>
 <h1 class="titulo-catalogo">
 <span>Paradisus · Colección Exclusiva de Habitaciones &amp; Suites</span>
@@ -1104,7 +1084,7 @@ body.hk-no-scroll{ overflow:hidden !important; }
     K: 0 · D: 0 · Total: 0 — Reserve: 0 · ♿: 0 · Cocineta: 0
   </span>
 <a class="btn-reporte" download="" href="introduccion_paradisus_2025.pdf" id="btn-descargar-pdf" target="_blank" title="Descargar reporte PDF">📄 Descargar PDF</a>
-<a class="btn-reporte" href="javascript:void(0)" id="btn-concentrado">📊 Concentrado</a><button id="btn-limpiar-filtro" type="button">Limpiar</button>
+<button id="btn-concentrado" type="button">📊 Concentrado</button><button id="btn-limpiar-filtro" type="button">Limpiar</button>
 <span class="contador-categoria">
     Coincidencias: <strong id="total-coincidencias-categoria">0</strong>
 </span>
@@ -1650,8 +1630,8 @@ body.hk-no-scroll{ overflow:hidden !important; }
 <!-- Lightbox de imagen -->
 <div class="visor-oculto" id="zoom-overlay" onclick="cerrarZoom(event)">
 <span id="zoom-close" onclick="cerrarZoom(event)" style="position: absolute; top: 20px; right: 30px; font-size: 30px; cursor: pointer; color: white;">❌</span>
-<img alt="Zoom" id="zoom-img" loading="lazy" src="">
-</img></div>
+<img alt="Zoom" id="zoom-img" loading="lazy" src=""/>
+</div>
 <script>
 
 async function mostrarInfo(num) {
@@ -2625,216 +2605,6 @@ document.addEventListener('DOMContentLoaded', () => {
 })();
 </script>
 <script>
-(function(){ if (window.__hk_concentrado_done) return; window.__hk_concentrado_done = true;
-
-  const API_URL   = "https://script.google.com/macros/s/AKfycbz3bAcBcbSyF3VlIjrXNzoqhR7DMOEAdYU3GFvTAP7MsU18VbQJVzVQbv3VhfLwP2n1nA/exec";
-  const API_TOKEN = "PARADISUS_INV_2025_xX7$K9";
-
-  const ADMIN_IDS = { "3072167":"Luis", "3067888":"Manuel" };
-  const SUP_IDS   = { "3077512":"Ximena", "3062148":"Silvia", "3071925":"Itzel", "3068694":"Dolores", "3075393":"Marisela" };
-
-  function getRole(){ try{ const id=(sessionStorage.getItem('HK_MAT')||'').trim(); if(ADMIN_IDS[id]) return 'admin'; if(SUP_IDS[id]) return 'supervisor'; }catch(_){} return 'none'; }
-  function el(sel,root){ return (root||document).querySelector(sel); }
-  function els(sel,root){ return Array.from((root||document).querySelectorAll(sel)); }
-  function h(elm,ev,fn){ elm && elm.addEventListener(ev,fn); }
-
-  function hdr(){ return {'Content-Type':'text/plain'}; }
-  async function apiList(){
-    const r = await fetch(API_URL + '?action=list&token=' + encodeURIComponent(API_TOKEN));
-    const j = await r.json(); if(!r.ok || !j || j.status!=='ok') throw new Error((j&&j.error)||'list failed'); return j.rows||[];
-  }
-  async function apiAppend(entry){
-    const r = await fetch(API_URL, { method:'POST', headers: hdr(), body: JSON.stringify({action:'append', token: API_TOKEN, entry}) });
-    const j = await r.json(); if(!r.ok || !j || j.status!=='ok') throw new Error((j&&j.error)||'append failed'); return j;
-  }
-
-  const QK='HK_INV_QUEUE';
-  const qLoad=()=>{ try{return JSON.parse(localStorage.getItem(QK)||'[]');}catch(_){return[];} };
-  const qSave=a=>{ try{localStorage.setItem(QK,JSON.stringify(a));}catch(_){} };
-  const qPush=x=>{ const a=qLoad(); a.push(x); qSave(a); };
-  async function flushQueue(){ const a=qLoad(); if(!a.length) return 0; let keep=[]; for(const it of a){ try{ await apiAppend(it); }catch(_){ keep.push(it); } } qSave(keep); return a.length-keep.length; }
-
-  function collect(hnum){
-    function val(id){ const e=el('#'+id); return e?(e.type==='checkbox'? e.checked : e.value):''; }
-    return {
-      fecha: new Date().toISOString(),
-      habitacion: String(hnum||''),
-      usuario: sessionStorage.getItem('HK_NAME')||'',
-      matricula: sessionStorage.getItem('HK_MAT')||'',
-      sillas: val('sillas-cant'),
-      cama: {
-        tipo:'',
-        protector: val('cama-protector'),
-        sabana: val('cama-sabanas'),
-        almohadas: val('cama-almohadas'),
-        fundas: val('cama-fundas'),
-        protAlm: val('cama-prot-alm'),
-        duvet: val('cama-inserto'),
-        fundaDuvet: val('cama-cubre'),
-        colorDuvet: val('cama-color')
-      },
-      closet: { toallasPlaya:'', bolsas:'', ganchos:'', albornoz:'' },
-      bano: {
-        categoria: val('ban-categoria'), bano: val('ban-bano'), mano: val('ban-mano'),
-        facial: val('ban-facial'), tapete: val('ban-tapete'), verdes: val('ban-verdes'), color: val('ban-color')
-      },
-      notas: val('invp-notas')
-    };
-  }
-
-  function ensureOverlay(){
-    let ov = el('#concentradoOverlay');
-    if(!ov){
-      ov = document.createElement('div');
-      ov.id='concentradoOverlay';
-      ov.innerHTML = '\
-        <div class="modal-contenido" role="dialog" aria-modal="true">\
-          <h2>Concentrado de Inventarios</h2>\
-          <div class="conc-toolbar">\
-            <div class="left">\
-              <input id="conc-search" type="search" placeholder="Buscar habitacion/usuario/nota..." />\
-              <div class="conc-stats" id="conc-stats"></div>\
-            </div>\
-            <div class="right" style="display:flex;gap:8px;align-items:center;flex-shrink:0">\
-              <button id="exp-excel" class="btn primary">Exportar Excel</button>\
-              <button id="exp-pdf" class="btn primary">Exportar PDF</button>\
-              <button id="conc-cerrar" class="btn danger">Cerrar</button>\
-            </div>\
-          </div>\
-          <div class="table-wrap"><div id="conc-body">Cargando...</div></div>\
-          <div class="conc-actions" style="display:none"></div>\
-        </div>';
-      document.body.appendChild(ov);
-    }
-    return ov;
-  }
-
-  function renderTable(rows){
-    if(!rows || !rows.length) return '<p>No hay registros todavia.</p>';
-    const prefer=['fecha','habitacion','usuario','matricula','estado','anomalias','created_at','updated_at','fecha_servidor','fecha_dia'];
-    const keys=Array.from(rows.reduce((s,o)=> (Object.keys(o).forEach(k=>s.add(k)),s), new Set()));
-    const headers=prefer.filter(k=>keys.includes(k)).concat(keys.filter(k=>!prefer.includes(k)).sort());
-    let th = headers.map(h=>'<th data-key="'+h+'">'+h+'</th>').join('');
-    let body = rows.map(r=>'<tr>'+headers.map(h=>'<td>'+(r[h]??'')+'</td>').join('')+'</tr>').join('');
-    return '<table class="conc-table"><thead><tr>'+th+'</tr></thead><tbody>'+body+'</tbody></table>';
-  }
-
-  function sortByKey(rows, key, dir){
-    const m = dir==='desc'?-1:1;
-    rows.sort((a,b)=>{ const av=(a[key]??'').toString(); const bv=(b[key]??'').toString(); return av.localeCompare(bv, undefined, {numeric:true})*m; });
-  }
-
-  function exportCSV(){
-    const ov=el('#concentradoOverlay'); const table=el('.conc-table', ov); let csv='';
-    if(table){
-      const rows=els('tr', table);
-      const cell=td=> (td.innerText||'').replace(/\r?\n/g,' ').trim();
-      csv = rows.map(tr => els(':scope > *', tr).map(td => JSON.stringify(cell(td))).join(',')).join('\n');
-    } else if (ov && ov.__data){
-      const rows = ov.__data||[]; if(!rows.length) return alert('No hay datos.');
-      const prefer=['fecha','habitacion','usuario','matricula','estado','anomalias','created_at','updated_at','fecha_servidor','fecha_dia'];
-      const set=new Set(); rows.forEach(r=>Object.keys(r).forEach(k=>set.add(k)));
-      const headers=prefer.filter(k=>set.has(k)).concat(Array.from(set).filter(k=>!prefer.includes(k)).sort());
-      csv = headers.join(',')+'\n'+rows.map(r=>headers.map(h=>JSON.stringify(r[h]??'')).join(',')).join('\n');
-    } else return alert('No hay datos.');
-    const blob=new Blob(['\ufeff', csv],{type:'text/csv;charset=utf-8;'}); const url=URL.createObjectURL(blob);
-    const a=document.createElement('a'); a.href=url; a.download='concentrado_inventario.csv'; a.click(); setTimeout(()=>URL.revokeObjectURL(url),1000);
-  }
-
-  function exportPDF(){
-    const ov=el('#concentradoOverlay'); const wrap=el('.table-wrap', ov); const html=wrap?wrap.innerHTML:'<p>Sin datos</p>';
-    const w=window.open('', '_blank'); if(!w) return alert('Permite ventanas emergentes para exportar a PDF.');
-    const css='<style>body{font-family:Arial,sans-serif;padding:16px}h1{font-size:18px;margin:0 0 10px}table{width:100%;border-collapse:collapse}th,td{border:1px solid #ddd;padding:6px;font-size:12px;white-space:nowrap}th{background:#f3f4f6;position:sticky;top:0}tr:nth-child(even) td{background:#fcfdff}</style>';
-    w.document.write('<html><head><meta charset="utf-8"><title>Concentrado</title>'+css+'</head><body><h1>Concentrado de Inventarios</h1>'+html+'</body></html>');
-    w.document.close(); w.focus(); w.print();
-  }
-
-  async function openConcentrado(){
-    if(getRole()!=='admin') return alert('Solo administradores pueden ver el concentrado.');
-    const ov=ensureOverlay(); el('#conc-body', ov).innerHTML='<div style="padding:18px">Cargando<span class="spinner"></span></div>';
-    ov.classList.add('activo'); ov.setAttribute('aria-hidden','false');
-    try{
-      const data = await apiList();
-      ov.__data = data.slice();
-      el('#conc-body', ov).innerHTML = renderTable(ov.__data);
-      refreshStats(ov); wireSort(ov);
-    }catch(e){
-      console.error(e);
-      let data=[]; try{ data = JSON.parse(localStorage.getItem('HK_INV_DATA')||'[]'); }catch(_){}
-      ov.__data = data;
-      el('#conc-body', ov).innerHTML = renderTable(ov.__data);
-      refreshStats(ov); wireSort(ov);
-    }
-  }
-
-  function refreshStats(ov){
-    const s = el('#conc-stats', ov);
-    const n = (ov.__data||[]).length;
-    const last = n? (ov.__data[ov.__data.length-1].fecha_servidor || ov.__data[ov.__data.length-1].created_at || '') : '';
-    s.textContent = n + ' registros' + (last ? (' • ultimo: ' + last) : '');
-  }
-
-  function wireSort(ov){
-    const table = el('.conc-table', ov); if(!table) return;
-    const headers = els('th', table);
-    headers.forEach(th => {
-      let dir = 'asc';
-      h(th,'click',()=>{ const key=th.getAttribute('data-key'); if(!key) return; sortByKey(ov.__data, key, dir); dir = dir==='asc'?'desc':'asc'; el('#conc-body', ov).innerHTML=renderTable(ov.__data); wireSort(ov); });
-    });
-  }
-
-  document.addEventListener('input', function(e){
-    if(e.target && e.target.id==='conc-search'){
-      const term = e.target.value.toLowerCase().trim();
-      const ov = el('#concentradoOverlay'); if(!ov || !ov.__data) return;
-      const base = ov.__data_all || (ov.__data_all = ov.__data.slice());
-      if(!term) ov.__data = base.slice();
-      else ov.__data = base.filter(r => JSON.stringify(r).toLowerCase().includes(term));
-      el('#conc-body', ov).innerHTML = renderTable(ov.__data);
-      wireSort(ov); refreshStats(ov);
-    }
-  });
-
-  document.addEventListener('click', function(e){
-    if(e.target && e.target.id==='btn-concentrado') openConcentrado();
-    if(e.target && e.target.id==='conc-cerrar'){ const ov=el('#concentradoOverlay'); if(ov){ ov.classList.remove('activo'); ov.setAttribute('aria-hidden','true'); } }
-    if(e.target && e.target.id==='exp-excel') exportCSV();
-    if(e.target && e.target.id==='exp-pdf') exportPDF();
-  });
-
-  if (typeof window.abrirInventarioPrincipal === 'function'){
-    const _open = window.abrirInventarioPrincipal;
-    window.abrirInventarioPrincipal = function(hnum){
-      _open(hnum);
-      setTimeout(function(){
-        const save = document.getElementById('invp-guardar');
-        if(save && !save.__wired){
-          save.__wired = true;
-          save.addEventListener('click', async function(){
-            try{ const entry = collect(hnum); try{ await apiAppend(entry); }catch(_e){ qPush(entry); } try{ await flushQueue(); }catch(_e){} }catch(err){ console.error(err); }
-          }, {capture:true});
-        }
-      }, 0);
-    };
-  }
-
-  async function badgeCheck(){
-    const bd = document.getElementById('hk-badge'); if(!bd) return;
-    bd.style.display = 'inline-block'; bd.textContent = 'Comprobando...';
-    try{ await apiList(); bd.textContent='Central'; bd.classList.add('ok'); }
-    catch(_e){ bd.textContent='Local'; bd.classList.remove('ok'); }
-    if(getRole()!=='admin') bd.style.display='none';
-  }
-
-  document.addEventListener('DOMContentLoaded', async function(){
-    const btn = document.getElementById('btn-concentrado');
-    if(btn) btn.style.display = (getRole()==='admin' ? 'inline-flex' : 'none');
-    try{ await flushQueue(); }catch(_){}
-    badgeCheck();
-  });
-
-})();</script>
-<script>
 (()=>{
   if(window.__hkRestoreGuardWired) return; window.__hkRestoreGuardWired = true;
   const DEPURACION_MAT = "3072167";
@@ -3223,7 +2993,62 @@ document.addEventListener('DOMContentLoaded', () => {
   wireBtn();
 })();
 </script>
-</div></div><div class="mk-backdrop" id="modal-solo-admin" style="display:none">
+</div></div><script>
+function haySesionValida(){
+  try{ if(typeof window.hasSession==='function'){ return !!window.hasSession(); } }catch(e){}
+  try{ if(typeof window.hkHasSession==='function'){ return !!window.hkHasSession(); } }catch(e){}
+  try{
+    const s = JSON.parse(localStorage.getItem('concentrado_auth_v1') || 'null');
+    return !!s && (typeof s==='object' ? Object.keys(s).length>0 : true);
+  }catch(_){ return false; }
+} }catch(e){}
+  try{
+    const s = JSON.parse(localStorage.getItem('concentrado_auth_v1') || 'null');
+    return !!s && (typeof s==='object' ? Object.keys(s).length>0 : true);
+  }catch(_){ return false; }
+}
+function mostrarSoloAdminModal(){
+  const back = document.getElementById('modal-solo-admin');
+  if(!back){ return; }
+  back.style.display = 'flex';
+  const ok = document.getElementById('mkOk');
+  const login = document.getElementById('mkLogin');
+  if(ok){ ok.onclick = ()=> back.style.display='none'; }
+  if(login){
+    login.onclick = ()=>{
+      back.style.display='none';
+      if(typeof window.hkLogin === 'function'){
+        // Después de login exitoso, reintenta el click del botón Concentrado
+        window.hkLogin(()=>{
+          const again = document.getElementById('btn-concentrado');
+          if(again){ setTimeout(()=> again.dispatchEvent(new Event('click')), 60); }
+        });
+      }else{
+        // Fallback: dispara tu botón de login existente si no está hkLogin
+        document.querySelector('#btn-login,#btnLogin')?.click();
+      }
+    };
+  }
+}
+  back.style.display = 'flex';
+  const ok = document.getElementById('mkOk');
+  const login = document.getElementById('mkLogin');
+  if(ok){ ok.onclick = ()=> back.style.display='none'; }
+  if(login){ login.onclick = ()=>{ back.style.display='none'; document.querySelector('#btn-login,#btnLogin')?.click(); }; }
+}
+document.addEventListener('DOMContentLoaded', function(){
+  const btn = document.getElementById('btn-concentrado');
+  if(!btn) return;
+  btn.addEventListener('click', function(ev){
+    if(!haySesionValida()){
+      ev.preventDefault();
+      mostrarSoloAdminModal();
+      return;
+    }
+    // Con sesión válida: continúa tu flujo normal sin alerts
+  });
+});
+</script><div class="mk-backdrop" id="modal-solo-admin" style="display:none">
 <div aria-labelledby="mkTitle" aria-modal="true" class="mk-modal" role="dialog">
 <div class="mk-header">
 <div class="mk-icon">🔒</div>
@@ -3231,10 +3056,6 @@ document.addEventListener('DOMContentLoaded', () => {
 </div>
 <div class="mk-body">
 <p>Solo <b>administradores</b> pueden ingresar al <b>Concentrado / Inventario</b>.</p>
-<div class="mk-badges">
-<span class="mk-badge">Luis</span>
-<span class="mk-badge">Sr. Manuel</span>
-</div>
 <p class="mk-hint">Inicia sesión con tu matrícula para continuar.</p>
 </div>
 <div class="mk-actions">
@@ -3242,46 +3063,48 @@ document.addEventListener('DOMContentLoaded', () => {
 <button class="mk-btn" id="mkOk">Aceptar</button>
 </div>
 </div>
-</div>
-<script>
-  function haySesionValida(){
-    try{
-      if(typeof window.hkHasSession === 'function'){ return !!window.hkHasSession(); }
-    }catch(e){}
-    try{
-      const s = JSON.parse(localStorage.getItem('concentrado_auth_v1') || 'null');
-      return !!s && (typeof s === 'object' ? Object.keys(s).length>0 : true);
-    }catch(_){ return false; }
-  }catch(e){ return false; }
-  }
-  function mostrarSoloAdminModal(){
-    const back = document.getElementById('modal-solo-admin');
-    if(!back){ alert('Solo administradores pueden ver el concentrado.'); return; }
-    back.style.display = 'flex';
-    const ok = document.getElementById('mkOk');
-    const login = document.getElementById('mkLogin');
-    if(ok){ ok.onclick = () => back.style.display = 'none'; }
-    if(login){
-      login.onclick = () => {
-        back.style.display = 'none';
-        // dispara tu login existente (ajusta el selector si tu botón de login tiene otro id)
-        const loginBtn = document.querySelector('#btn-login, #btnLogin');
-        if(loginBtn){ loginBtn.click(); }
-      };
+</div><script>
+function haySesionValida(){
+  // 1) Si existe getRole(), sólo admin entra
+  try { if (typeof getRole==='function') { if (getRole()!=='admin') return false; } } catch(_) {}
+  // 2) Usa hasSession() si existe
+  try { if (typeof hasSession==='function') return hasSession()===true; } catch(_) {}
+  // 3) Claves conocidas
+  try { if (sessionStorage.getItem('hk_inv_session')) return true; } catch(_) {}
+  try { if (localStorage.getItem('concentrado_auth_v1')) return true; } catch(_) {}
+  return false;
+}
+function mostrarSoloAdminModal(){
+  const back = document.getElementById('modal-solo-admin');
+  if (!back) return;
+  back.style.display = 'flex';
+  const ok = document.getElementById('mkOk');
+  const login = document.getElementById('mkLogin');
+  if (ok) ok.onclick = () => back.style.display='none';
+  if (login) login.onclick = () => {
+    back.style.display='none';
+    if (typeof window.hkLogin === 'function'){
+      window.hkLogin(()=>{
+        const again = document.getElementById('btn-concentrado');
+        if (again) setTimeout(()=> again.dispatchEvent(new Event('click')), 60);
+      });
+    } else {
+      document.querySelector('#btn-login,#btnLogin')?.click();
     }
-  }
-  document.addEventListener('DOMContentLoaded', function(){
-    const btn = document.getElementById('btn-concentrado');
-    if(!btn) return;
-    btn.addEventListener('click', function(ev){
-      if(!haySesionValida()){
-        ev.preventDefault();
-        mostrarSoloAdminModal();
-        return;
-      }
-      // Con sesión válida, continúa con tu flujo ya funcional (no tocamos nada)
-    });
+  };
+}
+document.addEventListener('DOMContentLoaded', () => {
+  const btn = document.getElementById('btn-concentrado');
+  if (!btn) return;
+  btn.style.display = 'inline-flex'; // siempre visible como Limpiar
+  btn.addEventListener('click', (ev) => {
+    if (!haySesionValida()){
+      ev.preventDefault();
+      mostrarSoloAdminModal();
+      return;
+    }
+    // Con sesión válida: sigue tu flujo normal
   });
-</script>
-</body>
+});
+</script></body>
 </html>
