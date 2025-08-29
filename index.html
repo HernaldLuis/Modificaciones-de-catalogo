@@ -934,7 +934,7 @@ body.hk-modal-open{ overflow: hidden; }
 #inventarioOverlay .invp-actions{ position:sticky; bottom:0; background:#fff; padding-top:8px; z-index:1; }
 @media (max-height:700px){ #inventarioOverlay .modal-contenido{ max-height:calc(100vh - 16px); } }
 
-/* === CONC-FS-002: Pantalla completa robusta === */
+/* === CONC-FS-002:  robusta === */
 #concentradoOverlay.fullscreen{ z-index: 9999; }
 #concentradoOverlay.fullscreen .modal-contenido{
   width: 98vw !important;
@@ -990,6 +990,21 @@ body.hk-no-scroll{ overflow: hidden !important; }
 .hk-purge-dialog .btn-go{ background:#ef4444; color:#fff; }
 .hk-purge-dialog .btn-go[disabled]{ opacity:.6; cursor:not-allowed; }
 body.hk-no-scroll{ overflow:hidden !important; }
+
+
+/* HK stats pill */
+#cp-stats, #conc-stats{
+  display:inline-block;
+  min-width: 84px;
+  padding: 6px 10px;
+  margin-left: 8px;
+  border-radius: 999px;
+  background:#e5e7eb;
+  color:#111827;
+  font-weight:700;
+  font-size:13px;
+  text-align:center;
+}
 
 </style>
 <style>
@@ -2020,7 +2035,70 @@ document.addEventListener('DOMContentLoaded', async () => {
   await initCategorias();
   aplicarFiltro('');
 });
-    </script> <!-- ✅ Cierra aquí tu script principal -->
+    
+  document.getElementById('cp-fs').addEventListener('click', function(){
+      var modal = document.getElementById('concPortal');
+      if(modal){ modal.classList.toggle('fullscreen'); }
+      var btn = document.getElementById('cp-fs');
+      var isFS = modal && modal.classList.contains('fullscreen');
+      btn.textContent = isFS ? 'Cerrar ' : '';
+      btn.className = 'btn green';
+});
+
+
+  // === Exportar Excel (.xls sin dependencia) ===
+  function exportXLS(){
+    try{
+      var table = document.getElementById('cp-table');
+      if(!table){ return; }
+      var clone = table.cloneNode(true);
+      // Quitar columna de acciones si existiera en el futuro: (no hay ahora)
+      var html = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"/></head><body>' + clone.outerHTML + '</body></html>';
+      var blob = new Blob([html], { type: 'application/vnd.ms-excel' });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = 'concentrado_inventarios.xls';
+      document.body.appendChild(a);
+      a.click();
+      URL.revokeObjectURL(url);
+      a.remove();
+    }catch(e){ console.error(e); }
+  }
+
+  // === Exportar PDF (via Print to PDF del navegador) ===
+  function exportPDF(){
+    try{
+      var table = document.getElementById('cp-table');
+      if(!table){ return; }
+      var w = window.open('', '_blank');
+      if(!w){ return; }
+      var styles = `
+        <style>
+          @page { size: A4 landscape; margin: 12mm; }
+          body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Inter, Helvetica, Arial, sans-serif; }
+          h1 { font-size: 16pt; margin: 0 0 10px; }
+          table { width: 100%; border-collapse: collapse; font-size: 10pt; }
+          thead th { background: #f1f5f9; border: 1px solid #e5e7eb; padding: 6px; text-align: left; }
+          tbody td { border: 1px solid #e5e7eb; padding: 6px; }
+        </style>
+      `;
+      w.document.write('<html><head><meta charset="utf-8"/>' + styles + '</head><body>');
+      w.document.write('<h1>Concentrado de Inventarios</h1>');
+      w.document.write(table.outerHTML);
+      w.document.write('</body></html>');
+      w.document.close();
+      w.focus();
+      setTimeout(function(){ w.print(); w.close(); }, 250);
+    }catch(e){ console.error(e); }
+  }
+
+  var _xlsBtn = document.getElementById('cp-xls');
+  if(_xlsBtn){ _xlsBtn.addEventListener('click', exportXLS); }
+  var _pdfBtn = document.getElementById('cp-pdf');
+  if(_pdfBtn){ _pdfBtn.addEventListener('click', exportPDF); }
+
+</script> <!-- ✅ Cierra aquí tu script principal -->
 <div aria-labelledby="titulo-novedades" aria-modal="true" class="modal-mejoras" id="modal-mejoras" role="dialog">
 <div class="modal-contenido">
 <h2>🆕BIENVENID@ - Novedades del Catálogo</h2>
@@ -2766,7 +2844,7 @@ document.addEventListener('DOMContentLoaded', () => {
     btn.onclick = () => {
       const on = ov.classList.toggle('fullscreen');
       document.body.classList.toggle('hk-no-scroll', on);
-      btn.textContent = on ? 'Salir de pantalla completa' : 'Expandir';
+      btn.textContent = on ? 'Cerrar ' : 'Expandir';
     };
 
     const closeBtn = ov.querySelector('#conc-cerrar');
@@ -3293,7 +3371,6 @@ document.addEventListener('DOMContentLoaded', ()=>{
         <span class="conc-stats" id="conc-stats">0 registros</span>
       </div>
       <div class="right">
-        <button class="btn primary" id="conc-fullscreen" title="Pantalla completa">Pantalla completa</button>
         <button class="btn primary" id="conc-export" title="Exportar CSV">Exportar CSV</button>
         <button class="btn" id="conc-cerrar" title="Cerrar">Cerrar</button>
       </div>
@@ -3484,6 +3561,511 @@ window.openConcentrado = function(){
     }
   }catch(_){}
 };
+</script>
+
+<script>
+(function(){
+  var btn = document.getElementById('cp-expand');
+  if(!btn) return;
+  function toggleFS(){
+    var modal = document.getElementById('concPortal');
+    if(modal){ modal.classList.toggle('fullscreen'); }
+    var isFS = modal && modal.classList.contains('fullscreen');
+    btn.textContent = isFS ? 'Cerrar pantalla completa' : 'Expandir';
+    btn.className = 'btn green';
+  }
+  btn.textContent = 'Expandir';
+  btn.className = 'btn green';
+  btn.addEventListener('click', toggleFS);
+})();
+</script>
+
+<!-- === [CONC-DETAILS UNIVERSAL PATCH] Agrega columnas de Sillas / Cama / Clóset / Baño -->
+<script>
+(function(){
+  if (window.__HK_CONC_DETAILS_PATCHED) return;
+  window.__HK_CONC_DETAILS_PATCHED = true;
+
+  const COLS = [
+    {k:'habitacion', label:'Hab.'},
+    {k:'torre', label:'Torre'},
+    {k:'piso', label:'Piso'},
+    {k:'prefijo', label:'Rec.'},
+    {k:'categoria', label:'Categoría'},
+    {k:'cama', label:'Cama'},
+    {k:'handicap', label:'♿'},
+    {k:'cocineta', label:'Cocineta'},
+    {k:'fecha', label:'Fecha/Hora'},
+    {k:'matricula', label:'Matrícula'},
+    {k:'estado', label:'Estado'},
+    {k:'delta', label:'Δ Faltantes'},
+    {k:'notas', label:'Notas'},
+    // Detalle solicitado
+    {k:'sillas', label:'Sillas'},
+    {k:'cama_tipo', label:'Tipo cama'},
+    {k:'cama_protector', label:'Protector'},
+    {k:'cama_sabanas', label:'Sábanas'},
+    {k:'cama_almohadas', label:'Almohadas'},
+    {k:'cama_fundas', label:'Fundas'},
+    {k:'cama_prot_alm', label:'Prot. almohadas'},
+    {k:'cama_inserto', label:'Inserto (dúvet)'},
+    {k:'cama_cubre_duvet', label:'Cubre dúvet'},
+    {k:'cama_color', label:'Color dúvet'},
+    {k:'closet_cobertor', label:'Cobertor'},
+    {k:'closet_almohada_mat', label:'Almohada matr.'},
+    {k:'closet_funda_mat', label:'Funda matr.'},
+    {k:'closet_protector_mat', label:'Protector matr.'},
+    {k:'closet_bolsas_tela', label:'Bolsas tela'},
+    {k:'bano_categoria', label:'Cat. baño'},
+    {k:'bano_toallas_banio', label:'Toallas baño'},
+    {k:'bano_toallas_mano', label:'Toallas mano'},
+    {k:'bano_toallas_faciales', label:'Toallas faciales'},
+    {k:'bano_tapetes', label:'Tapetes'},
+    {k:'bano_toallas_verdes', label:'Toallas verdes'},
+    {k:'bano_color', label:'Color baño'}
+  ];
+
+  const $ = (s, r=document)=>r.querySelector(s);
+  const $$ = (s, r=document)=>Array.from(r.querySelectorAll(s));
+
+  function deepGet(obj, path){
+    try{
+      if(!obj) return undefined;
+      let v=obj;
+      for(const key of path.split('.')){
+        if(v && typeof v==='object' && key in v) v=v[key]; else return undefined;
+      }
+      return v;
+    }catch(_){return undefined;}
+  }
+  function pick(o, keys){
+    for(const k of keys){
+      const v = k.includes('.') ? deepGet(o,k) : (o?o[k]:undefined);
+      if(v!==undefined && v!==null && v!=='') return v;
+    }
+    return '';
+  }
+
+  function normalize(x){
+    const base = {
+      habitacion:  (pick(x,['habitacion','hab','room','num']) || '') + '',
+      torre:       pick(x,['torre','tower']),
+      piso:        pick(x,['piso','floor']),
+      prefijo:     pick(x,['prefijo','recepcion','reception']),
+      categoria:   pick(x,['categoria','category']),
+      cama:        pick(x,['tipo_cama','cama','bed','cama.tipo','cama_tipo']),
+      handicap:   !!pick(x,['handicap','discapacidad','wheelchair']),
+      cocineta:   !!pick(x,['cocineta','kitchenette']),
+      fecha:       pick(x,['fecha','fecha_hora','datetime','createdAt','timestamp']),
+      matricula:   pick(x,['matricula','user','operador']),
+      estado:      pick(x,['estado','status']),
+      delta:       pick(x,['delta','faltantes','diff']),
+      notas:       pick(x,['notas','nota','comentarios','comments'])
+    };
+    const detalle = {
+      sillas: pick(x, ['sillas','cantidad_sillas','muebles.sillas']),
+      // cama
+      cama_tipo:          pick(x, ['cama.tipo','tipo_cama','cama_tipo']),
+      cama_protector:     pick(x, ['cama.protector','protector']),
+      cama_sabanas:       pick(x, ['cama.sabanas','sabanas']),
+      cama_almohadas:     pick(x, ['cama.almohadas','almohadas']),
+      cama_fundas:        pick(x, ['cama.fundas','fundas']),
+      cama_prot_alm:      pick(x, ['cama.protector_almohadas','protector_almohadas']),
+      cama_inserto:       pick(x, ['cama.inserto','inserto','duvet_inserto']),
+      cama_cubre_duvet:   pick(x, ['cama.cubre_duvet','cubre_duvet']),
+      cama_color:         pick(x, ['cama.color','color_duvet','color_cubre_duvet','color']),
+      // closet
+      closet_cobertor:       pick(x, ['closet.cobertor','cobertor']),
+      closet_almohada_mat:   pick(x, ['closet.almohada_matrimonial','almohada_matrimonial']),
+      closet_funda_mat:      pick(x, ['closet.funda_matrimonial','funda_matrimonial']),
+      closet_protector_mat:  pick(x, ['closet.protector_matrimonial','protector_matrimonial']),
+      closet_bolsas_tela:    pick(x, ['closet.bolsas_tela','bolsas_tela']),
+      // baño
+      bano_categoria:        pick(x, ['bano.categoria','bano_categoria','categoria_bano']),
+      bano_toallas_banio:    pick(x, ['bano.toallas_bano','toallas_banio','toallas_bano']),
+      bano_toallas_mano:     pick(x, ['bano.toallas_mano','toallas_mano']),
+      bano_toallas_faciales: pick(x, ['bano.toallas_faciales','toallas_faciales']),
+      bano_tapetes:          pick(x, ['bano.tapetes','tapetes']),
+      bano_toallas_verdes:   pick(x, ['bano.toallas_verdes','toallas_verdes']),
+      bano_color:            pick(x, ['bano.color','color_toallas','color_tapetes'])
+    };
+    return Object.assign({}, base, detalle, {__raw:x});
+  }
+
+  function loadRegistros(){
+    let arr = [];
+    try{
+      if(Array.isArray(window.HK_REGISTROS)) arr = arr.concat(window.HK_REGISTROS.filter(o=>o&&typeof o==='object'));
+      if(Array.isArray(window.hk_registros)) arr = arr.concat(window.hk_registros.filter(o=>o&&typeof o==='object'));
+      const keys = Object.keys(localStorage||{});
+      const cands = ['hk_inventarios','hk_inventario_registros','inventarios','hk_logs','HK_INV','HK_REGISTROS'];
+      for(const k of keys){
+        if(cands.includes(k) || /inv|invent|hk/i.test(k)){
+          try{ const v = JSON.parse(localStorage.getItem(k)); if(Array.isArray(v)) arr = arr.concat(v.filter(o=>o&&typeof o==='object')); }catch(_){}
+        }
+      }
+    }catch(_){}
+    return arr.map(normalize);
+  }
+
+  function groupLatest(items){
+    const map = new Map();
+    for(const it of items){
+      const key = it.habitacion;
+      const t = new Date(it.fecha || 0).getTime() || 0;
+      const prev = map.get(key);
+      if(!prev || (new Date(prev.fecha||0).getTime()||0) < t){
+        map.set(key, it);
+      }
+    }
+    return Array.from(map.values());
+  }
+
+  let sortKey='fecha', sortDir=-1;
+  function cmp(a,b,k){
+    const av=(a[k]??'')+''; const bv=(b[k]??'')+'';
+    return av.localeCompare(bv, undefined, {numeric:true, sensitivity:'base'});
+  }
+
+  function getDOM(){
+    const table = $('#cp-table') || $('#conc-table');
+    const thead = table ? table.querySelector('thead') : null;
+    const tbody = $('#cp-tbody') || $('#conc-tbody') || (table ? table.querySelector('tbody') : null);
+    const stats = $('#cp-stats') || $('#conc-stats');
+    const viewSel = $('#cp-view') || $('#conc-view');
+    const search = $('#cp-search') || $('#conc-search');
+    return {table, thead, tbody, stats, viewSel, search};
+  }
+
+  function buildHeader(dom){
+    if(!dom.thead) return;
+    const tr = document.createElement('tr');
+    for(const c of COLS){
+      const th = document.createElement('th');
+      th.setAttribute('data-k', c.k);
+      th.textContent = c.label;
+      tr.appendChild(th);
+    }
+    dom.thead.innerHTML = '';
+    dom.thead.appendChild(tr);
+
+    Array.from(tr.children).forEach(th=>{
+      th.addEventListener('click', function(){
+        const k = this.getAttribute('data-k');
+        if(!k) return;
+        if(sortKey===k) sortDir*=-1; else { sortKey=k; sortDir=(k==='fecha')?-1:1; }
+        render();
+      });
+    });
+  }
+
+  function render(){
+    const dom = getDOM();
+    if(!dom.tbody) return;
+    let rows = loadRegistros();
+    const view = dom.viewSel ? (dom.viewSel.value || 'ultimo') : 'ultimo';
+    if(view==='ultimo') rows = groupLatest(rows);
+    const q = (dom.search && dom.search.value || '').trim().toLowerCase();
+    if(q) rows = rows.filter(r => JSON.stringify(r).toLowerCase().includes(q));
+    rows.sort((a,b)=> sortKey==='fecha'
+      ? sortDir*((new Date(a.fecha||0).getTime()||0)-(new Date(b.fecha||0).getTime()||0))
+      : sortDir*cmp(a,b,sortKey));
+
+    dom.tbody.innerHTML = '';
+    if(rows.length===0){
+      const tr=document.createElement('tr'); const td=document.createElement('td');
+      td.colSpan = COLS.length; td.style.textAlign='center'; td.style.padding='14px';
+      td.textContent='Sin datos para mostrar.'; tr.appendChild(td); dom.tbody.appendChild(tr);
+    } else {
+      for(const r of rows){
+        const tr=document.createElement('tr');
+        for(const c of COLS){
+          const td=document.createElement('td');
+          const v = r[c.k];
+          td.textContent = (v===true)?'Sí':(v===false?'No':(v ?? ''));
+          tr.appendChild(td);
+        }
+        dom.tbody.appendChild(tr);
+      }
+    }
+    if(dom.stats) dom.stats.textContent = rows.length + ' registro' + (rows.length==1?'':'s');
+  }
+
+  function ensureExportsUseCurrentTable(){
+    function tableToCSV(){
+      const dom = getDOM();
+      const headers = COLS.map(c=>c.label);
+      const rows = Array.from(dom.tbody ? dom.tbody.querySelectorAll('tr') : [])
+        .map(tr=> Array.from(tr.children).map(td => (td.textContent||'').replace(/\s+/g,' ').trim()));
+      const all=[headers].concat(rows);
+      return all.map(r=> r.map(v => /[",\n]/.test(v) ? '"' + v.replace(/"/g,'""') + '"' : v).join(',')).join('\n');
+    }
+    function bind(id, fn){
+      const el = document.getElementById(id);
+      if(el && !el.__hkBind){
+        el.addEventListener('click', fn);
+        el.__hkBind = true;
+      }
+    }
+    bind('cp-export', function(){
+      const csv = tableToCSV();
+      const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = 'concentrado_inventarios.csv';
+      document.body.appendChild(a); a.click(); URL.revokeObjectURL(url); a.remove();
+    });
+    bind('cp-xls', function(){
+      const dom = getDOM();
+      const cloneTable = dom.table ? dom.table.cloneNode(true) : null;
+      if(!cloneTable) return;
+      const html = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"/></head><body>' + cloneTable.outerHTML + '</body></html>';
+      const blob = new Blob([html], {type:'application/vnd.ms-excel'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href=url; a.download='concentrado_inventarios.xls'; document.body.appendChild(a); a.click(); URL.revokeObjectURL(url); a.remove();
+    });
+    bind('cp-pdf', function(){
+      const dom = getDOM();
+      const w = window.open('', '_blank'); if(!w) return;
+      const styles = '<style>@page{size:A4 landscape;margin:12mm}body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Helvetica,Arial,sans-serif}h1{font-size:16pt;margin:0 0 10px}table{width:100%;border-collapse:collapse;font-size:10pt}thead th{background:#f1f5f9;border:1px solid #e5e7eb;padding:6px;text-align:left}tbody td{border:1px solid #e5e7eb;padding:6px}</style>';
+      w.document.write('<html><head><meta charset="utf-8"/>'+styles+'</head><body><h1>Concentrado de Inventarios</h1>');
+      if(dom.table) w.document.write(dom.table.outerHTML);
+      w.document.write('</body></html>');
+      w.document.close(); w.focus(); setTimeout(function(){ w.print(); w.close(); }, 250);
+    });
+  }
+
+  function buildAndRenderIfPossible(){
+    const dom = getDOM();
+    if(dom.table && dom.thead && dom.tbody){
+      buildHeader(dom);
+      render();
+      ensureExportsUseCurrentTable();
+      return true;
+    }
+    return false;
+  }
+
+  // Wrap concPortal.open
+  if (window.concPortal && typeof window.concPortal.open === 'function'){
+    const __oldOpen = window.concPortal.open;
+    window.concPortal.open = function(){
+      const res = __oldOpen.apply(this, arguments);
+      setTimeout(buildAndRenderIfPossible, 0);
+      return res;
+    };
+  }
+
+  // Wrap window.openModal (otra variante)
+  if (typeof window.openModal === 'function'){
+    const __old = window.openModal;
+    window.openModal = function(){
+      const res = __old.apply(this, arguments);
+      setTimeout(buildAndRenderIfPossible, 0);
+      return res;
+    };
+  }
+
+  // Si ya está abierto cuando cargamos el patch
+  setTimeout(buildAndRenderIfPossible, 300);
+})();
+</script>
+
+<script>
+(function(){
+  if (window.__HK_CLEAN_EMPTY_BTNS) return;
+  window.__HK_CLEAN_EMPTY_BTNS = true;
+  function cleanupEmptyButtons(){
+    try{
+      var roots = document.querySelectorAll('#concPortal .bar, #concPortal .bar .left, #concPortal .bar .right, #concentradoOverlay .conc-toolbar');
+      roots.forEach(function(root){
+        if(!root) return;
+        root.querySelectorAll('button').forEach(function(btn){
+          var txt = (btn.textContent || '').replace(/\u00A0/g,' ').trim();
+          if(!txt){ btn.remove(); }
+        });
+      });
+    }catch(_){}
+  }
+  // Hook into open functions so every vez que abras el modal, limpiamos
+  if(window.concPortal && typeof window.concPortal.open === 'function' && !window.concPortal.open.__wrapped){
+    var __old = window.concPortal.open;
+    window.concPortal.open = function(){
+      var r = __old.apply(this, arguments);
+      setTimeout(cleanupEmptyButtons, 0);
+      return r;
+    };
+    window.concPortal.open.__wrapped = true;
+  }
+  if(typeof window.openModal === 'function' && !window.openModal.__wrapped){
+    var __old2 = window.openModal;
+    window.openModal = function(){
+      var r = __old2.apply(this, arguments);
+      setTimeout(cleanupEmptyButtons, 0);
+      return r;
+    };
+    window.openModal.__wrapped = true;
+  }
+  // Run once after load and also on any click inside overlay (por si cambia dinámico)
+  setTimeout(cleanupEmptyButtons, 300);
+  document.addEventListener('click', function(e){
+    if(e.target && (e.target.closest('#concPortalOverlay') || e.target.closest('#concentradoOverlay'))){
+      setTimeout(cleanupEmptyButtons, 0);
+    }
+  }, true);
+})();
+</script>
+
+<script>
+(function(){
+  if(window.__HK_POLISH_APPLIED) return; window.__HK_POLISH_APPLIED = true;
+
+  function fmtFecha(val){
+    try{
+      if(!val) return '';
+      var d = new Date(val);
+      if(isNaN(d.getTime())){
+        // try parse "dd/mm/yyyy hh:mm" or "yyyy-mm-dd hh:mm"
+        var parts = String(val).replace('T',' ').split(/[\/\-\s:]/).map(Number);
+        if(parts.length >= 3){
+          if(String(val).indexOf('/')>-1){ // dd/mm/yyyy
+            d = new Date(parts[2], parts[1]-1, parts[0], parts[3]||0, parts[4]||0);
+          } else { // yyyy-mm-dd
+            d = new Date(parts[0], (parts[1]||1)-1, parts[2]||1, parts[3]||0, parts[4]||0);
+          }
+        }
+      }
+      if(isNaN(d.getTime())) return String(val);
+      var dd = String(d.getDate()).padStart(2,'0');
+      var mm = String(d.getMonth()+1).padStart(2,'0');
+      var yyyy = d.getFullYear();
+      var HH = String(d.getHours()).padStart(2,'0');
+      var MM = String(d.getMinutes()).padStart(2,'0');
+      return dd + "/" + mm + "/" + yyyy + " " + HH + ":" + MM;
+    }catch(_){ return String(val||''); }
+  }
+
+  function getDOM(){
+    var table = document.querySelector('#cp-table, #conc-table');
+    return {
+      table: table,
+      thead: table ? table.querySelector('thead') : null,
+      tbody: document.querySelector('#cp-tbody, #conc-tbody'),
+      stats: document.querySelector('#cp-stats, #conc-stats'),
+      view: document.querySelector('#cp-view, #conc-view'),
+      search: document.querySelector('#cp-search, #conc-search')
+    };
+  }
+
+  // Hook into the universal render if exists; else create a small wrapper
+  var _render = window.__HK_CONC_RENDER || null;
+
+  function persistPrefs(dom){
+    try{
+      var prefs = {
+        view: dom.view ? dom.view.value : null,
+        q: dom.search ? dom.search.value : ''
+      };
+      localStorage.setItem('hk_conc_prefs', JSON.stringify(prefs));
+    }catch(_){}
+  }
+  function loadPrefs(dom){
+    try{
+      var raw = localStorage.getItem('hk_conc_prefs');
+      if(!raw) return;
+      var prefs = JSON.parse(raw);
+      if(dom.view && prefs.view) dom.view.value = prefs.view;
+      if(dom.search && typeof prefs.q === 'string') dom.search.value = prefs.q;
+    }catch(_){}
+  }
+
+  function decorate(){
+    var dom = getDOM();
+    if(!dom.tbody) return false;
+
+    // Load saved prefs once per open
+    if(!dom.table.__hkPrefsLoaded){
+      loadPrefs(dom);
+      dom.table.__hkPrefsLoaded = true;
+    }
+
+    // Wrap the existing render so we can format fecha + refresh stats
+    var oldRender = _render;
+    function runRender(){
+      if(oldRender) oldRender();
+      // post-processing: format fecha cells (by header name)
+      try{
+        // Find index of "Fecha/Hora" column
+        var ths = dom.thead ? Array.from(dom.thead.querySelectorAll('th')) : [];
+        var idxFecha = ths.findIndex(th => (th.textContent||'').toLowerCase().includes('fecha'));
+        if(idxFecha >= 0){
+          dom.tbody.querySelectorAll('tr').forEach(function(tr){
+            var td = tr.children[idxFecha];
+            if(td) td.textContent = fmtFecha(td.textContent);
+          });
+        }
+      }catch(_){}
+      // Refresh stats text and persist current prefs
+      try{
+        var rows = dom.tbody ? dom.tbody.querySelectorAll('tr') : [];
+        // When empty table, first row is the "Sin datos..." row
+        var count = 0;
+        rows.forEach(function(tr){
+          var t = (tr.textContent||'').trim();
+          if(t && t !== 'Sin datos para mostrar.') count++;
+        });
+        if(dom.stats) dom.stats.textContent = count + ' registros';
+      }catch(_){}
+      persistPrefs(dom);
+    }
+
+    // Replace the global render reference so future calls go through ours
+    window.__HK_CONC_RENDER = runRender;
+
+    // Re-bind change listeners to keep prefs updated + trigger render
+    if(dom.view && !dom.view.__hkBind){
+      dom.view.addEventListener('change', function(){ window.__HK_CONC_RENDER(); });
+      dom.view.__hkBind = true;
+    }
+    if(dom.search && !dom.search.__hkBind){
+      dom.search.addEventListener('input', function(){ window.__HK_CONC_RENDER(); });
+      dom.search.__hkBind = true;
+    }
+
+    // run once now to apply formatting + stats
+    setTimeout(window.__HK_CONC_RENDER, 0);
+    return true;
+  }
+
+  // Hook on open modal, compatible with both openers
+  function hookOpen(fnName){
+    var fn = window[fnName];
+    if(typeof fn !== 'function' || fn.__hkPolishWrapped) return;
+    window[fnName] = function(){
+      var r = fn.apply(this, arguments);
+      setTimeout(decorate, 0);
+      return r;
+    };
+    window[fnName].__hkPolishWrapped = true;
+  }
+
+  hookOpen('openModal');
+  if(window.concPortal && typeof window.concPortal.open === 'function'){
+    var _o = window.concPortal.open;
+    if(!_o.__hkPolishWrapped){
+      window.concPortal.open = function(){
+        var r = _o.apply(this, arguments);
+        setTimeout(decorate, 0);
+        return r;
+      };
+      window.concPortal.open.__hkPolishWrapped = true;
+    }
+  }
+
+  // If modal is already open when this loads
+  setTimeout(decorate, 300);
+})();
 </script>
 </body>
 </html>
