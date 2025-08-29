@@ -3521,5 +3521,85 @@ document.addEventListener('DOMContentLoaded', ()=>{
   }, {capture:true});
 })();
 </script>
+
+<!-- === [VER INVENTARIO → CONCENTRADO] – Delegación robusta === -->
+<script>
+(function(){
+  // Captura cualquier clic en botones/enlaces con texto "Ver Inventario" (carga dinámica incluida)
+  document.addEventListener('click', function(e){
+    var el = e.target.closest('button, a');
+    if(!el) return;
+    var txt = (el.textContent || '').trim().toLowerCase();
+    if(txt === 'ver inventario'){
+      // Respetamos tu cierre de modal actual; solo abrimos el de concentrado
+      e.preventDefault();
+      e.stopPropagation();
+      setTimeout(function(){
+        if(typeof window.openModal === 'function'){
+          window.openModal();
+        } else {
+          var overlay = document.getElementById('concentradoOverlay');
+          if(overlay){
+            overlay.style.display = 'flex';
+            overlay.classList.add('activo');
+            document.body.classList.add('hk-no-scroll');
+          }
+        }
+      }, 0);
+    }
+  }, true);
+})();
+</script>
+
+<!-- === [STRICT FLOW] Ver Inventario => Concentrado | Concentrado solo si sesión activa === -->
+<script>
+(function(){
+  const $ = (s, r=document)=>r.querySelector(s);
+  const $$ = (s, r=document)=>Array.from(r.querySelectorAll(s));
+
+  function hasAccess(){
+    try{
+      if(typeof window.hkHasConcentradoAccess === "function"){
+        return !!window.hkHasConcentradoAccess();
+      }
+      const u = (window.__HK_USER || localStorage.getItem('hk_user') || '').toString().toLowerCase();
+      if(!u) return false;
+      return ['luis','manuel','sr. migoni','migoni'].some(x => u.includes(x));
+    }catch(_){ return false; }
+  }
+
+  // 1) SOLO abrimos modal cuando el usuario presiona "Ver Inventario"
+  function bindVerInventario(root=document){
+    const nodes = $$('button, a', root);
+    for(const el of nodes){
+      const txt = (el.textContent||'').trim().toLowerCase();
+      if(txt === 'ver inventario' && !el.__hkStrict){
+        el.addEventListener('click', function(ev){
+          // Deja que tu portal cierre, luego abrimos modal
+          setTimeout(()=>{ if(typeof window.openModal==='function'){ window.openModal(); } }, 0);
+        });
+        el.__hkStrict = true;
+      }
+    }
+  }
+  bindVerInventario(document);
+  new MutationObserver(muts=>{
+    muts.forEach(m=> m.addedNodes && m.addedNodes.forEach(n=>{ if(n.nodeType===1) bindVerInventario(n); }));
+  }).observe(document.documentElement, {childList:true, subtree:true});
+
+  // 2) Botón "Concentrado": solo abre modal si YA hay sesión activa; si no, NO intercepta (deja login y tu portal).
+  const btnConc = $('#btn-concentrado');
+  if(btnConc){
+    btnConc.addEventListener('click', function(e){
+      if(hasAccess() && typeof window.openModal==='function'){
+        e.preventDefault();
+        e.stopPropagation();
+        setTimeout(()=>window.openModal(), 0);
+      }
+      // Si no hay sesión, no hacemos nada: tu flujo pedirá matrícula y mostrará "Ver Inventario".
+    }, true);
+  }
+})();
+</script>
 </body>
 </html>
