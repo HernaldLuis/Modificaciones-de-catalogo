@@ -3261,9 +3261,9 @@ function showToast(msg, ok){
 </script><script>
 function openConcentrado(){
   // Abre el portal en una nueva pestaña:
-  window.open('portal_concentrado.html', '_blank');
+  
   // 👉 Si prefieres en la misma pestaña, cambia por esta línea:
-  // location.href = 'portal_concentrado.html';
+  // 
 }
 </script><script>
 document.addEventListener('DOMContentLoaded', ()=>{
@@ -3279,7 +3279,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
   });
 });
 </script>
-<!-- === [CONCENTRADO PORTAL] Modal autocontenido === -->
+<!-- === [CONCENTRADO PORTAL] Modal autocontenido (no toca tu login) === -->
 <div id="concentradoOverlay" class="" style="display:none; align-items:center; justify-content:center;">
   <div class="modal-contenido" role="dialog" aria-modal="true" aria-labelledby="conc-title">
     <h2 id="conc-title">Concentrado de Inventarios</h2>
@@ -3331,7 +3331,6 @@ document.addEventListener('DOMContentLoaded', ()=>{
 (function(){
   const $ = (sel, root=document) => root.querySelector(sel);
   const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
-
   const overlay = $("#concentradoOverlay");
   const btnCerrar = $("#conc-cerrar");
   const btnOK = $("#conc-ok");
@@ -3342,7 +3341,6 @@ document.addEventListener('DOMContentLoaded', ()=>{
   const stats = $("#conc-stats");
   const search = $("#conc-search");
 
-  // Exponer openModal/closeModal sin romper tu código
   window.openModal = function(){
     overlay.style.display = "flex";
     overlay.classList.add("activo");
@@ -3355,21 +3353,12 @@ document.addEventListener('DOMContentLoaded', ()=>{
     document.body.classList.remove("hk-no-scroll");
   }
 
-  function toast(msg, ok){
-    const t = document.createElement("div");
-    t.className = ok ? "toast-msg toast-ok" : "toast-msg";
-    t.innerText = msg;
-    Object.assign(t.style, {position:"fixed", top:"12px", left:"50%", transform:"translateX(-50%)", zIndex: 2147483647});
-    document.body.appendChild(t);
-    setTimeout(()=>{ t.remove(); }, 4200);
-  }
-
   function parseMaybeJSON(s){ try{ return JSON.parse(s); }catch(_){ return null; } }
   function isRegistro(obj){ return !!obj && typeof obj === 'object' && (('habitacion' in obj) || ('hab' in obj) || ('room' in obj)); }
   function normalizeItem(x){
     const hab = (x.habitacion || x.hab || x.room || x.num || "").toString();
     const fecha = x.fecha || x.fecha_hora || x.datetime || x.createdAt || x.timestamp || "";
-    const categoria = x.categoria || x.category || "";
+       const categoria = x.categoria || x.category || "";
     const torre = x.torre || x.tower || "";
     const piso = x.piso ?? x.floor ?? "";
     const prefijo = x.prefijo || x.recepcion || x.reception || "";
@@ -3468,7 +3457,8 @@ document.addEventListener('DOMContentLoaded', ()=>{
     const headers = ["Hab.","Torre","Piso","Rec.","Categoría","Cama","Handicap","Cocineta","Fecha/Hora","Matrícula","Estado","Δ Faltantes","Notas"];
     const rows = Array.from(document.querySelectorAll("#conc-tbody tr")).map(tr => Array.from(tr.children).map(td => td.textContent.replace(/\s+/g," ").trim()));
     const all = [headers].concat(rows);
-    const csv = all.map(r => r.map(v => /[",\n]/.test(v) ? '"' + v.replace(/"/g,'""') + '"' : v).join(",")).join("\n");
+    const csv = all.map(r => r.map(v => /[",\n]/.test(v) ? '"' + v.replace(/"/g,'""') + '"' : v).join(","))
+                   .join("\n");
     const blob = new Blob([csv], {type:"text/csv;charset=utf-8;"});
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -3489,7 +3479,6 @@ document.addEventListener('DOMContentLoaded', ()=>{
   if(viewSel){ viewSel.addEventListener("change", render); }
   if(search){ search.addEventListener("input", render); }
 
-  // Ordenar por encabezado
   $$("#conc-table thead th").forEach(th => {
     th.addEventListener("click", function(){
       const k = this.getAttribute("data-k");
@@ -3499,7 +3488,6 @@ document.addEventListener('DOMContentLoaded', ()=>{
     });
   });
 
-  // Escape para cerrar
   document.addEventListener("keydown", (ev)=>{
     if(ev.key === "Escape" && overlay.classList.contains("activo")){
       closeModal();
@@ -3508,58 +3496,29 @@ document.addEventListener('DOMContentLoaded', ()=>{
 })();
 </script>
 
-<!-- === [CONCENTRADO WIRING V2] – Respeta 100% tu flujo existente === -->
+<!-- === [CONCENTRADO WIRING – preserva login] === -->
 <script>
 (function(){
-  const $ = (s, r=document)=>r.querySelector(s);
-  const $$ = (s, r=document)=>Array.from(r.querySelectorAll(s));
-
-  function hasAccess(){
+  const btn = document.getElementById("btn-concentrado");
+  if(!btn) return;
+  btn.addEventListener("click", function(e){
     try{
+      let logged = false;
       if(typeof window.hkHasConcentradoAccess === "function"){
-        return !!window.hkHasConcentradoAccess();
+        logged = !!window.hkHasConcentradoAccess();
+      } else {
+        const u = (window.__HK_USER || localStorage.getItem('hk_user') || '').toString().toLowerCase();
+        logged = !!u && (u.includes('luis') || u.includes('manuel') || u.includes('migoni'));
       }
-      const u = (window.__HK_USER || localStorage.getItem('hk_user') || '').toString().toLowerCase();
-      if(!u) return false;
-      return ['luis','manuel','sr. migoni','migoni'].some(x => u.includes(x));
-    }catch(_){ return false; }
-  }
-
-  // Atajo directo desde botón Concentrado SOLO si hay sesión activa
-  const btnConc = document.getElementById("btn-concentrado");
-  if(btnConc){
-    btnConc.addEventListener("click", function(){
-      if(hasAccess() && typeof window.openModal === "function"){
+      if(logged && typeof window.openModal === "function"){
+        // Solo cuando ya hay sesión interceptamos para abrir el modal en-page
+        e.preventDefault();
+        e.stopPropagation();
         setTimeout(()=>window.openModal(), 0);
       }
-    }, {capture:false});
-  }
-
-  // Abrir modal al pulsar "Ver inventario" (portal tras login)
-  function bindVerInventarioButtons(root=document){
-    const candidates = $$('button, a', root);
-    for(const el of candidates){
-      const txt = (el.textContent||'').trim().toLowerCase();
-      if(txt === 'ver inventario' && !el.__hkBound){
-        el.addEventListener('click', function(){
-          setTimeout(()=>{
-            if(typeof window.openModal === "function"){ window.openModal(); }
-          }, 0);
-        });
-        el.__hkBound = true;
-      }
-    }
-  }
-  bindVerInventarioButtons(document);
-
-  const mo = new MutationObserver(muts => {
-    for(const m of muts){
-      if(m.addedNodes && m.addedNodes.length){
-        m.addedNodes.forEach(n => { if(n.nodeType === 1){ bindVerInventarioButtons(n); } });
-      }
-    }
-  });
-  mo.observe(document.documentElement, {childList:true, subtree:true});
+      // Si no hay sesión, NO prevenimos: tu flujo muestra hkpin2 y luego “Ver inventario”
+    }catch(_){}
+  }, {capture:true});
 })();
 </script>
 </body>
