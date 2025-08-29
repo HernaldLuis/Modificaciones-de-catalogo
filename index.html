@@ -3278,5 +3278,289 @@ document.addEventListener('DOMContentLoaded', ()=>{
     openConcentrado();
   });
 });
-</script></body>
+</script>
+<!-- === [CONCENTRADO PORTAL] Modal autocontenido === -->
+<div id="concentradoOverlay" class="" style="display:none; align-items:center; justify-content:center;">
+  <div class="modal-contenido" role="dialog" aria-modal="true" aria-labelledby="conc-title">
+    <h2 id="conc-title">Concentrado de Inventarios</h2>
+    <div class="conc-toolbar">
+      <div class="left">
+        <input id="conc-search" type="search" placeholder="Buscar (habitación, matrícula, notas, torre, vista...)" aria-label="Buscar en registros"/>
+        <select id="conc-view">
+          <option value="ultimo">Último por habitación</option>
+          <option value="historico">Histórico completo</option>
+        </select>
+        <span class="conc-stats" id="conc-stats">0 registros</span>
+      </div>
+      <div class="right">
+        <button class="btn primary" id="conc-fullscreen" title="Pantalla completa">Pantalla completa</button>
+        <button class="btn primary" id="conc-export" title="Exportar CSV">Exportar CSV</button>
+        <button class="btn" id="conc-cerrar" title="Cerrar">Cerrar</button>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table class="conc-table" id="conc-table" aria-describedby="conc-stats">
+        <thead>
+          <tr>
+            <th data-k="habitacion">Hab.</th>
+            <th data-k="torre">Torre</th>
+            <th data-k="piso">Piso</th>
+            <th data-k="prefijo">Rec.</th>
+            <th data-k="categoria">Categoría</th>
+            <th data-k="cama">Cama</th>
+            <th data-k="handicap">♿</th>
+            <th data-k="cocineta">Cocineta</th>
+            <th data-k="fecha">Fecha/Hora</th>
+            <th data-k="matricula">Matrícula</th>
+            <th data-k="estado">Estado</th>
+            <th data-k="delta">Δ Faltantes</th>
+            <th data-k="notas">Notas</th>
+          </tr>
+        </thead>
+        <tbody id="conc-tbody">
+          <tr><td colspan="13" style="text-align:center; padding:16px;">Sin datos aún.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="conc-actions">
+      <button class="btn ok" id="conc-ok">OK</button>
+    </div>
+  </div>
+</div>
+<script>
+(function(){
+  const $ = (sel, root=document) => root.querySelector(sel);
+  const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+
+  const overlay = $("#concentradoOverlay");
+  const btnCerrar = $("#conc-cerrar");
+  const btnOK = $("#conc-ok");
+  const btnExport = $("#conc-export");
+  const btnFS = $("#conc-fullscreen");
+  const viewSel = $("#conc-view");
+  const tbody = $("#conc-tbody");
+  const stats = $("#conc-stats");
+  const search = $("#conc-search");
+
+  // Exponer openModal/closeModal sin romper tu código
+  window.openModal = function(){
+    overlay.style.display = "flex";
+    overlay.classList.add("activo");
+    document.body.classList.add("hk-no-scroll");
+    render();
+  };
+  function closeModal(){
+    overlay.classList.remove("activo");
+    overlay.style.display = "none";
+    document.body.classList.remove("hk-no-scroll");
+  }
+
+  function toast(msg, ok){
+    const t = document.createElement("div");
+    t.className = ok ? "toast-msg toast-ok" : "toast-msg";
+    t.innerText = msg;
+    Object.assign(t.style, {position:"fixed", top:"12px", left:"50%", transform:"translateX(-50%)", zIndex: 2147483647});
+    document.body.appendChild(t);
+    setTimeout(()=>{ t.remove(); }, 4200);
+  }
+
+  function parseMaybeJSON(s){ try{ return JSON.parse(s); }catch(_){ return null; } }
+  function isRegistro(obj){ return !!obj && typeof obj === 'object' && (('habitacion' in obj) || ('hab' in obj) || ('room' in obj)); }
+  function normalizeItem(x){
+    const hab = (x.habitacion || x.hab || x.room || x.num || "").toString();
+    const fecha = x.fecha || x.fecha_hora || x.datetime || x.createdAt || x.timestamp || "";
+    const categoria = x.categoria || x.category || "";
+    const torre = x.torre || x.tower || "";
+    const piso = x.piso ?? x.floor ?? "";
+    const prefijo = x.prefijo || x.recepcion || x.reception || "";
+    const cama = x.tipo_cama || x.cama || x.bed || "";
+    const handicap = !!(x.handicap || x.discapacidad || x.wheelchair);
+    const cocineta = !!(x.cocineta || x.kitchenette);
+    const matricula = x.matricula || x.user || x.operador || "";
+    const estado = x.estado || x.status || "";
+    const delta = x.delta || x.faltantes || x.diff || "";
+    const notas = x.notas || x.nota || x.comentarios || x.comments || "";
+    return {habitacion:hab, torre, piso, prefijo, categoria, cama, handicap, cocineta, fecha, matricula, estado, delta, notas, __raw:x};
+  }
+  function loadRegistros(){
+    let arr = [];
+    if(Array.isArray(window.HK_REGISTROS)) arr = arr.concat(window.HK_REGISTROS.filter(isRegistro));
+    if(Array.isArray(window.hk_registros)) arr = arr.concat(window.hk_registros.filter(isRegistro));
+    const keys = Object.keys(localStorage||{});
+    const candidates = ['hk_inventarios','hk_inventario_registros','inventarios','hk_logs','HK_INV','HK_REGISTROS'];
+    for(const k of keys){
+      if(candidates.includes(k) || /inv|invent|hk/i.test(k)){
+        const v = parseMaybeJSON(localStorage.getItem(k));
+        if(Array.isArray(v)){ arr = arr.concat(v.filter(isRegistro)); }
+      }
+    }
+    return arr.map(normalizeItem);
+  }
+  function groupLatest(items){
+    const map = new Map();
+    for(const it of items){
+      const key = it.habitacion;
+      const t = new Date(it.fecha || 0).getTime() || 0;
+      const prev = map.get(key);
+      if(!prev || (new Date(prev.fecha||0).getTime()||0) < t){
+        map.set(key, it);
+      }
+    }
+    return Array.from(map.values());
+  }
+
+  let _sortKey = "fecha";
+  let _sortDir = -1;
+  function byKey(a,b,k){
+    const av = (a[k] ?? "").toString().toLowerCase();
+    const bv = (b[k] ?? "").toString().toLowerCase();
+    if(av < bv) return -1;
+    if(av > bv) return 1;
+    return 0;
+  }
+
+  function render(){
+    let rows = loadRegistros();
+    const view = viewSel.value || "ultimo";
+    if(view === "ultimo"){ rows = groupLatest(rows); }
+    const q = (search.value||"").trim().toLowerCase();
+    if(q){ rows = rows.filter(r => JSON.stringify(r).toLowerCase().includes(q)); }
+    rows.sort((a,b)=>{
+      if(_sortKey === "fecha"){
+        const at = new Date(a.fecha||0).getTime()||0;
+        const bt = new Date(b.fecha||0).getTime()||0;
+        return _sortDir * (at - bt);
+      }
+      return _sortDir * byKey(a,b,_sortKey);
+    });
+    const tbody = document.getElementById("conc-tbody");
+    tbody.innerHTML = "";
+    if(rows.length === 0){
+      const tr = document.createElement("tr");
+      const td = document.createElement("td");
+      td.colSpan = 13; td.style.textAlign = "center"; td.style.padding = "16px";
+      td.textContent = "Sin datos para mostrar.";
+      tr.appendChild(td); tbody.appendChild(tr);
+    } else {
+      for(const r of rows){
+        const tr = document.createElement("tr");
+        function td(v){ const cell=document.createElement("td"); cell.textContent=(v===true)?"Sí":(v===false?"No":(v??"")); return cell; }
+        tr.appendChild(td(r.habitacion));
+        tr.appendChild(td(r.torre));
+        tr.appendChild(td(r.piso));
+        tr.appendChild(td(r.prefijo));
+        tr.appendChild(td(r.categoria));
+        tr.appendChild(td(r.cama));
+        tr.appendChild(td(r.handicap));
+        tr.appendChild(td(r.cocineta));
+        tr.appendChild(td(r.fecha));
+        tr.appendChild(td(r.matricula));
+        tr.appendChild(td(r.estado));
+        tr.appendChild(td(r.delta));
+        tr.appendChild(td(r.notas));
+        tbody.appendChild(tr);
+      }
+    }
+    stats.textContent = rows.length + " registro" + (rows.length==1?"":"s");
+  }
+
+  function exportCSV(){
+    const headers = ["Hab.","Torre","Piso","Rec.","Categoría","Cama","Handicap","Cocineta","Fecha/Hora","Matrícula","Estado","Δ Faltantes","Notas"];
+    const rows = Array.from(document.querySelectorAll("#conc-tbody tr")).map(tr => Array.from(tr.children).map(td => td.textContent.replace(/\s+/g," ").trim()));
+    const all = [headers].concat(rows);
+    const csv = all.map(r => r.map(v => /[",\n]/.test(v) ? '"' + v.replace(/"/g,'""') + '"' : v).join(",")).join("\n");
+    const blob = new Blob([csv], {type:"text/csv;charset=utf-8;"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = "concentrado_inventarios.csv";
+    document.body.appendChild(a); a.click();
+    URL.revokeObjectURL(url); a.remove();
+  }
+
+  if(btnCerrar){ btnCerrar.addEventListener("click", closeModal); }
+  if(btnOK){ btnOK.addEventListener("click", closeModal); }
+  if(btnExport){ btnExport.addEventListener("click", exportCSV); }
+  if(btnFS){
+    btnFS.addEventListener("click", function(){
+      overlay.classList.toggle("fullscreen");
+      document.body.classList.toggle("hk-no-scroll", overlay.classList.contains("fullscreen"));
+    });
+  }
+  if(viewSel){ viewSel.addEventListener("change", render); }
+  if(search){ search.addEventListener("input", render); }
+
+  // Ordenar por encabezado
+  $$("#conc-table thead th").forEach(th => {
+    th.addEventListener("click", function(){
+      const k = this.getAttribute("data-k");
+      if(!k) return;
+      if(_sortKey === k){ _sortDir *= -1; } else { _sortKey = k; _sortDir = (k==="fecha")?-1:1; }
+      render();
+    });
+  });
+
+  // Escape para cerrar
+  document.addEventListener("keydown", (ev)=>{
+    if(ev.key === "Escape" && overlay.classList.contains("activo")){
+      closeModal();
+    }
+  });
+})();
+</script>
+
+<!-- === [CONCENTRADO WIRING V2] – Respeta 100% tu flujo existente === -->
+<script>
+(function(){
+  const $ = (s, r=document)=>r.querySelector(s);
+  const $$ = (s, r=document)=>Array.from(r.querySelectorAll(s));
+
+  function hasAccess(){
+    try{
+      if(typeof window.hkHasConcentradoAccess === "function"){
+        return !!window.hkHasConcentradoAccess();
+      }
+      const u = (window.__HK_USER || localStorage.getItem('hk_user') || '').toString().toLowerCase();
+      if(!u) return false;
+      return ['luis','manuel','sr. migoni','migoni'].some(x => u.includes(x));
+    }catch(_){ return false; }
+  }
+
+  // Atajo directo desde botón Concentrado SOLO si hay sesión activa
+  const btnConc = document.getElementById("btn-concentrado");
+  if(btnConc){
+    btnConc.addEventListener("click", function(){
+      if(hasAccess() && typeof window.openModal === "function"){
+        setTimeout(()=>window.openModal(), 0);
+      }
+    }, {capture:false});
+  }
+
+  // Abrir modal al pulsar "Ver inventario" (portal tras login)
+  function bindVerInventarioButtons(root=document){
+    const candidates = $$('button, a', root);
+    for(const el of candidates){
+      const txt = (el.textContent||'').trim().toLowerCase();
+      if(txt === 'ver inventario' && !el.__hkBound){
+        el.addEventListener('click', function(){
+          setTimeout(()=>{
+            if(typeof window.openModal === "function"){ window.openModal(); }
+          }, 0);
+        });
+        el.__hkBound = true;
+      }
+    }
+  }
+  bindVerInventarioButtons(document);
+
+  const mo = new MutationObserver(muts => {
+    for(const m of muts){
+      if(m.addedNodes && m.addedNodes.length){
+        m.addedNodes.forEach(n => { if(n.nodeType === 1){ bindVerInventarioButtons(n); } });
+      }
+    }
+  });
+  mo.observe(document.documentElement, {childList:true, subtree:true});
+})();
+</script>
+</body>
 </html>
