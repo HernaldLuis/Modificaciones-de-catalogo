@@ -1,172 +1,397 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Portal de Concentrado · API</title>
-<style>
-:root{--bg:#0b132b;--card:#0f172a;--muted:#94a3b8;--prim:#22c55e;--sec:#0ea5e9;--txt:#e5e7eb;}
-*{box-sizing:border-box;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto}
-body{margin:0;background:linear-gradient(180deg,#0b132b,#0b132b 60%,#0a0f24);color:var(--txt);}
-.header{position:sticky;top:0;z-index:5;padding:14px 16px;background:linear-gradient(90deg,rgba(34,197,94,.15),rgba(14,165,233,.15));border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;justify-content:space-between;gap:10px}
-h1{margin:0;font-size:clamp(18px,2.6vw,24px);}
-.badge{display:inline-flex;gap:8px;align-items:center;background:#0a0f24;border:1px solid rgba(255,255,255,.08);padding:8px 12px;border-radius:999px;font-weight:800;color:#cbd5e1}
-.wrap{max-width:1200px;margin:0 auto;padding:16px}
-.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:12px}
-.card{background:var(--card);border:1px solid rgba(255,255,255,.08);border-radius:14px;box-shadow:0 14px 40px rgba(0,0,0,.25);padding:14px}
-.card h3{margin:0 0 10px;font-size:1rem;color:#cbd5e1}
-.kpi{display:flex;align-items:center;justify-content:space-between}
-.kpi .num{font-size:1.6rem;font-weight:900}
-.kpi .tag{font-size:.85rem;color:var(--muted)}
-.controls{display:flex;gap:8px;flex-wrap:wrap}
-button,.btn{border:0;border-radius:10px;padding:9px 14px;font-weight:800;cursor:pointer;background:#1f2937;color:#e5e7eb}
-button:hover,.btn:hover{filter:brightness(1.1)}
-.btn-prim{background:var(--prim);color:#06202a} .btn-sec{background:var(--sec);color:#06202a}
-select,input[type="text"]{background:#0a0f24;border:1px solid #1f2937;color:#e5e7eb;border-radius:10px;padding:9px 12px}
-.table{overflow:auto;border-radius:12px;border:1px solid rgba(255,255,255,.08)}
-table{width:100%;border-collapse:collapse}
-thead th{position:sticky;top:0;background:#0a0f24;color:#cbd5e1;text-align:left;padding:10px;font-size:.9rem;border-bottom:1px solid #1f2937}
-tbody td{padding:10px;border-top:1px solid #0f172a;font-size:.92rem;color:#e5e7eb}
-tfoot td{padding:10px;border-top:2px solid #1f2937;font-weight:900}
-.empty{padding:16px;color:#94a3b8}
-.toast{position:fixed;bottom:20px;right:20px;background:#111827;color:white;padding:10px 14px;border-radius:10px;display:none;z-index:1200}
-.footer{padding:18px;color:#94a3b8;font-size:.9rem;text-align:center}
-@media (max-width:900px){.grid{grid-template-columns:repeat(6,1fr)}}
-@media (max-width:600px){.grid{grid-template-columns:repeat(2,1fr)}}
-</style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Historial por Habitación · Inventario</title>
+  <style>
+    :root{--bg:#0b132b;--card:#0f172a;--line:#1f2937;--txt:#e5e7eb;--muted:#94a3b8;--pri:#22c55e;--sec:#0ea5e9;--danger:#ef4444;}
+    *{box-sizing:border-box;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto}
+    body{margin:0;background:linear-gradient(180deg,#0b132b,#0a1026);color:var(--txt)}
+    header{position:sticky;top:0;z-index:10;display:flex;gap:10px;align-items:center;justify-content:space-between;padding:12px 16px;background:#0a0f24;border-bottom:1px solid rgba(255,255,255,.06)}
+    h1{margin:0;font-size:clamp(18px,2.8vw,24px)}
+    .wrap{max-width:1400px;margin:0 auto;padding:16px}
+    .card{background:var(--card);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:12px}
+    label{font-size:.85rem;color:var(--muted)}
+    input,select,button{padding:9px 12px;border-radius:10px;background:#0a0f24;border:1px solid var(--line);color:var(--txt)}
+    button{cursor:pointer;font-weight:800}
+    .btn-prim{background:var(--pri);color:#06202a;border:0} .btn-sec{background:var(--sec);color:#06202a;border:0}
+    .btn-danger{background:var(--danger);color:#fff;border:0}
+    .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+    .kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:10px 0}
+    .kpi{background:#0a0f24;border:1px solid var(--line);border-radius:12px;padding:10px}
+    .kpi .n{font-size:1.3rem;font-weight:900}
+    .table{overflow:auto;border-radius:12px;border:1px solid rgba(255,255,255,.08)}
+    table{width:100%;border-collapse:collapse;min-width:1000px}
+    thead th{position:sticky;top:96px;background:#0a0f24;color:#cbd5e1;text-align:left;padding:10px;border-bottom:1px solid var(--line);font-size:.86rem}
+    tbody td{padding:10px;border-top:1px solid #0f172a;font-size:.93rem}
+    tfoot td{padding:10px;border-top:2px solid var(--line);font-weight:900}
+    .muted{color:var(--muted)}
+    .pill{display:inline-block;padding:4px 8px;border-radius:999px;font-weight:900}
+    .ok{background:rgba(34,197,94,.15);color:#86efac} .pend{background:rgba(245,158,11,.12);color:#fde68a}
+
+    /* Depurar modal */
+    .modal-mask{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:50}
+    .modal{background:#0a0f24;color:var(--txt);border:1px solid var(--line);border-radius:14px;min-width:320px;max-width:420px;padding:16px;box-shadow:0 20px 60px rgba(0,0,0,.45)}
+    .modal h3{margin:0 0 8px}
+    .modal .row{margin-top:6px}
+    .modal input{width:100%}
+    .modal .actions{display:flex;gap:8px;justify-content:flex-end;margin-top:10px}
+    .hint{font-size:.8rem;color:var(--muted)}
+
+    @media (max-width:900px){.kpis{grid-template-columns:repeat(2,1fr)}
+      thead th{top:146px}}
+
+    @media print {
+      header, .row .btn-prim, .row .btn-sec, .row #btnDepurar, .modal-mask { display:none !important; }
+      body { background:#fff; color:#000; }
+      .card, .table { border:none; }
+      thead th { top:0 !important; background:#fff; color:#000; }
+    }
+  </style>
 </head>
 <body>
-  <div class="header">
-    <h1>Portal de Concentrado · Conectado a Apps Script</h1>
-    <div class="controls">
-      <span class="badge">API</span>
-      <button id="btnRefrescar" class="btn">🔄 Refrescar</button>
-      <button id="btnCSV" class="btn">⬇️ Exportar CSV</button>
-      <button id="btnPDF" class="btn">🖨️ Imprimir</button>
+  <header>
+    <h1>Historial por Habitación</h1>
+    <div class="row">
+      <button id="btnCSV">⬇️ CSV</button>
+      <button id="btnXLS">🧾 Excel</button>
+      <button id="btnPDF">📄 Exportar PDF</button>
+      <button id="btnPrint">🖨️ Imprimir</button>
+      <button id="btnDepurar" class="btn-danger" title="Eliminar registros de una habitación">🧹 Depurar</button>
+      <span id="status" class="muted">Listo.</span>
     </div>
-  </div>
+  </header>
 
   <div class="wrap">
-    <div class="grid">
-      <div class="card kpi col" style="grid-column:span 3;">
-        <div><div class="tag">Habitaciones registradas</div><div id="kpiTotal" class="num">0</div></div><div>🏨</div>
-      </div>
-      <div class="card kpi col" style="grid-column:span 3;">
-        <div><div class="tag">OK</div><div id="kpiOK" class="num">0</div></div><div>✅</div>
-      </div>
-      <div class="card kpi col" style="grid-column:span 3;">
-        <div><div class="tag">Pendientes</div><div id="kpiPend" class="num">0</div></div><div>⏳</div>
-      </div>
-      <div class="card kpi col" style="grid-column:span 3;">
-        <div><div class="tag">Última actualización</div><div id="kpiUltima" class="num">—</div></div><div>🕒</div>
+    <div class="card">
+      <div class="row" style="gap:12px">
+        <div>
+          <label>Habitación</label><br/>
+          <input id="fHab" placeholder="ej. 1501" />
+        </div>
+        <div>
+          <label>Fecha desde (AAAA-MM-DD)</label><br/>
+          <input id="fDesde" placeholder="2025-08-01" />
+        </div>
+        <div>
+          <label>Fecha hasta (AAAA-MM-DD)</label><br/>
+          <input id="fHasta" placeholder="2025-08-31" />
+        </div>
+        <div>
+          <label>Estado</label><br/>
+          <select id="fEstado">
+            <option value="">Todos</option>
+            <option>OK</option>
+            <option>Pendiente</option>
+          </select>
+        </div>
+        <div style="align-self:flex-end">
+          <button class="btn-prim" id="btnFiltrar">Aplicar filtros</button>
+        </div>
+        <div style="align-self:flex-end">
+          <button class="btn-sec" id="btnRecargar">Recargar datos</button>
+        </div>
+        <div style="align-self:flex-end">
+          <button id="btnLink">Copiar enlace de esta habitación</button>
+        </div>
       </div>
 
-      <div class="card" style="grid-column:span 12;">
-        <h3>Concentrado</h3>
-        <div class="table">
-          <table id="tabla">
-            <thead>
-              <tr>
-                <th>Habitación</th>
-                <th>Usuario</th>
-                <th>Estado</th>
-                <th>Anomalías</th>
-                <th>Cama</th>
-                <th>Baño</th>
-                <th>Fecha</th>
-              </tr>
-            </thead>
-            <tbody id="tbody">
-              <tr><td colspan="7" class="empty">Cargando desde la API…</td></tr>
-            </tbody>
-            <tfoot><tr><td colspan="7" id="resumen">K: 0 · D: 0 · Pendientes: 0 · Total: 0</td></tr></tfoot>
-          </table>
-        </div>
+      <div class="kpis">
+        <div class="kpi"><div class="muted">Registros</div><div id="kTotal" class="n">0</div></div>
+        <div class="kpi"><div class="muted">OK</div><div id="kOK" class="n">0</div></div>
+        <div class="kpi"><div class="muted">Pendientes</div><div id="kPend" class="n">0</div></div>
+        <div class="kpi"><div class="muted">Última fecha</div><div id="kUlt" class="n">—</div></div>
+        <div class="kpi"><div class="muted">Total sillas</div><div id="kSillas" class="n">0</div></div>
+      </div>
+
+      <div class="table">
+        <table id="tabla">
+          <thead>
+            <tr>
+              <th>Fecha</th><th>Usuario</th><th>Estado</th><th>Anomalías</th><th>Sillas</th>
+              <th>Cama tipo</th><th>Prot.</th><th>Sábanas</th><th>Almohadas</th><th>Fundas</th><th>Prot. almoh.</th><th>Dúvet</th><th>Funda dúvet</th><th>Color dúvet</th>
+              <th>Clóset cobertor</th><th>Alm. mat.</th><th>Funda mat.</th><th>Prot. mat.</th><th>Bolsa tela</th>
+              <th>Baño cat.</th><th>Baño</th><th>Mano</th><th>Facial</th><th>Tapete</th><th>Verdes</th><th>Color</th>
+              <th>Notas</th>
+            </tr>
+          </thead>
+          <tbody id="tbody">
+            <tr><td colspan="27" class="muted">Cargando…</td></tr>
+          </tbody>
+          <tfoot>
+            <tr><td colspan="27" id="resumen">—</td></tr>
+          </tfoot>
+        </table>
       </div>
     </div>
   </div>
 
-  <div id="toast" class="toast"></div>
-  <div class="footer">Paradisus · API centralizada</div>
+  <!-- Modal depurar -->
+  <div id="mask" class="modal-mask" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="ttlDepurar">
+      <h3 id="ttlDepurar">Depurar historial</h3>
+      <p class="hint">Eliminará <b>registros</b> de una habitación (y opcionalmente por rango de fechas). Requiere matrícula y contraseña.</p>
+      <div class="row">
+        <div style="flex:1">
+          <label>Habitación</label>
+          <input id="dHab" placeholder="ej. 1501">
+        </div>
+        <div style="flex:1">
+          <label>Desde (AAAA-MM-DD)</label>
+          <input id="dDesde" placeholder="opcional">
+        </div>
+        <div style="flex:1">
+          <label>Hasta (AAAA-MM-DD)</label>
+          <input id="dHasta" placeholder="opcional">
+        </div>
+      </div>
+      <div class="row">
+        <div style="flex:1">
+          <label>Matrícula</label>
+          <input id="dMat" autocomplete="username">
+        </div>
+        <div style="flex:1">
+          <label>Contraseña</label>
+          <input id="dPass" type="password" autocomplete="current-password">
+        </div>
+      </div>
+      <div class="actions">
+        <button id="dCancel">Cancelar</button>
+        <button id="dDo" class="btn-danger">Depurar</button>
+      </div>
+    </div>
+  </div>
 
 <script>
-/** CONFIG **/
+// === CONFIG ===
 const API_URL = "https://script.google.com/macros/s/AKfycbz-jh6y0UwfLtiQgOuPP3Wubm7SIlQich_T0iSigy7l8at04Zq4wGo2hsXZu_ZaW6sftw/exec";
-const TOKEN   = "PARADISUS_INV_2025_xX7$K9"; // la app codifica %24 en GET automáticamente
+const TOKEN   = "PARADISUS_INV_2025_xX7$K9";         // en GET se codifica automáticamente
+const tokenParam = encodeURIComponent(TOKEN);
 
-/** UTILS **/
-const $ = (s)=>document.querySelector(s);
-const toast=(t)=>{const el=$("#toast"); el.textContent=t; el.style.display="block"; setTimeout(()=>el.style.display="none",2400);};
+// === STATE ===
+let rawRows = [];
+let viewRows = [];
+
+// === HELPERS ===
+const $ = s => document.querySelector(s);
 const fmt = d => d ? new Intl.DateTimeFormat('es-MX',{dateStyle:'medium', timeStyle:'short'}).format(new Date(d)) : '';
+const isBetween = (iso, d1, d2) => !iso ? true : (!d1 || iso >= d1) && (!d2 || iso <= d2);
 
-function mapRow(it){
+function readParam(name){ return new URLSearchParams(location.search).get(name) || ''; }
+function setParam(name,value){ const u = new URL(location.href); value? u.searchParams.set(name,value) : u.searchParams.delete(name); history.replaceState(null,'',u.toString()); }
+
+function mapRow(r){
   return {
-    habitacion: it.habitacion || '',
-    usuario: it.usuario || '',
-    estado: it.estado || '',
-    anomalias: it.anomalias || '',
-    cama: it['cama.tipo'] || '',
-    bano: `${it['bano.categoria']||''}${it['bano.verdes']!=null?` (verdes: ${it['bano.verdes']})`:''}`,
-    fecha: it.fecha || it.created_at || it.fecha_servidor || ''
+    fecha: r.fecha || r.created_at || r.fecha_servidor || r.fecha_dia || '',
+    habitacion: r.habitacion ?? '',
+    usuario: r.usuario ?? '',
+    estado: r.estado ?? '',
+    anomalias: r.anomalias ?? '',
+    sillas: +r.sillas || 0,
+    cama_tipo: r['cama.tipo'] ?? '',
+    cama_protector: +r['cama.protector'] || 0,
+    cama_sabana: +r['cama.sabana'] || 0,
+    cama_alm: +r['cama.almohadas'] || 0,
+    cama_fundas: +r['cama.fundas'] || 0,
+    cama_protAlm: +r['cama.protAlm'] || 0,
+    cama_duvet: +r['cama.duvet'] || 0,
+    cama_fundaDuvet: +r['cama.fundaDuvet'] || 0,
+    cama_colorDuvet: r['cama.colorDuvet'] ?? '',
+    closet_cobertor: +r['closet.cobertor'] || 0,
+    closet_almMat: +r['closet.almohadaMat'] || 0,
+    closet_fundaMat: +r['closet.fundaMat'] || 0,
+    closet_protMat: +r['closet.protectorMat'] || 0,
+    closet_bolsa: +r['closet.bolsaTela'] || 0,
+    bano_cat: r['bano.categoria'] ?? '',
+    bano_bano: +r['bano.bano'] || 0,
+    bano_mano: +r['bano.mano'] || 0,
+    bano_facial: +r['bano.facial'] || 0,
+    bano_tapete: +r['bano.tapete'] || 0,
+    bano_verdes: +r['bano.verdes'] || 0,
+    bano_color: r['bano.color'] ?? '',
+    notas: r.notas ?? ''
   };
 }
 
-function pintar(arr){
+function render(rows){
   const tb = $("#tbody");
-  if(!arr.length){ tb.innerHTML='<tr><td colspan="7" class="empty">Sin datos.</td></tr>'; return; }
-  tb.innerHTML = arr.map(r => `
-    <tr>
-      <td>${r.habitacion}</td>
-      <td>${r.usuario}</td>
-      <td>${r.estado}</td>
-      <td>${r.anomalias}</td>
-      <td>${r.cama}</td>
-      <td>${r.bano}</td>
-      <td>${fmt(r.fecha)}</td>
-    </tr>
-  `).join('');
+  if (!rows.length){ tb.innerHTML = '<tr><td colspan="27" class="muted">Sin datos con esos filtros.</td></tr>'; }
+  else {
+    tb.innerHTML = rows.map(r => `
+      <tr>
+        <td>${fmt(r.fecha)}</td>
+        <td>${r.usuario}</td>
+        <td><span class="pill ${String(r.estado).toUpperCase()==='OK'?'ok':'pend'}">${r.estado}</span></td>
+        <td>${r.anomalias}</td>
+        <td>${r.sillas}</td>
+        <td>${r.cama_tipo}</td>
+        <td>${r.cama_protector}</td>
+        <td>${r.cama_sabana}</td>
+        <td>${r.cama_alm}</td>
+        <td>${r.cama_fundas}</td>
+        <td>${r.cama_protAlm}</td>
+        <td>${r.cama_duvet}</td>
+        <td>${r.cama_fundaDuvet}</td>
+        <td>${r.cama_colorDuvet}</td>
+        <td>${r.closet_cobertor}</td>
+        <td>${r.closet_almMat}</td>
+        <td>${r.closet_fundaMat}</td>
+        <td>${r.closet_protMat}</td>
+        <td>${r.closet_bolsa}</td>
+        <td>${r.bano_cat}</td>
+        <td>${r.bano_bano}</td>
+        <td>${r.bano_mano}</td>
+        <td>${r.bano_facial}</td>
+        <td>${r.bano_tapete}</td>
+        <td>${r.bano_verdes}</td>
+        <td>${r.bano_color}</td>
+        <td>${r.notas}</td>
+      </tr>`).join('');
+  }
+
+  // KPIs
+  const total = rows.length;
+  const ok = rows.filter(x=>String(x.estado).toUpperCase()==='OK').length;
+  const pend = total - ok;
+  document.getElementById('kTotal').textContent = total;
+  document.getElementById('kOK').textContent = ok;
+  document.getElementById('kPend').textContent = pend;
+  const fechas = rows.map(x=>x.fecha).filter(Boolean).sort();
+  document.getElementById('kUlt').textContent = fechas.length ? fmt(fechas[fechas.length-1]) : '—';
+  const sumSillas = rows.reduce((a,x)=>a+(+x.sillas||0),0);
+  document.getElementById('kSillas').textContent = sumSillas;
+  document.getElementById('resumen').textContent = `Registros: ${total} · OK: ${ok} · Pend: ${pend} · Total sillas: ${sumSillas}`;
 }
 
-function kpis(arr){
-  const total = arr.length;
-  const ok = arr.filter(x=>String(x.estado).toUpperCase()==='OK').length;
-  const pend = total - ok;
-  $("#kpiTotal").textContent = total;
-  $("#kpiOK").textContent = ok;
-  $("#kpiPend").textContent = pend;
-  const fechas = arr.map(x=>x.fecha).filter(Boolean).sort();
-  $("#kpiUltima").textContent = fechas.length ? fmt(fechas[fechas.length-1]) : "—";
-  const cont = arr.reduce((a,x)=>{ if(x.cama==='K') a.K++; else if(x.cama==='D') a.D++; a.T++; return a; }, {K:0,D:0,T:0});
-  $("#resumen").textContent = `K: ${cont.K} · D: ${cont.D} · Pendientes: ${pend} · Total: ${cont.T}`;
+function aplicarFiltros(){
+  const hab = (document.getElementById('fHab').value||'').trim();
+  const desde = (document.getElementById('fDesde').value||'').trim();
+  const hasta = (document.getElementById('fHasta').value||'').trim();
+  const est = (document.getElementById('fEstado').value||'').trim();
+
+  let rows = rawRows;
+  if (hab) rows = rows.filter(r => String(r.habitacion) === hab);
+  if (est) rows = rows.filter(r => String(r.estado).toUpperCase() === est.toUpperCase());
+  rows = rows.filter(r => isBetween(String(r.fecha).slice(0,10), desde, hasta));
+
+  viewRows = rows.sort((a,b)=> String(a.fecha).localeCompare(String(b.fecha)));
+  render(viewRows);
+  document.getElementById('status').textContent = `Filtrado: ${viewRows.length} registro(s)`;
+  setParam('hab', hab);
 }
 
 async function cargar(){
-  try{
-    const url = `${API_URL}?token=${encodeURIComponent(TOKEN)}`;
-    const res = await fetch(url);
-    const json = await res.json();
-    if (json.status !== 'ok') throw new Error(json.error || 'Error de API');
-    const items = (json.rows || []).map(mapRow);
-    pintar(items); kpis(items);
-    toast("Datos desde API cargados");
-  }catch(e){ console.error(e); toast("Error al leer API"); }
+  document.getElementById('status').textContent = 'Cargando…';
+  const res = await fetch(`${API_URL}?token=${tokenParam}`);
+  const json = await res.json();
+  if (json.status !== 'ok') throw new Error(json.error || 'Error API');
+  rawRows = (json.rows || []).map(mapRow);
+  document.getElementById('status').textContent = `Cargados ${rawRows.length}`;
+
+  const habParam = readParam('hab');
+  if (habParam) document.getElementById('fHab').value = habParam;
+  aplicarFiltros();
 }
 
 function exportCSV(){
-  const rows = [...document.querySelectorAll('#tbody tr')].map(tr=>[...tr.children].map(td=>td.textContent));
-  if(!rows.length || rows[0].length!==7){ toast('Nada para exportar'); return; }
-  const headers = ["habitacion","usuario","estado","anomalias","cama","bano","fecha"];
-  const csv = [headers.join(","), ...rows.map(r=>r.map(x=>`"${x.replace(/"/g,'""')}"`).join(","))].join("\n");
+  if (!viewRows.length) return;
+  const headers = [
+    'fecha','usuario','estado','anomalias','sillas',
+    'cama.tipo','cama.protector','cama.sabana','cama.almohadas','cama.fundas','cama.protAlm','cama.duvet','cama.fundaDuvet','cama.colorDuvet',
+    'closet.cobertor','closet.almohadaMat','closet.fundaMat','closet.protectorMat','closet.bolsaTela',
+    'bano.categoria','bano.bano','bano.mano','bano.facial','bano.tapete','bano.verdes','bano.color','notas'
+  ];
+  const csv = [headers.join(',')].concat(viewRows.map(r => [
+    r.fecha,r.usuario,r.estado,r.anomalias,r.sillas,
+    r.cama_tipo,r.cama_protector,r.cama_sabana,r.cama_alm,r.cama_fundas,r.cama_protAlm,r.cama_duvet,r.cama_fundaDuvet,r.cama_colorDuvet,
+    r.closet_cobertor,r.closet_almMat,r.closet_fundaMat,r.closet_protMat,r.closet_bolsa,
+    r.bano_cat,r.bano_bano,r.bano_mano,r.bano_facial,r.bano_tapete,r.bano_verdes,r.bano_color,r.notas
+  ].map(x => `"${String(x??'').replace(/"/g,'""')}"`)).join(','))).join('\n');
+
   const blob = new Blob([csv], {type:"text/csv;charset=utf-8"});
-  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = "concentrado.csv"; a.click(); URL.revokeObjectURL(a.href);
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = (document.getElementById('fHab').value || 'historial') + '.csv';
+  a.click(); URL.revokeObjectURL(a.href);
 }
 
-document.getElementById('btnRefrescar').addEventListener('click', cargar);
-document.getElementById('btnCSV').addEventListener('click', exportCSV);
-document.getElementById('btnPDF').addEventListener('click', ()=> window.print());
+function exportXLS(){
+  if (!viewRows.length) return;
+  const headers = [
+    'fecha','usuario','estado','anomalias','sillas',
+    'cama.tipo','cama.protector','cama.sabana','cama.almohadas','cama.fundas','cama.protAlm','cama.duvet','cama.fundaDuvet','cama.colorDuvet',
+    'closet.cobertor','closet.almohadaMat','closet.fundaMat','closet.protectorMat','closet.bolsaTela',
+    'bano.categoria','bano.bano','bano.mano','bano.facial','bano.tapete','bano.verdes','bano.color','notas'
+  ];
+  const esc = s=>String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const headerXml = '<Row>' + headers.map(h=>`<Cell><Data ss:Type="String">${esc(h)}</Data></Cell>`).join('') + '</Row>';
+  const rowsXml = viewRows.map(r=>[
+    r.fecha,r.usuario,r.estado,r.anomalias,r.sillas,
+    r.cama_tipo,r.cama_protector,r.cama_sabana,r.cama_alm,r.cama_fundas,r.cama_protAlm,r.cama_duvet,r.cama_fundaDuvet,r.cama_colorDuvet,
+    r.closet_cobertor,r.closet_almMat,r.closet_fundaMat,r.closet_protMat,r.closet_bolsa,
+    r.bano_cat,r.bano_bano,r.bano_mano,r.bano_facial,r.bano_tapete,r.bano_verdes,r.bano_color,r.notas
+  ]).map(cols=>'<Row>'+cols.map(v=>`<Cell><Data ss:Type="String">${esc(v)}</Data></Cell>`).join('')+'</Row>').join('');
+  const xml = `<?xml version="1.0"?>
+  <Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
+    xmlns:o="urn:schemas-microsoft-com:office:office"
+    xmlns:x="urn:schemas-microsoft-com:office:excel"
+    xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">
+    <Worksheet ss:Name="Historial">
+      <Table>
+        ${headerXml}
+        ${rowsXml}
+      </Table>
+    </Worksheet>
+  </Workbook>`;
+  const blob = new Blob([xml], {type:'application/vnd.ms-excel'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  a.download = (document.getElementById('fHab').value || 'historial') + '.xls';
+  a.click(); URL.revokeObjectURL(a.href);
+}
 
-// bootstrap
-cargar();
+function exportPDF(){ window.print(); }
+
+// === Depurar ===
+function openDepurar(){
+  const mask = document.getElementById('mask');
+  mask.style.display = 'flex'; mask.setAttribute('aria-hidden','false');
+  document.getElementById('dHab').value = document.getElementById('fHab').value || '';
+}
+function closeDepurar(){
+  const mask = document.getElementById('mask');
+  mask.style.display = 'none'; mask.setAttribute('aria-hidden','true');
+}
+async function doDepurar(){
+  const hab = (document.getElementById('dHab').value||'').trim();
+  const desde = (document.getElementById('dDesde').value||'').trim();
+  const hasta = (document.getElementById('dHasta').value||'').trim();
+  const matricula = (document.getElementById('dMat').value||'').trim();
+  const pass = (document.getElementById('dPass').value||'').trim();
+  if (!hab || !matricula || !pass) { alert('Habitación, matrícula y contraseña son obligatorios.'); return; }
+  if (!confirm('¿Seguro que deseas eliminar registros? Esta acción no se puede deshacer.')) return;
+  document.getElementById('status').textContent = 'Depurando…';
+  const body = { token: TOKEN, action:'purge', habitacion:hab, desde, hasta, matricula, pass };
+  const res = await fetch(API_URL, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) }).then(r=>r.json());
+  if (res.status==='ok') { alert('Depuración completada: '+(res.deleted||0)+' fila(s)'); closeDepurar(); cargar(); }
+  else { alert('Error: '+(res.error||'desconocido')); }
+  document.getElementById('status').textContent = 'Listo.';
+}
+
+// Events
+document.getElementById('btnRecargar').addEventListener('click', cargar);
+document.getElementById('btnFiltrar').addEventListener('click', aplicarFiltros);
+document.getElementById('btnCSV').addEventListener('click', exportCSV);
+document.getElementById('btnXLS').addEventListener('click', exportXLS);
+document.getElementById('btnPDF').addEventListener('click', exportPDF);
+document.getElementById('btnPrint').addEventListener('click', ()=>window.print());
+document.getElementById('btnLink').addEventListener('click', ()=>{ const h=(document.getElementById('fHab').value||'').trim(); const u=new URL(location.href); if(h)u.searchParams.set('hab',h); navigator.clipboard.writeText(u.toString()).then(()=>document.getElementById('status').textContent='Enlace copiado'); });
+document.getElementById('btnDepurar').addEventListener('click', openDepurar);
+document.getElementById('dCancel').addEventListener('click', closeDepurar);
+document.getElementById('dDo').addEventListener('click', doDepurar);
+
+// Init
+cargar().catch(e => { console.error(e); document.getElementById('status').textContent = 'Error: '+e.message; });
 </script>
 </body>
 </html>
