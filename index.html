@@ -184,12 +184,7 @@ border-bottom: none;
   max-width: 98vw;
   width: 1000px; /* antes 600px, luego 800px */
   color: black;
-
-  max-height: calc(100vh - 60px);
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  -webkit-overflow-scrolling: touch;
-  touch-action: pan-y;}
+}
 
 
   .contenido-panel {
@@ -2591,16 +2586,26 @@ document.addEventListener('DOMContentLoaded', () => {
       const hide = document.getElementById('invp-hide-hist');
       const hist = document.getElementById('invp-histbox');
       if(hide && hist){ hide.onchange = ()=>{ hist.style.display = hide.checked ? 'none':'block'; }; }
-      const save = document.getElementById('invp-guardar');
-      if(save){
-        save.onclick = ()=>{
-          showSuccessModal('Inventario de la habitación ' + hnum + ' guardado con éxito.', function(){
-          const ov = document.getElementById('inventarioOverlay');
-          if(ov) ov.classList.remove('activo');
-          try{ document.body.classList.remove('hk-modal-open'); }catch(e){}
-        });
-        };
-      }
+      
+const save = document.getElementById('invp-guardar');
+if(save){
+  save.onclick = async ()=>{
+    try{
+      save.disabled = true;
+      await guardarInventario(hnum);
+      showSuccessModal('Inventario de la habitación ' + hnum + ' guardado con éxito.', function(){
+        const ov = document.getElementById('inventarioOverlay');
+        if(ov) ov.classList.remove('activo');
+        try{ document.body.classList.remove('hk-modal-open'); }catch(e){}
+      });
+    }catch(err){
+      alert('No se pudo guardar: ' + (err && err.message ? err.message : err));
+    }finally{
+      save.disabled = false;
+    }
+  };
+}
+
     })(habitacionNum);
 
     
@@ -3278,5 +3283,64 @@ document.addEventListener('DOMContentLoaded', ()=>{
     openConcentrado();
   });
 });
-</script></body>
+</script>
+<!-- ====== INVENTARIO · CONEXIÓN API ====== -->
+<script>
+const INV_API_URL = "https://script.google.com/macros/s/AKfycbz-jh6y0UwfLtiQgOuPP3Wubm7SIlQich_T0iSigy7l8at04Zq4wGo2hsXZu_ZaW6sftw/exec";
+const INV_TOKEN   = "PARADISUS_INV_2025_xX7$K9";
+
+const $G = id => document.getElementById(id);
+const _n = id => Number($G(id)?.value || 0);
+const _v = id => String($G(id)?.value || '').trim();
+
+function entryFromForm(hnum){
+  return {
+    fecha: new Date().toISOString().slice(0,10),
+    habitacion: String(hnum),
+    usuario: sessionStorage.getItem('HK_NAME') || '',
+    matricula: sessionStorage.getItem('HK_MAT') || '',
+    sillas: _n('sillas-cant'),
+    cama: {
+      tipo: _v('tipo-cama'),
+      protector: _n('cama-protector'),
+      sabana: _n('cama-sabanas'),
+      almohadas: _n('cama-almohadas'),
+      fundas: _n('cama-fundas'),
+      protAlm: _n('cama-prot-alm'),
+      duvet: _n('cama-inserto'),
+      fundaDuvet: _n('cama-cubre'),
+      colorDuvet: _v('cama-color')
+    },
+    closet: {
+      cobertor: _n('clo-cobertor'),
+      almohadaMat: _n('clo-alm-mat'),
+      fundaMat: _n('clo-funda-mat'),
+      protectorMat: _n('clo-prot-mat'),
+      bolsaTela: _n('clo-bolsa')
+    },
+    bano: {
+      categoria: _v('ban-categoria'),
+      bano: _n('ban-bano'),
+      mano: _n('ban-mano'),
+      facial: _n('ban-facial'),
+      tapete: _n('ban-tapete'),
+      verdes: _n('ban-verdes'),
+      color: _v('ban-color')
+    },
+    notas: _v('invp-notas')
+  };
+}
+
+async function guardarInventario(hnum){
+  const payload = { action:'append', token: INV_TOKEN, entry: entryFromForm(hnum) };
+  const res = await fetch(INV_API_URL, {
+    method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload)
+  });
+  const j = await res.json();
+  if(j.status!=='ok') throw new Error(j.error || 'Error al guardar');
+  return j;
+}
+</script>
+
+</body>
 </html>
