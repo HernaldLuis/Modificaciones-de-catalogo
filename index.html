@@ -3261,9 +3261,9 @@ function showToast(msg, ok){
 </script><script>
 function openConcentrado(){
   // Abre el portal en una nueva pestaña:
-  
+  window.open('portal_concentrado.html', '_blank');
   // 👉 Si prefieres en la misma pestaña, cambia por esta línea:
-  // 
+  // location.href = 'portal_concentrado.html';
 }
 </script><script>
 document.addEventListener('DOMContentLoaded', ()=>{
@@ -3279,8 +3279,8 @@ document.addEventListener('DOMContentLoaded', ()=>{
   });
 });
 </script>
-<!-- === [CONCENTRADO PORTAL] Modal autocontenido (no toca tu login) === -->
-<div id="concentradoOverlay" class="" style="display:none; align-items:center; justify-content:center;">
+<!-- === [CONCENTRADO PORTAL – INLINE MODAL] (no altera flujo) === -->
+<div id="concentradoOverlay" style="display:none; align-items:center; justify-content:center;">
   <div class="modal-contenido" role="dialog" aria-modal="true" aria-labelledby="conc-title">
     <h2 id="conc-title">Concentrado de Inventarios</h2>
     <div class="conc-toolbar">
@@ -3318,7 +3318,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
           </tr>
         </thead>
         <tbody id="conc-tbody">
-          <tr><td colspan="13" style="text-align:center; padding:16px;">Sin datos aún.</td></tr>
+          <tr><td colspan="13" style="text-align:center; padding:16px;">Sin datos para mostrar.</td></tr>
         </tbody>
       </table>
     </div>
@@ -3327,279 +3327,163 @@ document.addEventListener('DOMContentLoaded', ()=>{
     </div>
   </div>
 </div>
+
 <script>
 (function(){
-  const $ = (sel, root=document) => root.querySelector(sel);
-  const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+  const $ = (s, r=document)=>r.querySelector(s);
+  const $$ = (s, r=document)=>Array.from(r.querySelectorAll(s));
   const overlay = $("#concentradoOverlay");
+  const tbody = $("#conc-tbody");
+  const stats = $("#conc-stats");
+  const viewSel = $("#conc-view");
+  const search = $("#conc-search");
   const btnCerrar = $("#conc-cerrar");
   const btnOK = $("#conc-ok");
   const btnExport = $("#conc-export");
   const btnFS = $("#conc-fullscreen");
-  const viewSel = $("#conc-view");
-  const tbody = $("#conc-tbody");
-  const stats = $("#conc-stats");
-  const search = $("#conc-search");
-
-  window.openModal = function(){
-    overlay.style.display = "flex";
-    overlay.classList.add("activo");
-    document.body.classList.add("hk-no-scroll");
-    render();
-  };
-  function closeModal(){
-    overlay.classList.remove("activo");
-    overlay.style.display = "none";
-    document.body.classList.remove("hk-no-scroll");
-  }
 
   function parseMaybeJSON(s){ try{ return JSON.parse(s); }catch(_){ return null; } }
-  function isRegistro(obj){ return !!obj && typeof obj === 'object' && (('habitacion' in obj) || ('hab' in obj) || ('room' in obj)); }
-  function normalizeItem(x){
-    const hab = (x.habitacion || x.hab || x.room || x.num || "").toString();
-    const fecha = x.fecha || x.fecha_hora || x.datetime || x.createdAt || x.timestamp || "";
-       const categoria = x.categoria || x.category || "";
-    const torre = x.torre || x.tower || "";
-    const piso = x.piso ?? x.floor ?? "";
-    const prefijo = x.prefijo || x.recepcion || x.reception || "";
-    const cama = x.tipo_cama || x.cama || x.bed || "";
-    const handicap = !!(x.handicap || x.discapacidad || x.wheelchair);
-    const cocineta = !!(x.cocineta || x.kitchenette);
-    const matricula = x.matricula || x.user || x.operador || "";
-    const estado = x.estado || x.status || "";
-    const delta = x.delta || x.faltantes || x.diff || "";
-    const notas = x.notas || x.nota || x.comentarios || x.comments || "";
-    return {habitacion:hab, torre, piso, prefijo, categoria, cama, handicap, cocineta, fecha, matricula, estado, delta, notas, __raw:x};
+  function isRegistro(o){ return o && typeof o==='object' && (('habitacion'in o)||('hab'in o)||('room'in o)); }
+  function norm(x){
+    return {
+      habitacion: (x.habitacion||x.hab||x.room||x.num||"")+"",
+      torre: x.torre||x.tower||"",
+      piso: x.piso ?? x.floor ?? "",
+      prefijo: x.prefijo||x.recepcion||x.reception||"",
+      categoria: x.categoria||x.category||"",
+      cama: x.tipo_cama||x.cama||x.bed||"",
+      handicap: !!(x.handicap||x.discapacidad||x.wheelchair),
+      cocineta: !!(x.cocineta||x.kitchenette),
+      fecha: x.fecha||x.fecha_hora||x.datetime||x.createdAt||x.timestamp||"",
+      matricula: x.matricula||x.user||x.operador||"",
+      estado: x.estado||x.status||"",
+      delta: x.delta||x.faltantes||x.diff||"",
+      notas: x.notas||x.nota||x.comentarios||x.comments||""
+    };
   }
   function loadRegistros(){
     let arr = [];
     if(Array.isArray(window.HK_REGISTROS)) arr = arr.concat(window.HK_REGISTROS.filter(isRegistro));
     if(Array.isArray(window.hk_registros)) arr = arr.concat(window.hk_registros.filter(isRegistro));
-    const keys = Object.keys(localStorage||{});
-    const candidates = ['hk_inventarios','hk_inventario_registros','inventarios','hk_logs','HK_INV','HK_REGISTROS'];
-    for(const k of keys){
-      if(candidates.includes(k) || /inv|invent|hk/i.test(k)){
-        const v = parseMaybeJSON(localStorage.getItem(k));
-        if(Array.isArray(v)){ arr = arr.concat(v.filter(isRegistro)); }
+    try {
+      const keys = Object.keys(localStorage||{});
+      const candidates = ['hk_inventarios','hk_inventario_registros','inventarios','hk_logs','HK_INV','HK_REGISTROS'];
+      for(const k of keys){
+        if(candidates.includes(k) || /inv|invent|hk/i.test(k)){
+          const v = parseMaybeJSON(localStorage.getItem(k));
+          if(Array.isArray(v)) arr = arr.concat(v.filter(isRegistro));
+        }
       }
-    }
-    return arr.map(normalizeItem);
+    }catch(_){}
+    return arr.map(norm);
   }
-  function groupLatest(items){
-    const map = new Map();
+  function latestByRoom(items){
+    const m = new Map();
     for(const it of items){
       const key = it.habitacion;
-      const t = new Date(it.fecha || 0).getTime() || 0;
-      const prev = map.get(key);
-      if(!prev || (new Date(prev.fecha||0).getTime()||0) < t){
-        map.set(key, it);
-      }
+      const t = new Date(it.fecha||0).getTime()||0;
+      const prev = m.get(key);
+      if(!prev || (new Date(prev.fecha||0).getTime()||0) < t) m.set(key,it);
     }
-    return Array.from(map.values());
+    return Array.from(m.values());
   }
-
-  let _sortKey = "fecha";
-  let _sortDir = -1;
-  function byKey(a,b,k){
-    const av = (a[k] ?? "").toString().toLowerCase();
-    const bv = (b[k] ?? "").toString().toLowerCase();
-    if(av < bv) return -1;
-    if(av > bv) return 1;
-    return 0;
+  let _sortKey="fecha", _sortDir=-1;
+  function cmp(a,b,k){
+    const av=(a[k]??"").toString().toLowerCase(), bv=(b[k]??"").toString().toLowerCase();
+    if(av<bv) return -1; if(av>bv) return 1; return 0;
   }
-
   function render(){
     let rows = loadRegistros();
-    const view = viewSel.value || "ultimo";
-    if(view === "ultimo"){ rows = groupLatest(rows); }
-    const q = (search.value||"").trim().toLowerCase();
-    if(q){ rows = rows.filter(r => JSON.stringify(r).toLowerCase().includes(q)); }
-    rows.sort((a,b)=>{
-      if(_sortKey === "fecha"){
-        const at = new Date(a.fecha||0).getTime()||0;
-        const bt = new Date(b.fecha||0).getTime()||0;
-        return _sortDir * (at - bt);
+    const v = (viewSel && viewSel.value) || "ultimo";
+    if(v==="ultimo") rows = latestByRoom(rows);
+    const q = (search && search.value || "").trim().toLowerCase();
+    if(q) rows = rows.filter(r => JSON.stringify(r).toLowerCase().includes(q));
+    rows.sort((a,b)=> _sortKey==="fecha"
+      ? _sortDir*((new Date(a.fecha||0).getTime()||0)-(new Date(b.fecha||0).getTime()||0))
+      : _sortDir*cmp(a,b,_sortKey));
+    if(tbody){
+      tbody.innerHTML="";
+      if(rows.length===0){
+        const tr=document.createElement("tr");
+        const td=document.createElement("td"); td.colSpan=13; td.style.textAlign="center"; td.style.padding="16px"; td.textContent="Sin datos para mostrar.";
+        tr.appendChild(td); tbody.appendChild(tr);
+      } else {
+        for(const r of rows){
+          const tr=document.createElement("tr");
+          function td(v){ const c=document.createElement("td"); c.textContent=(v===true)?"Sí":(v===false?"No":(v??"")); return c; }
+          tr.appendChild(td(r.habitacion));
+          tr.appendChild(td(r.torre));
+          tr.appendChild(td(r.piso));
+          tr.appendChild(td(r.prefijo));
+          tr.appendChild(td(r.categoria));
+          tr.appendChild(td(r.cama));
+          tr.appendChild(td(r.handicap));
+          tr.appendChild(td(r.cocineta));
+          tr.appendChild(td(r.fecha));
+          tr.appendChild(td(r.matricula));
+          tr.appendChild(td(r.estado));
+          tr.appendChild(td(r.delta));
+          tr.appendChild(td(r.notas));
+          tbody.appendChild(tr);
+        }
       }
-      return _sortDir * byKey(a,b,_sortKey);
-    });
-    const tbody = document.getElementById("conc-tbody");
-    tbody.innerHTML = "";
-    if(rows.length === 0){
-      const tr = document.createElement("tr");
-      const td = document.createElement("td");
-      td.colSpan = 13; td.style.textAlign = "center"; td.style.padding = "16px";
-      td.textContent = "Sin datos para mostrar.";
-      tr.appendChild(td); tbody.appendChild(tr);
-    } else {
-      for(const r of rows){
-        const tr = document.createElement("tr");
-        function td(v){ const cell=document.createElement("td"); cell.textContent=(v===true)?"Sí":(v===false?"No":(v??"")); return cell; }
-        tr.appendChild(td(r.habitacion));
-        tr.appendChild(td(r.torre));
-        tr.appendChild(td(r.piso));
-        tr.appendChild(td(r.prefijo));
-        tr.appendChild(td(r.categoria));
-        tr.appendChild(td(r.cama));
-        tr.appendChild(td(r.handicap));
-        tr.appendChild(td(r.cocineta));
-        tr.appendChild(td(r.fecha));
-        tr.appendChild(td(r.matricula));
-        tr.appendChild(td(r.estado));
-        tr.appendChild(td(r.delta));
-        tr.appendChild(td(r.notas));
-        tbody.appendChild(tr);
-      }
+      if(stats) stats.textContent = rows.length + " registro" + (rows.length===1?"":"s");
     }
-    stats.textContent = rows.length + " registro" + (rows.length==1?"":"s");
   }
-
-  function exportCSV(){
+  window.openModal = function(){
+    if(!overlay) return;
+    overlay.style.display="flex";
+    overlay.classList.add("activo");
+    try{ document.body.classList.add("hk-no-scroll"); }catch(_){}
+    render();
+  };
+  function closeModal(){
+    overlay.classList.remove("activo");
+    overlay.style.display="none";
+    try{ document.body.classList.remove("hk-no-scroll"); }catch(_){}
+  }
+  if(btnCerrar) btnCerrar.addEventListener("click", closeModal);
+  if(btnOK) btnOK.addEventListener("click", closeModal);
+  if(btnExport) btnExport.addEventListener("click", function(){
     const headers = ["Hab.","Torre","Piso","Rec.","Categoría","Cama","Handicap","Cocineta","Fecha/Hora","Matrícula","Estado","Δ Faltantes","Notas"];
-    const rows = Array.from(document.querySelectorAll("#conc-tbody tr")).map(tr => Array.from(tr.children).map(td => td.textContent.replace(/\s+/g," ").trim()));
+    const rows = Array.from((tbody||document).querySelectorAll("tr")).map(tr => Array.from(tr.children).map(td => td.textContent.replace(/\s+/g," ").trim()));
     const all = [headers].concat(rows);
-    const csv = all.map(r => r.map(v => /[",\n]/.test(v) ? '"' + v.replace(/"/g,'""') + '"' : v).join(","))
-                   .join("\n");
+    const csv = all.map(r => r.map(v => /[\",\n]/.test(v) ? '\"'+v.replace(/\"/g,'\"\"')+'\"' : v).join(",")).join("\n");
     const blob = new Blob([csv], {type:"text/csv;charset=utf-8;"});
     const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url; a.download = "concentrado_inventarios.csv";
-    document.body.appendChild(a); a.click();
-    URL.revokeObjectURL(url); a.remove();
-  }
-
-  if(btnCerrar){ btnCerrar.addEventListener("click", closeModal); }
-  if(btnOK){ btnOK.addEventListener("click", closeModal); }
-  if(btnExport){ btnExport.addEventListener("click", exportCSV); }
+    const a = document.createElement("a"); a.href = url; a.download = "concentrado_inventarios.csv";
+    document.body.appendChild(a); a.click(); URL.revokeObjectURL(url); a.remove();
+  });
   if(btnFS){
     btnFS.addEventListener("click", function(){
       overlay.classList.toggle("fullscreen");
-      document.body.classList.toggle("hk-no-scroll", overlay.classList.contains("fullscreen"));
+      try{ document.body.classList.toggle("hk-no-scroll", overlay.classList.contains("fullscreen")); }catch(_){}
     });
   }
-  if(viewSel){ viewSel.addEventListener("change", render); }
-  if(search){ search.addEventListener("input", render); }
-
+  if(viewSel) viewSel.addEventListener("change", render);
+  if(search) search.addEventListener("input", render);
   $$("#conc-table thead th").forEach(th => {
     th.addEventListener("click", function(){
       const k = this.getAttribute("data-k");
       if(!k) return;
-      if(_sortKey === k){ _sortDir *= -1; } else { _sortKey = k; _sortDir = (k==="fecha")?-1:1; }
+      if(_sortKey===k){ _sortDir*=-1; } else { _sortKey=k; _sortDir=(k==="fecha")?-1:1; }
       render();
     });
   });
-
-  document.addEventListener("keydown", (ev)=>{
-    if(ev.key === "Escape" && overlay.classList.contains("activo")){
-      closeModal();
-    }
-  });
 })();
 </script>
-
-<!-- === [CONCENTRADO WIRING – preserva login] === -->
+<!-- === [OVERRIDE] openConcentrado → abre modal inline (no navega) === -->
 <script>
-(function(){
-  const btn = document.getElementById("btn-concentrado");
-  if(!btn) return;
-  btn.addEventListener("click", function(e){
-    try{
-      let logged = false;
-      if(typeof window.hkHasConcentradoAccess === "function"){
-        logged = !!window.hkHasConcentradoAccess();
-      } else {
-        const u = (window.__HK_USER || localStorage.getItem('hk_user') || '').toString().toLowerCase();
-        logged = !!u && (u.includes('luis') || u.includes('manuel') || u.includes('migoni'));
-      }
-      if(logged && typeof window.openModal === "function"){
-        // Solo cuando ya hay sesión interceptamos para abrir el modal en-page
-        e.preventDefault();
-        e.stopPropagation();
-        setTimeout(()=>window.openModal(), 0);
-      }
-      // Si no hay sesión, NO prevenimos: tu flujo muestra hkpin2 y luego “Ver inventario”
-    }catch(_){}
-  }, {capture:true});
-})();
-</script>
-
-<!-- === [VER INVENTARIO → CONCENTRADO] – Delegación robusta === -->
-<script>
-(function(){
-  // Captura cualquier clic en botones/enlaces con texto "Ver Inventario" (carga dinámica incluida)
-  document.addEventListener('click', function(e){
-    var el = e.target.closest('button, a');
-    if(!el) return;
-    var txt = (el.textContent || '').trim().toLowerCase();
-    if(txt === 'ver inventario'){
-      // Respetamos tu cierre de modal actual; solo abrimos el de concentrado
-      e.preventDefault();
-      e.stopPropagation();
-      setTimeout(function(){
-        if(typeof window.openModal === 'function'){
-          window.openModal();
-        } else {
-          var overlay = document.getElementById('concentradoOverlay');
-          if(overlay){
-            overlay.style.display = 'flex';
-            overlay.classList.add('activo');
-            document.body.classList.add('hk-no-scroll');
-          }
-        }
-      }, 0);
+window.openConcentrado = function(){
+  try{
+    if(typeof window.openModal === 'function'){ window.openModal(); return; }
+    var ov = document.getElementById('concentradoOverlay');
+    if(ov){
+      ov.style.display='flex'; ov.classList.add('activo');
+      try{ document.body.classList.add('hk-no-scroll'); }catch(_){}
     }
-  }, true);
-})();
-</script>
-
-<!-- === [STRICT FLOW] Ver Inventario => Concentrado | Concentrado solo si sesión activa === -->
-<script>
-(function(){
-  const $ = (s, r=document)=>r.querySelector(s);
-  const $$ = (s, r=document)=>Array.from(r.querySelectorAll(s));
-
-  function hasAccess(){
-    try{
-      if(typeof window.hkHasConcentradoAccess === "function"){
-        return !!window.hkHasConcentradoAccess();
-      }
-      const u = (window.__HK_USER || localStorage.getItem('hk_user') || '').toString().toLowerCase();
-      if(!u) return false;
-      return ['luis','manuel','sr. migoni','migoni'].some(x => u.includes(x));
-    }catch(_){ return false; }
-  }
-
-  // 1) SOLO abrimos modal cuando el usuario presiona "Ver Inventario"
-  function bindVerInventario(root=document){
-    const nodes = $$('button, a', root);
-    for(const el of nodes){
-      const txt = (el.textContent||'').trim().toLowerCase();
-      if(txt === 'ver inventario' && !el.__hkStrict){
-        el.addEventListener('click', function(ev){
-          // Deja que tu portal cierre, luego abrimos modal
-          setTimeout(()=>{ if(typeof window.openModal==='function'){ window.openModal(); } }, 0);
-        });
-        el.__hkStrict = true;
-      }
-    }
-  }
-  bindVerInventario(document);
-  new MutationObserver(muts=>{
-    muts.forEach(m=> m.addedNodes && m.addedNodes.forEach(n=>{ if(n.nodeType===1) bindVerInventario(n); }));
-  }).observe(document.documentElement, {childList:true, subtree:true});
-
-  // 2) Botón "Concentrado": solo abre modal si YA hay sesión activa; si no, NO intercepta (deja login y tu portal).
-  const btnConc = $('#btn-concentrado');
-  if(btnConc){
-    btnConc.addEventListener('click', function(e){
-      if(hasAccess() && typeof window.openModal==='function'){
-        e.preventDefault();
-        e.stopPropagation();
-        setTimeout(()=>window.openModal(), 0);
-      }
-      // Si no hay sesión, no hacemos nada: tu flujo pedirá matrícula y mostrará "Ver Inventario".
-    }, true);
-  }
-})();
+  }catch(_){}
+};
 </script>
 </body>
 </html>
